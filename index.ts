@@ -13,13 +13,16 @@ import gameRouter from "./src/api/game/router";
 
 dotenv.config();
 
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3003;
 const app = express();
 const URL = `/api/v1`;
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, "public")));
 
 // Middleware
 app.use(
@@ -38,9 +41,14 @@ app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
 
-// routes
-app.get("/", (req: Request, res: Response) => {
-  res.render("index");
+// Default route
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Route for the admin view
+app.get("/admin", (req, res) => {
+  res.render("admin/index", { title: "Admin Panel" });
 });
 
 app.listen(port, () => {
