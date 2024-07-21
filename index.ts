@@ -13,16 +13,17 @@ import gameRouter from "./src/api/game/router";
 
 dotenv.config();
 
-const port = process.env.PORT || 3003;
+const port = process.env.PORT || 3004;
 const app = express();
 const URL = `/api/v1`;
 
 // view engine setup
 app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "src/views"));
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/adminlte", express.static(path.join(__dirname, "public/adminlte/")));
 
 // Middleware
 app.use(
@@ -40,11 +41,6 @@ app.use(express.json());
 app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
-
-// Default route
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
 
 // Route for the admin view
 app.get("/admin", (req, res) => {
