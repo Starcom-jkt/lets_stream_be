@@ -1,0 +1,30 @@
+<table id="example2" class="table table-bordered table-hover table-striped" style="width: 100%">
+    <thead>
+      <tr>
+        <th style="width: 7%">No</th>
+        <th>Code Game</th>
+        <th>Game Name</th>
+        <th style="width: 20%">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for(let i = 0; i < game.length; i++){ %>
+        <tr>
+          <td><%= i + 1 %></td>
+          <td><%= game[i].gameCode %></td>
+          <td><%= game[i].gameName %></td>
+          <td>
+            <form action="/game/delete/<%= game[i].id %>?_method=DELETE" method="POST">
+              <a href="/game/edit/<%= game[i].id %>" class="btn btn-warning">
+                <i class="fas fa-pencil-alt"></i> Edit
+              </a>
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  

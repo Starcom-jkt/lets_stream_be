@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-import pool from "./db"; // pastikan ini adalah import koneksi database yang benar
+import pool from "./db";
 import path from "path";
 import session from "express-session";
 import cors from "cors";
@@ -11,8 +11,13 @@ import giftRouter from "./src/api/gift/router";
 import merchantRouter from "./src/api/merchant/router";
 import gameRouter from "./src/api/game/router";
 
-import agentRoutes from "./src/app/agent/router";
 import adminRoutes from "./src/app/admin/router";
+import agentRoutes from "./src/app/agent/router";
+import gameRoutes from "./src/app/game/router";
+import giftRoutes from "./src/app/gift/router";
+import userRoutes from "./src/app/user/router";
+import merchantRoutes from "./src/app/merchant/router";
+import currencyRoutes from "./src/app/currency/router";
 
 dotenv.config();
 
@@ -50,6 +55,11 @@ app.use(`${URL}/game`, gameRouter);
 
 app.use("/agent", agentRoutes);
 app.use("/admin", adminRoutes);
+app.use("/game", gameRoutes);
+app.use("/gift", giftRoutes);
+app.use("/user", userRoutes);
+app.use("/merchant", merchantRoutes);
+app.use("/currency", currencyRoutes);
 
 // Route for the admin view
 app.get("/admin", (req, res) => {
@@ -57,6 +67,21 @@ app.get("/admin", (req, res) => {
 });
 app.get("/agent", (req, res) => {
   res.render("admin/agent/index", { title: "Admin Panel" });
+});
+app.get("/user", (req, res) => {
+  res.render("admin/user/index", { title: "Admin Panel" });
+});
+app.get("/game", (req, res) => {
+  res.render("admin/game/index", { title: "Admin Panel" });
+});
+app.get("/gift", (req, res) => {
+  res.render("admin/gift/index", { title: "Admin Panel" });
+});
+app.get("/currency", (req, res) => {
+  res.render("admin/currency/index", { title: "Admin Panel" });
+});
+app.get("/merchant", (req, res) => {
+  res.render("admin/merchant/index", { title: "Admin Panel" });
 });
 
 app.listen(port, () => {

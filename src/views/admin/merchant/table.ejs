@@ -1,0 +1,32 @@
+<table id="example2" class="table table-bordered table-hover table-striped" style="width: 100%">
+    <thead>
+      <tr>
+        <th style="width: 7%">No</th>
+        <th>Merchant Code</th>
+        <th>Merchant Name</th>
+        <th>Merchant Logo</th>
+        <th style="width: 20%">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for(let i = 0; i < merchant.length; i++){ %>
+        <tr>
+          <td><%= i + 1 %></td>
+          <td><%= merchant[i].merchantCode %></td>
+          <td><%= merchant[i].merchantName %></td>
+          <td><%= merchant[i].merchantLogo %></td>
+          <td>
+            <form action="/merchant/delete/<%= merchant[i].id %>?_method=DELETE" method="POST">
+              <a href="/merchant/edit/<%= merchant[i].id %>" class="btn btn-warning">
+                <i class="fas fa-pencil-alt"></i> Edit
+              </a>
+              <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+  
