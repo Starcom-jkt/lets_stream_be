@@ -13,7 +13,7 @@ import gameRouter from "./src/api/game/router";
 
 dotenv.config();
 
-const port = process.env.PORT || 3004;
+const port = process.env.PORT || 3005;
 const app = express();
 const URL = `/api/v1`;
 
@@ -23,7 +23,7 @@ app.set("views", path.join(__dirname, "src/views"));
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, "public")));
-app.use("/adminlte", express.static(path.join(__dirname, "public/adminlte/")));
+app.use("/adminlte", express.static(path.join(__dirname, "public/adminlte")));
 
 // Middleware
 app.use(
