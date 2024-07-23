@@ -1,4 +1,4 @@
-import pool from "../../../db";
+import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
@@ -12,32 +12,32 @@ const formatDate = (date: Date) => {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 };
 
-interface Gift extends RowDataPacket {
+interface Merchant extends RowDataPacket {
   id: number;
-  img: string;
-  giftName: string;
-  giftLink: string;
-  price: number;
+  merchantCode: string;
+  merchantName: string;
+  merchantLogo: string;
+  useBranch: number;
   create_time: Date;
 }
 
 export const index = async (req: Request, res: Response) => {
   try {
-    // Ambil data dari tabel gift
+    // Ambil data dari tabel merchant
     const alertMessage = req.flash("alertMessage");
     const alertStatus = req.flash("alertStatus");
 
     const alert = { message: alertMessage, status: alertStatus };
-    const [gift] = await pool.query("SELECT * FROM gift");
-    // Render halaman dengan data gift
-    res.render("admin/gift/index", {
-      gift,
+    const [merchant] = await pool.query("SELECT * FROM merchant");
+    // Render halaman dengan data merchant
+    res.render("admin/merchant/index", {
+      merchant,
       alert,
       // name: req.session.user.name,
-      title: "Halaman gift",
+      title: "Halaman merchant",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman gift
+    // Jika terjadi kesalahan, redirect ke halaman merchant
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
     res.redirect("/");
@@ -46,28 +46,29 @@ export const index = async (req: Request, res: Response) => {
 
 export const indexCreate = async (req: Request, res: Response) => {
   try {
-    // Render halaman dengan data gift
-    res.render("admin/gift/create", {
+    // Render halaman dengan data merchant
+    res.render("admin/merchant/create", {
       // name: req.session.user.name,
-      title: "Halaman create gift",
+      title: "Halaman create merchant",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman gift
+    // Jika terjadi kesalahan, redirect ke halaman merchant
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/gift");
+    res.redirect("/merchant");
   }
 };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { img, giftName, giftLink, price } = req.body;
+    const { merchantCode, merchantName, merchantLogo, useBranchLogo } =
+      req.body;
     // const createTime = formatDate(new Date());
     const [rows] = await pool.query(
-      "INSERT INTO gift ( img, giftName, giftLink, price) VALUES ( ?, ?, ?, ?)",
-      [img, giftName, giftLink, price]
+      "INSERT INTO merchant ( merchantCode, merchantName, merchantLogo, useBranchLogo) VALUES ( ?, ?, ?, ?)",
+      [merchantCode, merchantName, merchantLogo, useBranchLogo]
     );
-    res.redirect("/gift");
+    res.redirect("/merchant");
   } catch (err) {
     res.send(err);
   }
@@ -77,23 +78,23 @@ export const actionDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM gift WHERE id = ?",
+      "DELETE FROM merchant WHERE id = ?",
       [id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "gift not found");
+      req.flash("alertMessage", "merchant not found");
       req.flash("alertStatus", "danger");
     } else {
-      req.flash("alertMessage", "Berhasil hapus gift");
+      req.flash("alertMessage", "Berhasil hapus merchant");
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/gift");
+    res.redirect("/merchant");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/gift");
+    res.redirect("/merchant");
   }
 };
 
@@ -102,31 +103,32 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Ambil ID dari parameter request
     const { id } = req.params;
 
-    // Ambil data dari tabel gift
-    const [rows] = await pool.query<Gift[]>("SELECT * FROM gift WHERE id = ?", [
-      id,
-    ]);
+    // Ambil data dari tabel merchant
+    const [rows] = await pool.query<Merchant[]>(
+      "SELECT * FROM merchant WHERE id = ?",
+      [id]
+    );
 
     // Periksa apakah agen ditemukan
     if (rows.length === 0) {
-      req.flash("alertMessage", "gift not found");
+      req.flash("alertMessage", "merchant not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/gift");
+      return res.redirect("/merchant");
     }
 
-    const gift = rows[0];
+    const merchant = rows[0];
 
-    // Render halaman dengan data gift
-    res.render("admin/gift/edit", {
-      gift,
+    // Render halaman dengan data merchant
+    res.render("admin/merchant/edit", {
+      merchant,
       // name: req.session.user.name,
-      title: "Halaman Edit gift",
+      title: "Halaman Edit merchant",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman gift
+    // Jika terjadi kesalahan, redirect ke halaman merchant
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/gift");
+    res.redirect("/merchant");
   }
 };
 
@@ -134,25 +136,25 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { img, giftName, giftLink, price } = req.body;
+    const { merchantCode, merchantName, merchantLogo } = req.body;
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE gift SET img = ?, giftName = ?, giftLink = ?, price = ? WHERE id = ?",
-      [img, giftName, giftLink, price, id]
+      "UPDATE merchant SET merchantCode = ?, merchantName = ?, merchantLogo = ?, WHERE id = ?",
+      [merchantCode, merchantName, merchantLogo, id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "gift not found");
+      req.flash("alertMessage", "merchant not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/gift");
+      return res.redirect("/merchant");
     }
 
-    req.flash("alertMessage", "Berhasil mengedit gift");
+    req.flash("alertMessage", "Berhasil mengedit merchant");
     req.flash("alertStatus", "success");
-    res.redirect("/gift");
+    res.redirect("/merchant");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/gift");
+    res.redirect("/merchant");
   }
 };

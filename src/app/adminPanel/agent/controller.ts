@@ -1,4 +1,4 @@
-import pool from "../../../db";
+import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
@@ -136,27 +136,27 @@ export const indexEdit = async (req: Request, res: Response) => {
 
 // Handler untuk menangani pembaruan data agen
 export const actionEdit = async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const { name, username } = req.body;
-  
-      const [result] = await pool.query<ResultSetHeader>(
-        "UPDATE agent SET name = ?, username = ? WHERE id = ?",
-        [name, username, id]
-      );
-  
-      if (result.affectedRows === 0) {
-        req.flash("alertMessage", "Agent not found");
-        req.flash("alertStatus", "danger");
-        return res.redirect("/agent");
-      }
-  
-      req.flash("alertMessage", "Berhasil mengedit agent");
-      req.flash("alertStatus", "success");
-      res.redirect("/agent");
-    } catch (err: any) {
-      req.flash("alertMessage", `${err.message}`);
+  try {
+    const { id } = req.params;
+    const { name, username } = req.body;
+
+    const [result] = await pool.query<ResultSetHeader>(
+      "UPDATE agent SET name = ?, username = ? WHERE id = ?",
+      [name, username, id]
+    );
+
+    if (result.affectedRows === 0) {
+      req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      res.redirect("/agent");
+      return res.redirect("/agent");
     }
-  };
+
+    req.flash("alertMessage", "Berhasil mengedit agent");
+    req.flash("alertStatus", "success");
+    res.redirect("/agent");
+  } catch (err: any) {
+    req.flash("alertMessage", `${err.message}`);
+    req.flash("alertStatus", "danger");
+    res.redirect("/agent");
+  }
+};

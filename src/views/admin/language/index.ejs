@@ -1,8 +1,4 @@
 <%- include('../../components/header.ejs') %>
-<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-
 <body class="hold-transition sidebar-mini">
   <div class="wrapper">
 <%- include('../../components/navbar.ejs') %>
@@ -15,12 +11,12 @@
             <div class="container-fluid">
               <div class="row mb-2">
                 <div class="col-sm-6">
-                  <h1>Currency</h1>
+                  <h1>Language</h1>
                 </div>
                 <div class="col-sm-6">
                   <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active" >Currency</li>
+                    <li class="breadcrumb-item"><a href="/">Home</a></li>
+                    <li class="breadcrumb-item active">Language</li>
                   </ol>
                 </div>
               </div>
@@ -36,7 +32,7 @@
                   <div class="card">
                     <div class="card-header">
                       <h3 class="card-title">
-                        <a href="/admin/currency/create" class="btn btn-primary">
+                        <a href="/language/create" class="btn btn-primary">
                           <i class="nav-icon far fa-plus-square"></i>
                           Tambah
                         </a>
@@ -44,10 +40,11 @@
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
-                   <%- include ('../currency/table.ejs') %>
+                      <%- include ('../language/table.ejs') %>
                     </div>
                     <!-- /.card-body -->
                   </div>
+                  <!-- /.card -->
                   <!-- /.card -->
                 </div>
                 <!-- /.col -->

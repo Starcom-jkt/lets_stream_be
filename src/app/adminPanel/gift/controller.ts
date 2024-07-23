@@ -1,4 +1,4 @@
-import pool from "../../../db";
+import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
@@ -12,31 +12,32 @@ const formatDate = (date: Date) => {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 };
 
-interface game extends RowDataPacket {
+interface Gift extends RowDataPacket {
   id: number;
-  gameCode: string;
-  gameName: string;
+  img: string;
+  giftName: string;
+  giftLink: string;
+  price: number;
   create_time: Date;
 }
 
 export const index = async (req: Request, res: Response) => {
   try {
-    // Ambil data dari tabel game
+    // Ambil data dari tabel gift
     const alertMessage = req.flash("alertMessage");
     const alertStatus = req.flash("alertStatus");
 
     const alert = { message: alertMessage, status: alertStatus };
-    const [game] = await pool.query("SELECT * FROM game");
-    console.log(game);
-    // Render halaman dengan data game
-    res.render("admin/game/index", {
-      game,
+    const [gift] = await pool.query("SELECT * FROM gift");
+    // Render halaman dengan data gift
+    res.render("admin/gift/index", {
+      gift,
       alert,
       // name: req.session.user.name,
-      title: "Halaman game",
+      title: "Halaman gift",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman game
+    // Jika terjadi kesalahan, redirect ke halaman gift
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
     res.redirect("/");
@@ -45,28 +46,28 @@ export const index = async (req: Request, res: Response) => {
 
 export const indexCreate = async (req: Request, res: Response) => {
   try {
-    // Render halaman dengan data game
-    res.render("admin/game/create", {
+    // Render halaman dengan data gift
+    res.render("admin/gift/create", {
       // name: req.session.user.name,
-      title: "Halaman create game",
+      title: "Halaman create gift",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman game
+    // Jika terjadi kesalahan, redirect ke halaman gift
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/gift");
   }
 };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { gameCode, gameName } = req.body;
+    const { img, giftName, giftLink, price } = req.body;
     // const createTime = formatDate(new Date());
     const [rows] = await pool.query(
-      "INSERT INTO game ( gameCode, gameName) VALUES ( ?, ?)",
-      [gameCode, gameName]
+      "INSERT INTO gift ( img, giftName, giftLink, price) VALUES ( ?, ?, ?, ?)",
+      [img, giftName, giftLink, price]
     );
-    res.redirect("/game");
+    res.redirect("/gift");
   } catch (err) {
     res.send(err);
   }
@@ -76,23 +77,23 @@ export const actionDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM game WHERE id = ?",
+      "DELETE FROM gift WHERE id = ?",
       [id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "game not found");
+      req.flash("alertMessage", "gift not found");
       req.flash("alertStatus", "danger");
     } else {
-      req.flash("alertMessage", "Berhasil hapus game");
+      req.flash("alertMessage", "Berhasil hapus gift");
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/game");
+    res.redirect("/gift");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/gift");
   }
 };
 
@@ -101,31 +102,31 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Ambil ID dari parameter request
     const { id } = req.params;
 
-    // Ambil data dari tabel game
-    const [rows] = await pool.query<game[]>("SELECT * FROM game WHERE id = ?", [
+    // Ambil data dari tabel gift
+    const [rows] = await pool.query<Gift[]>("SELECT * FROM gift WHERE id = ?", [
       id,
     ]);
 
     // Periksa apakah agen ditemukan
     if (rows.length === 0) {
-      req.flash("alertMessage", "game not found");
+      req.flash("alertMessage", "gift not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/gift");
     }
 
-    const game = rows[0];
+    const gift = rows[0];
 
-    // Render halaman dengan data game
-    res.render("admin/game/edit", {
-      game,
+    // Render halaman dengan data gift
+    res.render("admin/gift/edit", {
+      gift,
       // name: req.session.user.name,
-      title: "Halaman Edit game",
+      title: "Halaman Edit gift",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman game
+    // Jika terjadi kesalahan, redirect ke halaman gift
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/gift");
   }
 };
 
@@ -133,25 +134,25 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { gameName, gameCode } = req.body;
+    const { img, giftName, giftLink, price } = req.body;
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE game SET gameCode = ?, gameName = ? WHERE id = ?",
-      [gameCode, gameName, id]
+      "UPDATE gift SET img = ?, giftName = ?, giftLink = ?, price = ? WHERE id = ?",
+      [img, giftName, giftLink, price, id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "game not found");
+      req.flash("alertMessage", "gift not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/gift");
     }
 
-    req.flash("alertMessage", "Berhasil mengedit game");
+    req.flash("alertMessage", "Berhasil mengedit gift");
     req.flash("alertStatus", "success");
-    res.redirect("/game");
+    res.redirect("/gift");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/gift");
   }
 };

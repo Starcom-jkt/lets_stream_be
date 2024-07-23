@@ -7,17 +7,20 @@ import cors from "cors";
 import methodOverride from "method-override";
 import flash from "connect-flash";
 
+// api
 import giftRouter from "./src/api/gift/router";
 import merchantRouter from "./src/api/merchant/router";
 import gameRouter from "./src/api/game/router";
 
-import adminRoutes from "./src/app/admin/router";
-import agentRoutes from "./src/app/agent/router";
-import gameRoutes from "./src/app/game/router";
-import giftRoutes from "./src/app/gift/router";
-import userRoutes from "./src/app/user/router";
-import merchantRoutes from "./src/app/merchant/router";
-import currencyRoutes from "./src/app/currency/router";
+// admin view
+import adminRoutes from "./src/app/adminPanel/admin/router";
+import agentRoutes from "./src/app/adminPanel/agent/router";
+import gameRoutes from "./src/app/adminPanel/game/router";
+import giftRoutes from "./src/app/adminPanel/gift/router";
+import userRoutes from "./src/app/adminPanel/user/router";
+import merchantRoutes from "./src/app/adminPanel/merchant/router";
+import currencyRoutes from "./src/app/adminPanel/currency/router";
+import languageRoutes from "./src/app/adminPanel/language/router";
 
 dotenv.config();
 
@@ -48,41 +51,20 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// api
+// Route for the api
 app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
 
-app.use("/agent", agentRoutes);
-app.use("/admin", adminRoutes);
-app.use("/game", gameRoutes);
-app.use("/gift", giftRoutes);
-app.use("/user", userRoutes);
-app.use("/merchant", merchantRoutes);
-app.use("/currency", currencyRoutes);
-
 // Route for the admin view
-app.get("/admin", (req, res) => {
-  res.render("admin/index", { title: "Admin Panel" });
-});
-app.get("/agent", (req, res) => {
-  res.render("admin/agent/index", { title: "Admin Panel" });
-});
-app.get("/user", (req, res) => {
-  res.render("admin/user/index", { title: "Admin Panel" });
-});
-app.get("/game", (req, res) => {
-  res.render("admin/game/index", { title: "Admin Panel" });
-});
-app.get("/gift", (req, res) => {
-  res.render("admin/gift/index", { title: "Admin Panel" });
-});
-app.get("/currency", (req, res) => {
-  res.render("admin/currency/index", { title: "Admin Panel" });
-});
-app.get("/merchant", (req, res) => {
-  res.render("admin/merchant/index", { title: "Admin Panel" });
-});
+app.use("/admin", adminRoutes);
+app.use("/admin/agent", agentRoutes);
+app.use("/admin/game", gameRoutes);
+app.use("/admin/gift", giftRoutes);
+app.use("/admin/user", userRoutes);
+app.use("/admin/merchant", merchantRoutes);
+app.use("/admin/currency", currencyRoutes);
+app.use("/admin/language", languageRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

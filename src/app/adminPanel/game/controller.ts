@@ -1,4 +1,4 @@
-import pool from "../../../db";
+import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 
@@ -12,32 +12,30 @@ const formatDate = (date: Date) => {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 };
 
-interface User extends RowDataPacket {
+interface game extends RowDataPacket {
   id: number;
-  playerId: number;
-  username: string;
-  balance: number;
+  gameCode: string;
+  gameName: string;
   create_time: Date;
 }
 
 export const index = async (req: Request, res: Response) => {
   try {
-    // Ambil data dari tabel user
+    // Ambil data dari tabel game
     const alertMessage = req.flash("alertMessage");
     const alertStatus = req.flash("alertStatus");
 
     const alert = { message: alertMessage, status: alertStatus };
-    const [user] = await pool.query("SELECT * FROM user");
-    console.log(user);
-    // Render halaman dengan data user
-    res.render("admin/user/index", {
-      user,
+    const [game] = await pool.query("SELECT * FROM game");
+    // Render halaman dengan data game
+    res.render("admin/game/index", {
+      game,
       alert,
       // name: req.session.user.name,
-      title: "Halaman user",
+      title: "Halaman game",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman user
+    // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
     res.redirect("/");
@@ -46,28 +44,28 @@ export const index = async (req: Request, res: Response) => {
 
 export const indexCreate = async (req: Request, res: Response) => {
   try {
-    // Render halaman dengan data user
-    res.render("admin/user/create", {
+    // Render halaman dengan data game
+    res.render("admin/game/create", {
       // name: req.session.user.name,
-      title: "Halaman create user",
+      title: "Halaman create game",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman user
+    // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/game");
   }
 };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { username, playerId, nickname, balance } = req.body;
+    const { gameCode, gameName } = req.body;
     // const createTime = formatDate(new Date());
     const [rows] = await pool.query(
-      "INSERT INTO user ( username, playerId, nickname, balance) VALUES (?, ?, ?, ?)",
-      [username, playerId, nickname, balance]
+      "INSERT INTO game ( gameCode, gameName) VALUES ( ?, ?)",
+      [gameCode, gameName]
     );
-    res.redirect("/user");
+    res.redirect("/game");
   } catch (err) {
     res.send(err);
   }
@@ -77,23 +75,23 @@ export const actionDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM user WHERE id = ?",
+      "DELETE FROM game WHERE id = ?",
       [id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "user not found");
+      req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
     } else {
-      req.flash("alertMessage", "Berhasil hapus user");
+      req.flash("alertMessage", "Berhasil hapus game");
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/user");
+    res.redirect("/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/game");
   }
 };
 
@@ -102,31 +100,31 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Ambil ID dari parameter request
     const { id } = req.params;
 
-    // Ambil data dari tabel user
-    const [rows] = await pool.query<User[]>("SELECT * FROM user WHERE id = ?", [
+    // Ambil data dari tabel game
+    const [rows] = await pool.query<game[]>("SELECT * FROM game WHERE id = ?", [
       id,
     ]);
 
     // Periksa apakah agen ditemukan
     if (rows.length === 0) {
-      req.flash("alertMessage", "user not found");
+      req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/user");
+      return res.redirect("/game");
     }
 
-    const user = rows[0];
+    const game = rows[0];
 
-    // Render halaman dengan data user
-    res.render("admin/user/edit", {
-      user,
+    // Render halaman dengan data game
+    res.render("admin/game/edit", {
+      game,
       // name: req.session.user.name,
-      title: "Halaman Edit user",
+      title: "Halaman Edit game",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman user
+    // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/game");
   }
 };
 
@@ -134,25 +132,25 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { username, playerId, nickname, balance } = req.body;
+    const { gameName, gameCode } = req.body;
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE user SET username = ?, playerId = ?, nickname = ?, balance = ? WHERE id = ?",
-      [username, playerId, nickname, balance, id]
+      "UPDATE game SET gameCode = ?, gameName = ? WHERE id = ?",
+      [gameCode, gameName, id]
     );
 
     if (result.affectedRows === 0) {
-      req.flash("alertMessage", "user not found");
+      req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/user");
+      return res.redirect("/game");
     }
 
-    req.flash("alertMessage", "Berhasil mengedit user");
+    req.flash("alertMessage", "Berhasil mengedit game");
     req.flash("alertStatus", "success");
-    res.redirect("/user");
+    res.redirect("/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/game");
   }
 };
