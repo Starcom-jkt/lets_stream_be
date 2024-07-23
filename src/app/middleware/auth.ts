@@ -1,16 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import pool from "../../../db";
-import config from "../../config";
 
-interface JwtPayload {
-  player: {
-    id: number;
-  };
+import session from "express-session";
+
+interface CustomSession extends session.Session {
+  user?: { id: number; email: string; status: string; name: string };
 }
 
+const jwtSecretKey = "your_secret_key_here"; // Gantilah dengan kunci rahasia Anda
+
 export const isLoginAdmin = (
-  req: Request,
+  req: Request & { session: CustomSession },
   res: Response,
   next: NextFunction
 ) => {
@@ -20,37 +21,37 @@ export const isLoginAdmin = (
       "Mohon maaf session anda telah habis silahkan login kembali"
     );
     req.flash("alertStatus", "danger");
-    return res.redirect("/");
+    return res.redirect("/admin/login");
   } else {
     next();
   }
 };
 
-export const isLoginPlayer = async (
-  req: Request,
+export const isLoginViewer = async (
+  req: Request & { session: CustomSession },
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const token = req.headers.authorization
-      ? req.headers.authorization.replace("Bearer ", "")
-      : null;
+    const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
 
     if (!token) {
       throw new Error("Token not provided");
     }
 
-    const data = jwt.verify(token, config.jwtKey) as JwtPayload;
+    const data: any = jwt.verify(token, jwtSecretKey);
 
-    const [rows] = await pool.query("SELECT * FROM players WHERE id = ?", [
+    const [result] = await pool.execute("SELECT * FROM players WHERE id =?", [
       data.player.id,
     ]);
 
-    if ((rows as any).length === 0) {
+    const rows = result as any[];
+
+    if (!Array.isArray(rows) || rows.length === 0) {
       throw new Error("Player not found");
     }
 
-    req.body.player = (rows as any)[0];
+    req.body.player = rows[0];
     req.body.token = token;
     next();
   } catch (err) {

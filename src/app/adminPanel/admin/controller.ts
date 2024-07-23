@@ -18,7 +18,7 @@ export const index = async (req: Request, res: Response) => {
     );
 
     res.render("admin/index", {
-      //   name: req.session.user.name,
+      name: req.session.user?.username,
       title: "Halaman Admin",
       count: {
         agent: agentRows[0].count,

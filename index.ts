@@ -13,6 +13,7 @@ import merchantRouter from "./src/api/merchant/router";
 import gameRouter from "./src/api/game/router";
 
 // admin view
+import authRoutes from "./src/app/adminPanel/auth/router";
 import adminRoutes from "./src/app/adminPanel/admin/router";
 import agentRoutes from "./src/app/adminPanel/agent/router";
 import gameRoutes from "./src/app/adminPanel/game/router";
@@ -46,6 +47,20 @@ app.use(
     cookie: {},
   })
 );
+
+declare module "express-session" {
+  interface SessionData {
+    user: {
+      id: number;
+      username: string;
+      email: string;
+      status: string;
+      picture: string;
+      name: string;
+    };
+  }
+}
+
 app.use(flash());
 app.use(cors());
 app.use(express.json());
@@ -57,6 +72,7 @@ app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
 
 // Route for the admin view
+app.use("/admin/login", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/agent", agentRoutes);
 app.use("/admin/game", gameRoutes);
