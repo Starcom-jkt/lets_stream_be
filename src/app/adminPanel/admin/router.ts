@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { index } from "./controller";
-import { isLoginAdmin } from "../../middleware/auth";
+import { isLoginAdmin } from "../../../middleware/auth";
 
 const router = Router();
 
