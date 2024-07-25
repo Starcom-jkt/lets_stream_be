@@ -32,9 +32,9 @@ const URL = `/api/v1`;
 // view engine setup
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "src/views"));
-
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static("public/uploads"));
 app.use("/adminlte", express.static(path.join(__dirname, "public/adminlte")));
 app.use(methodOverride("_method"));
 

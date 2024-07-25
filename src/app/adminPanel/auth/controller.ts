@@ -34,7 +34,7 @@ export const actionSignin = async (req: Request, res: Response) => {
             email: admin.email,
             name: admin.name,
           };
-          console.log("req.session.user", req.session.user);
+          // console.log("req.session.user", req.session.user);
           res.redirect("/admin");
         } else {
           req.flash("alertMessage", "Kata sandi yang anda inputkan salah");

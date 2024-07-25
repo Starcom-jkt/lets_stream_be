@@ -1,11 +1,10 @@
-// src/uploadMiddleware.ts
 import multer from "multer";
 import { Request, Response, NextFunction } from "express";
-import
-// Konfigurasi penyimpanan file
+
+// Configure storage for uploaded files
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Folder tujuan penyimpanan file
+    cb(null, "public/uploads/"); // Destination folder for file storage
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
@@ -13,32 +12,75 @@ const storage = multer.diskStorage({
   },
 });
 
-// Filter file yang diizinkan
+// Filter to allow only JPEG and PNG files
 const fileFilter = (
   req: Request,
   file: Express.Multer.File,
-  cb: multer.FileFilterCallback
+  cb: (error: Error | null, acceptFile?: boolean) => void
 ) => {
   if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
     cb(null, true);
   } else {
-    cb(new Error("Hanya file JPEG dan PNG yang diizinkan!"), false);
+    cb(new Error("Only JPEG and PNG files are allowed!"), false);
   }
 };
 
-// Konfigurasi multer
+// Configure Multer with the specified storage and file filter
 const upload = multer({
   storage: storage,
   limits: {
-    fileSize: 1024 * 1024 * 5, // Batas ukuran file 5MB
+    fileSize: 1024 * 1024 * 5, // Set file size limit to 5MB
   },
   fileFilter: fileFilter,
 });
 
-// Middleware untuk mengunggah satu file
-const uploadSingle = upload.single("image");
+// Middleware for uploading a single file
+// const uploadSingle = (req: Request, res: Response, next: NextFunction) => {
+//   const singleUpload = upload.single("image");
 
-// Middleware untuk mengunggah beberapa file
-const uploadMultiple = upload.array("images", 10);
+//   singleUpload(req, res, (err: any) => {
+//     if (err instanceof multer.MulterError) {
+//       // Handle Multer errors
+//       return res.status(400).json({ message: err.message });
+//     } else if (err) {
+//       // Handle other errors
+//       return res.status(400).json({ message: err.message });
+//     }
+//     next();
+//   });
+// };
+
+// Higher-order function to create middleware for uploading a single file with a dynamic field name
+const uploadSingle = (fieldName: string) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const singleUpload = upload.single(fieldName);
+    singleUpload(req, res, (err: any) => {
+      if (err instanceof multer.MulterError) {
+        // Handle Multer errors
+        return res.status(400).json({ message: err.message });
+      } else if (err) {
+        // Handle other errors
+        return res.status(400).json({ message: err.message });
+      }
+      next();
+    });
+  };
+};
+
+// Middleware for uploading multiple files
+const uploadMultiple = (req: Request, res: Response, next: NextFunction) => {
+  const multipleUpload = upload.array("images", 10);
+
+  multipleUpload(req, res, (err: any) => {
+    if (err instanceof multer.MulterError) {
+      // Handle Multer errors
+      return res.status(400).json({ message: err.message });
+    } else if (err) {
+      // Handle other errors
+      return res.status(400).json({ message: err.message });
+    }
+    next();
+  });
+};
 
 export { uploadSingle, uploadMultiple };

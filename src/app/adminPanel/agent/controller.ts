@@ -1,6 +1,7 @@
 import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+import bcrypt from "bcrypt";
 
 const formatDate = (date: Date) => {
   const yyyy = date.getFullYear();
@@ -17,6 +18,7 @@ interface Agent extends RowDataPacket {
   name: string;
   username: string;
   create_time: Date;
+  profile_picture: Date;
 }
 
 export const index = async (req: Request, res: Response) => {
@@ -45,34 +47,40 @@ export const index = async (req: Request, res: Response) => {
 
 export const indexCreate = async (req: Request, res: Response) => {
   try {
-    // Ambil data dari tabel agent
-    //   const [agent] = await pool.query("SELECT * FROM agent");
-
     // Render halaman dengan data agent
     res.render("admin/agent/create", {
       // agent,
       // name: req.session.user.name,
       title: "Halaman create Agent",
     });
-  } catch (err) {
+  } catch (err: any) {
     // Jika terjadi kesalahan, redirect ke halaman agent
-    // req.flash("alertMessage", `${err.message}`);
-    // req.flash("alertStatus", "danger");
+    req.flash("alertMessage", `${err.message}`);
+    req.flash("alertStatus", "danger");
     res.redirect("/agent");
   }
 };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { name, username } = req.body;
+    const { name, username, password } = req.body;
+    const saltRounds = 10;
+    const profile_picture = req.file?.filename || "";
+
+    // Hash the password
+    const passwordBrcypted = await bcrypt.hash(password, saltRounds);
+
     const createTime = formatDate(new Date());
     const [rows] = await pool.query(
-      "INSERT INTO agent ( create_time, name, username) VALUES (?, ?, ?)",
-      [createTime, name, username]
+      "INSERT INTO agent (create_time, name, username, profile_picture, password) VALUES (?, ?, ?, ?, ?)",
+      [createTime, name, username, profile_picture, passwordBrcypted]
     );
-    res.redirect("/agent");
-  } catch (err) {
-    res.send(err);
+
+    console.log(profile_picture);
+    res.redirect("/admin/agent");
+  } catch (err: any) {
+    res.status(500).send(err.message);
+    console.log(err);
   }
 };
 
@@ -138,11 +146,11 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, username } = req.body;
+    const { name, username, profile_picture } = req.body;
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE agent SET name = ?, username = ? WHERE id = ?",
-      [name, username, id]
+      "UPDATE agent SET name = ?, username = ?, profile_picture = ? WHERE id = ?",
+      [name, username, profile_picture, id]
     );
 
     if (result.affectedRows === 0) {

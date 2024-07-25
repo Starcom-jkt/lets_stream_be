@@ -37,28 +37,38 @@
                 </div>
                 <!-- /.card-header -->
                 <!-- form start -->
-                <form action="/agent/create" method="POST">
+                <form action="/admin/agent/create" method="POST" enctype="multipart/form-data">
                   <div class="card-body">
                     <div class="form-group">
-                      <label for="name">Profile</label>
-                      <input type="text" name="profile" class="form-control" id="profile" placeholder="profile" />
+                      <label for="profile_picture">Profile Picture</label>
+                      <input type="file" name="profile_picture" class="form-control" id="profile_picture" accept="image/*" onchange="previewImage(event)" />
                     </div>
-
+                    <div class="form-group">
+                      <img id="profile-preview" src="" alt="Profile Preview" style="display: none; max-width: 200px; max-height: 200px;" />
+                    </div>
+                
                     <div class="form-group">
                       <label for="name">Nama Agent</label>
                       <input type="text" name="name" class="form-control" id="name" placeholder="Nama agent" required />
                     </div>
-
+                
                     <div class="form-group">
                       <label for="username">Username</label>
                       <input type="text" name="username" class="form-control" id="username" placeholder="username" required />
                     </div>
-                  </div>
+                
+                    <div class="form-group">
+                      <label for="password">Password</label>
+                      <input type="password" name="password" class="form-control" id="password" placeholder="password" required />
+                    </div>
 
+                    <input type="checkbox" class="my-1" onclick="myFunction()" /> Show Password
+                  </div>
+                
                   <div class="card-footer">
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i>Simpan</button>
-                    <button type="submit" class="btn btn-secondary">
-                      <a href="/agent" style="color: white"><i class="fa fa-undo"></i>Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                    <button type="button" class="btn btn-secondary">
+                      <a href="/agent" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
                     </button>
                   </div>
                 </form>
@@ -76,6 +86,31 @@
   </section>
   <!-- /.content -->
 </div>
+<script>
+  function previewImage(event) {
+    var input = event.target;
+    var reader = new FileReader();
 
+    reader.onload = function() {
+      var dataURL = reader.result;
+      var output = document.getElementById('profile-preview');
+      output.src = dataURL;
+      output.style.display = 'block';
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+</script>
+
+<script>
+  function myFunction() {
+    var x = document.getElementById('password');
+    if (x.type === 'password') {
+      x.type = 'text';
+    } else {
+      x.type = 'password';
+    }
+  }
+</script>
 
 <%- include ('../../components/footer.ejs') %>
