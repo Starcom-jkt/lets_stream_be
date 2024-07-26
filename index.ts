@@ -11,6 +11,7 @@ import flash from "connect-flash";
 import giftRouter from "./src/api/gift/router";
 import merchantRouter from "./src/api/merchant/router";
 import gameRouter from "./src/api/game/router";
+import streamRouter from "./src/api/streamer/router";
 
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
@@ -70,6 +71,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
+app.use(`${URL}/streamer`, streamRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);

@@ -2,8 +2,10 @@
     <thead>
       <tr>
         <th style="width: 7%">No</th>
-        <th>Code Game</th>
+        <th>Game Code</th>
+        <th>Game Img</th>
         <th>Game Name</th>
+        <th>Game URL</th>
         <th style="width: 20%">Actions</th>
       </tr>
     </thead>
@@ -11,8 +13,12 @@
       <% for(let i = 0; i < game.length; i++){ %>
         <tr>
           <td><%= i + 1 %></td>
+          <td>
+            <img src="/uploads/<%= game[i].gameImg %>" alt="">
+          </td>
           <td><%= game[i].gameCode %></td>
           <td><%= game[i].gameName %></td>
+          <td><%= game[i].gameLink %></td>
           <td>
             <form action="/admin/game/delete/<%= game[i].id %>?_method=DELETE" method="POST">
               <a href="/admin/game/edit/<%= game[i].id %>" class="btn btn-warning">

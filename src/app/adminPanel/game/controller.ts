@@ -38,7 +38,7 @@ export const index = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/");
+    res.redirect("/admin/game");
   }
 };
 
@@ -53,21 +53,23 @@ export const indexCreate = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { gameCode, gameName } = req.body;
-    // const createTime = formatDate(new Date());
+    const { gameCode, gameName, gameLink } = req.body;
+    const createTime = formatDate(new Date());
+    const gameImg = req.file?.filename || "";
+
     const [rows] = await pool.query(
-      "INSERT INTO game ( gameCode, gameName) VALUES ( ?, ?)",
-      [gameCode, gameName]
+      "INSERT INTO game (gameCode, gameName, created_at, gameLink, gameImg) VALUES (?, ?, ?, ?, ?)",
+      [gameCode, gameName, createTime, gameLink, gameImg]
     );
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err) {
-    res.send(err);
+    res.status(500).send(err);
   }
 };
 
@@ -87,11 +89,11 @@ export const actionDelete = async (req: Request, res: Response) => {
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -109,7 +111,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/admin/game");
     }
 
     const game = rows[0];
@@ -124,7 +126,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -132,25 +134,25 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { gameName, gameCode } = req.body;
+    const { gameName, gameCode, gameLink, gameImg } = req.body;
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE game SET gameCode = ?, gameName = ? WHERE id = ?",
-      [gameCode, gameName, id]
+      "UPDATE game SET gameCode = ?, gameName = ?, gameLink = ?, gameImg = ? WHERE id = ?",
+      [gameCode, gameName, gameLink, gameImg, id]
     );
 
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/admin/game");
     }
 
     req.flash("alertMessage", "Berhasil mengedit game");
     req.flash("alertStatus", "success");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
