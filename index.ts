@@ -8,10 +8,12 @@ import methodOverride from "method-override";
 import flash from "connect-flash";
 
 // api
-import giftRouter from "./src/api/gift/router";
-import merchantRouter from "./src/api/merchant/router";
-import gameRouter from "./src/api/game/router";
-import streamRouter from "./src/api/streamer/router";
+import giftRouter from "./src/api/user/gift/router";
+import merchantRouter from "./src/api/user/merchant/router";
+import gameRouter from "./src/api/user/game/router";
+import streamRouter from "./src/api/streamer/token/router";
+import agentRouter from "./src/api/streamer/agent/router";
+import streamSessionRouter from "./src/api/streamer/streamSession/router";
 
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
@@ -72,6 +74,8 @@ app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
 app.use(`${URL}/streamer`, streamRouter);
+app.use(`${URL}/agent`, agentRouter);
+app.use(`${URL}/stream_session`, streamSessionRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);
