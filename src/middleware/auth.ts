@@ -60,3 +60,35 @@ export const isLoginViewer = async (
     });
   }
 };
+
+interface CustomRequest extends Request {
+  agent?: { agentId?: number };
+}
+export const isLoginAgent = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ message: "Unauthorized: No token provided" });
+    }
+
+    jwt.verify(token, jwtSecretKey, (err, decoded: any) => {
+      if (err) {
+        req.agent = { agentId: decoded.agentId };
+        return res.status(401).json({ message: "Unauthorized: Invalid token" });
+      }
+
+      req.agent = { agentId: decoded.agentId };
+      console.log("agentData", req.agent);
+      next();
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error processing authentication", error });
+  }
+};

@@ -14,6 +14,7 @@ import gameRouter from "./src/api/user/game/router";
 import streamRouter from "./src/api/streamer/token/router";
 import agentRouter from "./src/api/streamer/agent/router";
 import streamSessionRouter from "./src/api/streamer/streamSession/router";
+import agentAuthRouter from "./src/api/streamer/auth/router";
 
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
@@ -75,7 +76,10 @@ app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
 app.use(`${URL}/streamer`, streamRouter);
 app.use(`${URL}/agent`, agentRouter);
+
+// Route for the api agent / streamer
 app.use(`${URL}/stream_session`, streamSessionRouter);
+app.use(`${URL}/agentAuth`, agentAuthRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);

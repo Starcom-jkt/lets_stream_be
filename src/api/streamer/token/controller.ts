@@ -146,3 +146,39 @@ function getRole(role: string) {
     return RtcRole.SUBSCRIBER;
   }
 }
+
+export const generateRtcToken = (
+  channelName: string,
+  role: number,
+  tokentype: string,
+  uid: string,
+  expiry = 3600
+) => {
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const expireTimestamp = currentTimestamp + expiry;
+  let token;
+
+  if (tokentype === "userAccount") {
+    token = RtcTokenBuilder.buildTokenWithAccount(
+      appID,
+      appCertificate,
+      channelName,
+      uid,
+      role,
+      expireTimestamp
+    );
+  } else if (tokentype === "uid") {
+    token = RtcTokenBuilder.buildTokenWithUid(
+      appID,
+      appCertificate,
+      channelName,
+      parseInt(uid, 10),
+      role,
+      expireTimestamp
+    );
+  } else {
+    throw new Error(`Unknown tokentype: ${tokentype}`);
+  }
+
+  return token;
+};
