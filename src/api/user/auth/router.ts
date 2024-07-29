@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {
-  changeStatusAgent,
+  changeStatusUser,
   login,
   logout,
   register,
-  removeAgent,
+  removeUser,
 } from "./controller";
 
 const router = Router();
@@ -12,7 +12,6 @@ const router = Router();
 router.post("/login", login);
 router.post("/logout", logout);
 router.post("/register", register);
-router.post("/update/:id", changeStatusAgent);
-router.delete("/remove/:id", removeAgent);
-
+router.post("/update/:id", changeStatusUser);
+router.delete("/remove/:id", removeUser);
 export default router;

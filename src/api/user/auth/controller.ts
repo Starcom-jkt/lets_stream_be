@@ -6,9 +6,17 @@ import { ResultSetHeader } from "mysql2";
 
 const JWT_SECRET = "your_secret_key_here"; // Replace with your actual secret key
 
-const router = express.Router();
+const generateUniqueKey = () => {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 4; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return result;
+};
 
-interface Agent {
+interface User {
   id: number;
   username: string;
   password: string;
@@ -19,22 +27,22 @@ export const login = async (req: Request, res: Response) => {
 
   try {
     const [rows]: any = await pool.query(
-      "SELECT * FROM agent WHERE username = ?",
+      "SELECT * FROM user WHERE username = ?",
       [username]
     );
-
+    console.log(rows);
     if (rows.length === 0) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
-    const agent = rows[0];
-    const match = password === agent.password;
+    const user = rows[0];
+    const match = bcrypt.compareSync(password, user.password);
     if (!match) {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
-    // Generate JWT token with agentData
-    const token = jwt.sign({ agentData: agent }, JWT_SECRET, {
+    // Generate JWT token with userData
+    const token = jwt.sign({ userData: user }, JWT_SECRET, {
       expiresIn: "1h",
     });
 
@@ -60,100 +68,102 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { name, username, profilePicture, password, streamChannel } = req.body;
+  const { email, username, profilePicture, password, nickname, streamChannel } =
+    req.body;
+  const playerId = generateUniqueKey();
   const saltRounds = 10;
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);
 
   try {
     // Check if the username or streamChannel already exists
-    const [existingUsers]: any = await pool.query(
-      "SELECT * FROM agent WHERE username = ? ",
+    const [existingEmail]: any = await pool.query(
+      "SELECT * FROM user WHERE email = ? ",
       [username]
     );
 
-    if (existingUsers.length > 0) {
+    if (existingEmail.length > 0) {
       return res.status(400).json({
-        message: "Username already exists",
+        message: "Email already exists",
       });
     }
 
-    const [existingChannel]: any = await pool.query(
-      "SELECT * FROM agent WHERE streamChannel = ?",
-      [streamChannel]
+    const [existingNickname]: any = await pool.query(
+      "SELECT * FROM user WHERE nickname = ?",
+      [nickname]
     );
 
-    if (existingChannel.length > 0) {
+    if (existingNickname.length > 0) {
       return res.status(400).json({
-        message: "Stream Channel already exists",
+        message: "Nickname Channel already exists",
       });
     }
 
-    // Insert the new agent into the database
+    // Insert the new user into the database
     const [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO agent (name, username, profilePicture, password, streamChannel) VALUES (?, ?, ?, ?, ?)",
-      [name, username, profilePicture, bcryptedPassword, streamChannel]
+      "INSERT INTO user (email, username, profilePicture, password, playerId) VALUES (?, ?, ?, ?, ?)",
+      [email, username, profilePicture, bcryptedPassword, playerId]
     );
 
     res.json({
       id: result.insertId,
-      name,
+      email,
       username,
       profilePicture,
       bcryptedPassword,
-      streamChannel,
+      playerId,
     });
   } catch (error) {
     res.status(500).json({ message: "Error during register", error });
   }
 };
 
-export const removeAgent = async (req: Request, res: Response) => {
+export const removeUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM agent WHERE id = ?",
+      "DELETE FROM user WHERE id = ?",
       [id]
     );
     if (result.affectedRows === 0) {
-      res.status(404).json({ message: "Agent not found" });
+      res.status(404).json({ message: "user not found" });
     } else {
-      res.json({ message: "Agent deleted successfully" });
+      res.json({ message: "user deleted successfully" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting Agent", error });
+    res.status(500).json({ message: "Error deleting user", error });
   }
 };
 
-export const changeStatusAgent = async (req: Request, res: Response) => {
+export const changeStatusUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    // First, get the current status of the agent
+    // First, get the current status of the user
     const [rows]: [any[], any] = await pool.query(
-      "SELECT status FROM agent WHERE id = ?",
+      "SELECT status FROM user WHERE id = ?",
       [id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ message: "Agent not found" });
+      return res.status(404).json({ message: "user not found" });
     }
 
     const currentStatus = rows[0].status;
     const newStatus = currentStatus === 0 ? 1 : 0;
 
-    // Update the status of the agent
+    // Update the status of the user
     const [result]: [ResultSetHeader, any] = await pool.query(
-      "UPDATE agent SET status = ? WHERE id = ?",
+      "UPDATE user SET status = ? WHERE id = ?",
       [newStatus, id]
     );
 
     if (result.affectedRows === 0) {
-      res.status(404).json({ message: "Agent not found" });
+      res.status(404).json({ message: "user not found" });
     } else {
       res.json({
-        message: `Agent ${id} status updated successfully to ${newStatus}`,
+        message: `user ${id} status updated successfully to ${newStatus}`,
       });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating agent status", error });
+    res.status(500).json({ message: "Error updating user status", error });
   }
 };

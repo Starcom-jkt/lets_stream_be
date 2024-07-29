@@ -139,45 +139,56 @@ export const getBothTokens = (req: Request, res: Response): void => {
   }
 };
 
-function getRole(role: string) {
+const APP_ID = process.env.APP_ID || "";
+const APP_CERTIFICATE = process.env.APP_CERTIFICATE || "";
+const expirationTimeInSeconds = 3600;
+
+// Function to map role string to RtcRole
+const getRole = (role: string) => {
   if (role === "publisher") {
     return RtcRole.PUBLISHER;
   } else {
     return RtcRole.SUBSCRIBER;
   }
-}
+};
 
+// Function to generate RTC token
 export const generateRtcToken = (
   channelName: string,
-  role: number,
+  role: string,
   tokentype: string,
   uid: string,
-  expiry = 3600
+  expiry = expirationTimeInSeconds
 ) => {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const expireTimestamp = currentTimestamp + expiry;
   let token;
 
-  if (tokentype === "userAccount") {
-    token = RtcTokenBuilder.buildTokenWithAccount(
-      appID,
-      appCertificate,
-      channelName,
-      uid,
-      role,
-      expireTimestamp
-    );
-  } else if (tokentype === "uid") {
-    token = RtcTokenBuilder.buildTokenWithUid(
-      appID,
-      appCertificate,
-      channelName,
-      parseInt(uid, 10),
-      role,
-      expireTimestamp
-    );
-  } else {
-    throw new Error(`Unknown tokentype: ${tokentype}`);
+  try {
+    if (tokentype === "userAccount") {
+      token = RtcTokenBuilder.buildTokenWithAccount(
+        APP_ID,
+        APP_CERTIFICATE,
+        channelName,
+        uid,
+        getRole(role),
+        expireTimestamp
+      );
+    } else if (tokentype === "uid") {
+      token = RtcTokenBuilder.buildTokenWithUid(
+        APP_ID,
+        APP_CERTIFICATE,
+        channelName,
+        parseInt(uid, 10),
+        getRole(role),
+        expireTimestamp
+      );
+    } else {
+      throw new Error(`Unknown tokentype: ${tokentype}`);
+    }
+  } catch (error: any) {
+    console.error("Error generating RTC token:", error.message);
+    throw error;
   }
 
   return token;
