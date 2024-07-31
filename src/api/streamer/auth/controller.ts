@@ -31,6 +31,7 @@ export const login = async (req: Request, res: Response) => {
 
     const agent = rows[0];
     const match = bcrypt.compareSync(password, agent.password);
+    // const match = password === agent.password;
     if (!match) {
       return res
         .status(400)
