@@ -14,11 +14,3 @@ const pool = mysql.createPool({
 });
 
 export default pool;
-
-// CREATE TABLE `stream`.`merchant` (
-//   `id` INT NOT NULL AUTO_INCREMENT,
-//   `merchantCode` VARCHAR(300) NULL,
-//   `merchantName` VARCHAR(300) NULL,
-//   `merchantLogo` VARCHAR(300) NULL,
-//   `useBranchLogo` VARCHAR(45) NULL,
-//   PRIMARY KEY (`id`));
