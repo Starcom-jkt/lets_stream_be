@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../../../../db";
-import { ResultSetHeader } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { v4 as uuidv4 } from "uuid";
 import { generateRtcToken } from "../token/controller";
 
@@ -22,26 +22,19 @@ const generateUniqueKey = () => {
 };
 
 export const startStreamSession = async (req: Request, res: Response) => {
-  const agentId = req.agent?.id; // Ensure this matches how you set `req.agent` in middleware
-  console.log("agentId", agentId);
+  const agentId = req.agent?.id;
   if (!agentId) {
     return res
       .status(401)
       .json({ success: false, message: "Unauthorized: No agentId found" });
   }
 
-  const channelName: string = req.agent?.streamChannel ?? "";
-  console.log(channelName);
-  const tokentype: string = "uid";
-  const uid: number = req.agent?.id ?? 0;
-  const uidstr: string = uid.toString(); // Convert uid to string
+  const channelName = req.agent?.streamChannel ?? "";
+  const uid = agentId.toString();
 
   try {
-    const [existingSessions]: any = await pool.query(
-      `
-      SELECT * FROM stream_session 
-      WHERE agentId = ? AND status = 1
-    `,
+    const [existingSessions] = await pool.query<RowDataPacket[]>(
+      "SELECT * FROM stream_session WHERE agentId = ? AND status = 1",
       [agentId]
     );
 
@@ -51,7 +44,7 @@ export const startStreamSession = async (req: Request, res: Response) => {
         .json({ success: true, message: "You're on the live" });
     }
 
-    const token = generateRtcToken(channelName, "publisher", tokentype, uidstr);
+    const token = generateRtcToken(channelName, uid);
     const status = 1;
     const streamId = generateUniqueKey();
 
