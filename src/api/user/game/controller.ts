@@ -26,11 +26,12 @@ export const getDetailGame = async (req: Request, res: Response) => {
 };
 
 export const postGame = async (req: Request, res: Response) => {
-  const { gameCode, gameName } = req.body;
+  const { gameCode, gameName, gameLink } = req.body;
+  const gameImg = req.file?.filename || "";
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO game (gameCode, gameName) VALUES (?, ?)",
-      [gameCode, gameName]
+      "INSERT INTO game (gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?)",
+      [gameCode, gameName, gameLink, gameImg]
     );
     res.json({
       id: result.insertId,

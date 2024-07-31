@@ -6,13 +6,15 @@ import {
   getDetailGift,
   postGift,
 } from "./controller";
+import { isLoginViewer } from "../../../middleware/auth";
+import { uploadSingle } from "../../../middleware/uploadImage";
 
 const router = Router();
 
-router.get("/", getAllGifts);
-router.get("/:id", getDetailGift);
-router.post("/", postGift);
-router.put("/edit/:id", editGift);
-router.delete("/delete/:id", deleteGift);
+router.get("/", isLoginViewer, getAllGifts);
+router.get("/:id", isLoginViewer, getDetailGift);
+router.post("/", uploadSingle("img"), isLoginViewer, postGift);
+router.put("/edit/:id", uploadSingle("img"), isLoginViewer, editGift);
+router.delete("/delete/:id", isLoginViewer, deleteGift);
 
 export default router;

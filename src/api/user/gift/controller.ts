@@ -24,13 +24,21 @@ export const getDetailGift = async (req: Request, res: Response) => {
 };
 
 export const postGift = async (req: Request, res: Response) => {
-  const { img, gift_name, gift_link, price } = req.body;
+  const { giftName, giftLink, price } = req.body;
+  const img = req.file?.filename || "";
   try {
     const [result] = await pool.query<ResultSetHeader>(
       "INSERT INTO gift (img, giftName, giftLink, price) VALUES (?, ?, ?, ?)",
-      [img, gift_name, gift_link, price]
+      [img, giftName, giftLink, price]
     );
-    res.json({ id: result.insertId, img, gift_name, gift_link, price });
+    res.json({
+      success: true,
+      id: result.insertId,
+      img,
+      giftName,
+      giftLink,
+      price,
+    });
   } catch (error) {
     res.status(500).json({ message: "Error adding gift", error });
   }

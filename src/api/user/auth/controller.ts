@@ -72,8 +72,8 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  const { email, username, profilePicture, password, nickname, streamChannel } =
-    req.body;
+  const { email, username, password, nickname } = req.body;
+  const profilePicture = req.file?.filename || "default.png";
   const playerId = generateUniqueKey();
   const saltRounds = 10;
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);

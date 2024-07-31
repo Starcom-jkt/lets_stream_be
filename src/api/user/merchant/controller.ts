@@ -26,7 +26,9 @@ export const getDetailmerchant = async (req: Request, res: Response) => {
 };
 
 export const postmerchant = async (req: Request, res: Response) => {
-  const { merchantCode, merchantName, merchantLogo, useBranchLogo } = req.body;
+  const { merchantCode, merchantName, useBranchLogo } = req.body;
+  const merchantLogo = req.file?.filename || "";
+
   try {
     const [result] = await pool.query<ResultSetHeader>(
       "INSERT INTO merchant (merchantCode, merchantName, merchantLogo, useBranchLogo) VALUES (?, ?, ?, ?)",

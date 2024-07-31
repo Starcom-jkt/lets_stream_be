@@ -28,6 +28,7 @@ export const isLoginAdmin = (
 
 interface CustomRequest extends Request {
   agent?: { agentId?: any };
+  user?: { userId?: any };
 }
 
 export const isLoginAgent = (
@@ -76,7 +77,8 @@ export const isLoginViewer = (
         return res.status(401).json({ message: "Unauthorized: Invalid token" });
       }
 
-      req.agent = decoded.userData; // Ensure this contains valid token type
+      req.user = decoded.userData; // Ensure this contains valid token type
+      console.log("req.agent", req.user);
       next();
     });
   } catch (error) {

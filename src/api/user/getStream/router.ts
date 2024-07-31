@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { getStreamSession } from "./controller";
+import { isLoginViewer } from "../../../middleware/auth";
 
 const router = Router();
 
-router.get("/", getStreamSession);
+router.get("/", isLoginViewer, getStreamSession);
 
 export default router;

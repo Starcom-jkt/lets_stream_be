@@ -23,8 +23,9 @@ export const getDetailAgent = async (req: Request, res: Response) => {
 };
 
 export const postAgent = async (req: Request, res: Response) => {
-  const { name, username, profilePicture, password, streamChannel } = req.body;
+  const { name, username, password, streamChannel } = req.body;
   const saltRounds = 10;
+  const profilePicture = req.file?.filename || "default.png";
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);
   try {
     const [result] = await pool.query<ResultSetHeader>(
@@ -46,6 +47,7 @@ export const postAgent = async (req: Request, res: Response) => {
 export const editAgent = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
+  // const profilePicture = req.file?.filename || "default.png";
   const fields = Object.keys(updates);
   const values = Object.values(updates);
 

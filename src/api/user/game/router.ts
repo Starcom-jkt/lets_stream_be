@@ -6,13 +6,15 @@ import {
   getDetailGame,
   postGame,
 } from "./controller";
+import { isLoginViewer } from "../../../middleware/auth";
+import { uploadSingle } from "../../../middleware/uploadImage";
 
 const router = Router();
 
-router.get("/", getAllGame);
+router.get("/", isLoginViewer, getAllGame);
 router.get("/:id", getDetailGame);
-router.post("/", postGame);
-router.put("/edit/:id", editGame);
+router.post("/", uploadSingle("gameImg"), postGame);
+router.put("/edit/:id", uploadSingle("gameImg"), editGame);
 router.delete("/delete/:id", deleteGame);
 
 export default router;

@@ -69,6 +69,7 @@ export const startStreamSession = async (req: Request, res: Response) => {
 
 export const endStreamSession = async (req: Request, res: Response) => {
   const { id } = req.params;
+  // const {id} =
   const agentId = req.agent?.id; // Get the logged-in agent's ID
 
   if (!agentId) {
@@ -130,6 +131,12 @@ export const endStreamSession = async (req: Request, res: Response) => {
     // Update the stream session status to ended
     const [result] = await pool.query<ResultSetHeader>(
       "UPDATE stream_session SET status = '0' WHERE id = ?",
+      [id]
+    );
+
+    // remove token from stream session
+    const [removeToken] = await pool.query<ResultSetHeader>(
+      "UPDATE stream_session SET token = NULL WHERE id = ?",
       [id]
     );
 
