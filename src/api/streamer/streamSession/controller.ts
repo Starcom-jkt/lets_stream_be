@@ -25,7 +25,9 @@ export const startStreamSession = async (req: Request, res: Response) => {
   const agentId = req.agent?.id; // Ensure this matches how you set `req.agent` in middleware
   console.log("agentId", agentId);
   if (!agentId) {
-    return res.status(401).json({ message: "Unauthorized: No agentId found" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No agentId found" });
   }
 
   const channelName: string = req.agent?.streamChannel ?? "";
@@ -44,7 +46,9 @@ export const startStreamSession = async (req: Request, res: Response) => {
     );
 
     if (existingSessions.length > 0) {
-      return res.status(400).json({ message: "You're on the live" });
+      return res
+        .status(400)
+        .json({ success: true, message: "You're on the live" });
     }
 
     const token = generateRtcToken(channelName, "publisher", tokentype, uidstr);
@@ -64,7 +68,9 @@ export const startStreamSession = async (req: Request, res: Response) => {
       status,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error adding stream session", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error adding stream session", error });
   }
 };
 
@@ -73,7 +79,9 @@ export const endStreamSession = async (req: Request, res: Response) => {
   const agentId = req.agent?.id; // Get the logged-in agent's ID
 
   if (!agentId) {
-    return res.status(401).json({ message: "Unauthorized: No agentId found" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No agentId found" });
   }
 
   try {
@@ -87,7 +95,9 @@ export const endStreamSession = async (req: Request, res: Response) => {
     );
 
     if (sessionRows.length === 0) {
-      return res.status(404).json({ message: "Stream session not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Stream session not found" });
     }
 
     const session = sessionRows[0];
@@ -96,13 +106,14 @@ export const endStreamSession = async (req: Request, res: Response) => {
     if (session.status === 0) {
       return res
         .status(400)
-        .json({ message: "Stream session is already ended" });
+        .json({ success: false, message: "Stream session is already ended" });
     }
 
     if (parseInt(session.agentId) !== agentId) {
-      return res
-        .status(403)
-        .json({ message: "You are not authorized to end this stream session" });
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to end this stream session",
+      });
     }
 
     // Calculate the duration from createdAt to now
@@ -130,10 +141,12 @@ export const endStreamSession = async (req: Request, res: Response) => {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Stream session not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Stream session not found" });
     }
 
-    res.json({ message: "Stream session ended successfully" });
+    res.json({ success: true, message: "Stream session ended successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error ending stream session", error });
   }
@@ -169,7 +182,11 @@ export const getStreamSession = async (req: Request, res: Response) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching stream_session", error });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching stream_session",
+      error,
+    });
   }
 };
 
@@ -205,7 +222,9 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
 
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching stream_session", error });
+    res
+      .status(500)
+      .json({ success: true, message: "Error fetching stream_session", error });
   }
 };
 

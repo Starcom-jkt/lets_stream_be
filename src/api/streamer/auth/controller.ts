@@ -24,13 +24,17 @@ export const login = async (req: Request, res: Response) => {
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid username or password" });
     }
 
     const agent = rows[0];
-    const match = password === agent.password;
+    const match = bcrypt.compareSync(password, agent.password);
     if (!match) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid username or password" });
     }
 
     // Generate JWT token with agentData
@@ -38,9 +42,15 @@ export const login = async (req: Request, res: Response) => {
       expiresIn: "1h",
     });
 
-    res.json({ success: true, token });
+    res.json({
+      success: true,
+      accessToken: token,
+      message: "Logged in successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error during authentication", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error during authentication", error });
   }
 };
 
@@ -48,14 +58,18 @@ export const logout = async (req: Request, res: Response) => {
   const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
 
   if (!token) {
-    return res.status(400).json({ message: "Token not provided" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Token not provided" });
   }
 
   try {
     await pool.query("INSERT INTO token_blacklist (token) VALUES (?)", [token]);
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error logging out", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error logging out", error });
   }
 };
 
@@ -73,6 +87,7 @@ export const register = async (req: Request, res: Response) => {
 
     if (existingUsers.length > 0) {
       return res.status(400).json({
+        status: false,
         message: "Username already exists",
       });
     }
@@ -84,6 +99,7 @@ export const register = async (req: Request, res: Response) => {
 
     if (existingChannel.length > 0) {
       return res.status(400).json({
+        status: false,
         message: "Stream Channel already exists",
       });
     }
@@ -95,15 +111,13 @@ export const register = async (req: Request, res: Response) => {
     );
 
     res.json({
-      id: result.insertId,
-      name,
-      username,
-      profilePicture,
-      bcryptedPassword,
-      streamChannel,
+      success: true,
+      message: "Agent registered successfully",
     });
   } catch (error) {
-    res.status(500).json({ message: "Error during register", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error during register", error });
   }
 };
 
@@ -117,10 +131,12 @@ export const removeAgent = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       res.status(404).json({ message: "Agent not found" });
     } else {
-      res.json({ message: "Agent deleted successfully" });
+      res.json({ status: "success", message: "Agent deleted successfully" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting Agent", error });
+    res
+      .status(500)
+      .json({ status: "false", message: "Error deleting Agent", error });
   }
 };
 

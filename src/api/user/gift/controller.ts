@@ -7,7 +7,9 @@ export const getAllGifts = async (req: Request, res: Response) => {
     const [data] = await pool.query("SELECT * FROM gift");
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching gifts", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching gifts", error });
   }
 };
 

@@ -7,7 +7,9 @@ export const getAllGame = async (req: Request, res: Response) => {
     const [data] = await pool.query("SELECT * FROM game");
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching games", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching games", error });
   }
 };
 
@@ -17,7 +19,9 @@ export const getDetailGame = async (req: Request, res: Response) => {
     const [data] = await pool.query("SELECT * FROM game where id = ?", [id]);
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching games", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching games", error });
   }
 };
 

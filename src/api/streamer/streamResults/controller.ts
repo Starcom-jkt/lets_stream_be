@@ -28,7 +28,7 @@ export const getDetailStreamResult = async (req: Request, res: Response) => {
   if (!stream_sessionId) {
     return res
       .status(401)
-      .json({ message: "Error: no stream_sessionId found" });
+      .json({ success: false, message: "Error: no stream_sessionId found" });
   }
 
   const [data] = await pool.query(

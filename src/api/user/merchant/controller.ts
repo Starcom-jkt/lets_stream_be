@@ -7,7 +7,9 @@ export const getAllMerchant = async (req: Request, res: Response) => {
     const [data] = await pool.query("SELECT * FROM merchant");
     res.json({ success: true, data });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching merchants", error });
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching merchants", error });
   }
 };
 

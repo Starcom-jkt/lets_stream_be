@@ -32,13 +32,17 @@ export const login = async (req: Request, res: Response) => {
     );
     console.log(rows);
     if (rows.length === 0) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid username or password" });
     }
 
     const user = rows[0];
     const match = bcrypt.compareSync(password, user.password);
     if (!match) {
-      return res.status(401).json({ message: "Invalid username or password" });
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid username or password" });
     }
 
     // Generate JWT token with userData
@@ -46,7 +50,7 @@ export const login = async (req: Request, res: Response) => {
       expiresIn: "1h",
     });
 
-    res.json({ success: true, token });
+    res.json({ success: true, token, message: "Logged in successfully" });
   } catch (error) {
     res.status(500).json({ message: "Error during authentication", error });
   }
