@@ -30,9 +30,11 @@ import merchantRoutes from "./src/app/adminPanel/merchant/router";
 import currencyRoutes from "./src/app/adminPanel/currency/router";
 import languageRoutes from "./src/app/adminPanel/language/router";
 
+import testRoutes from "./src/app/adminPanel/test/router";
+
 dotenv.config();
 
-const port = process.env.PORT || 3005;
+const port = process.env.PORT || 3006;
 const app = express();
 const URL = `/api/v1`;
 
@@ -97,6 +99,7 @@ app.use("/admin/user", userRoutes);
 app.use("/admin/merchant", merchantRoutes);
 app.use("/admin/currency", currencyRoutes);
 app.use("/admin/language", languageRoutes);
+app.use("/test", testRoutes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

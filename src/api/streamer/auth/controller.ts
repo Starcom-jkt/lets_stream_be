@@ -38,6 +38,12 @@ export const login = async (req: Request, res: Response) => {
         .json({ success: false, message: "Invalid username or password" });
     }
 
+    const description = "Logged in";
+    const [login_session]: any = await pool.query(
+      "INSERT INTO agent_login_log (agentid, description) VALUES (?, ?)",
+      [agent.id, description]
+    );
+
     // Generate JWT token with agentData
     const token = jwt.sign({ agentData: agent }, JWT_SECRET, {
       expiresIn: "1h",
@@ -56,6 +62,21 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
+  // Verifikasi token dan dapatkan data agent
+  const agentId = req.agent?.id;
+
+  if (!agentId) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Agent ID not found in session" });
+  }
+
+  const description = "Logged out";
+  await pool.query(
+    "INSERT INTO agent_login_log (agentid, description) VALUES (?, ?)",
+    [agentId, description]
+  );
+
   const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
 
   if (!token) {
@@ -65,7 +86,6 @@ export const logout = async (req: Request, res: Response) => {
   }
 
   try {
-    await pool.query("INSERT INTO token_blacklist (token) VALUES (?)", [token]);
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
     res

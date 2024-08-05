@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login with Google</title>
+  <script>
+    async function handleRedirect() {
+      // Mendapatkan authorization code dari URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const code = urlParams.get('code');
+
+      if (code) {
+        try {
+          // Mengirimkan authorization code ke backend
+          const response = await fetch('http://localhost:3006/api/v1/user/auth/loginGoogle', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code })
+          });
+
+          const result = await response.json();
+          console.log('Result:', result);
+        } catch (error) {
+          console.error('Error during login process:', error);
+        }
+      }
+    }
+
+    window.onload = handleRedirect;
+  </script>
+</head>
+<body>
+
+
+
+  <!-- <script 
+  src="https://cdn.htmlgames.com/embed.js?game=TetrisPuzzle&amp;bgcolor=white" >
+  </script> -->
+
+  <h1>Login with Google</h1>
+  <p>
+    <a href="https://accounts.google.com/o/oauth2/auth?client_id=1038226218211-ucf52g8l5stqaft5m05cmomblukfjvjt.apps.googleusercontent.com&redirect_uri=http://localhost:3006/test&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile">
+      <button>Login with Google</button>
+    </a>
+  </p>
+</body>
+</html>

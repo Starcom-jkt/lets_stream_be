@@ -31,7 +31,6 @@ export const startStreamSession = async (req: Request, res: Response) => {
 
   const channelName = req.agent?.streamChannel ?? "";
   const uid = agentId.toString();
-
   try {
     const [existingSessions] = await pool.query<RowDataPacket[]>(
       "SELECT * FROM stream_session WHERE agentId = ? AND status = 1",
@@ -57,6 +56,7 @@ export const startStreamSession = async (req: Request, res: Response) => {
       id: result.insertId,
       streamId,
       agentId,
+      channelName,
       token,
       status,
     });
@@ -136,7 +136,7 @@ export const endStreamSession = async (req: Request, res: Response) => {
 
     // remove token from stream session
     const [removeToken] = await pool.query<ResultSetHeader>(
-      "UPDATE stream_session SET token = NULL WHERE id = ?",
+      "UPDATE stream_session SET token = ' ' WHERE id = ?",
       [id]
     );
 

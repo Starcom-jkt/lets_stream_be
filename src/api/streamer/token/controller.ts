@@ -152,57 +152,11 @@ const getRole = (role: string) => {
   }
 };
 
-// Function to generate RTC token
-// export const generateRtcToken = (
-//   channelName: string,
-//   // role: string,
-//   tokentype: string,
-//   uid: string,
-//   expiry = expirationTimeInSeconds
-// ) => {
-//   const currentTimestamp = Math.floor(Date.now() / 1000);
-//   const expireTimestamp = currentTimestamp + expiry;
-//   let token;
-//   const role = RtcRole.PUBLISHER;
-
-//   try {
-//     if (tokentype === "userAccount") {
-//       token = RtcTokenBuilder.buildTokenWithAccount(
-//         APP_ID,
-//         APP_CERTIFICATE,
-//         channelName,
-//         uid,
-//         role,
-//         expireTimestamp
-//       );
-//     } else if (tokentype === "uid") {
-//       token = RtcTokenBuilder.buildTokenWithUid(
-//         APP_ID,
-//         APP_CERTIFICATE,
-//         channelName,
-//         parseInt(uid, 10),
-//         // getRole(role),
-//         role,
-//         expireTimestamp
-//       );
-//     } else {
-//       throw new Error(`Unknown tokentype: ${tokentype}`);
-//     }
-//   } catch (error: any) {
-//     console.error("Error generating RTC token:", error.message);
-//     throw error;
-//   }
-
-//   return token;
-// };
-
 export const generateRtcToken = (
   channelName: string,
   uid: string,
   expiry = 3600
 ) => {
-  const APP_ID = "490e5e40aa1341e8aecf54dd1f40b8b6";
-  const APP_CERTIFICATE = "422c8cd387614f1fb4c1e65979b3cbbb";
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const expireTimestamp = currentTimestamp + expiry;
 
@@ -215,7 +169,7 @@ export const generateRtcToken = (
       APP_CERTIFICATE,
       channelName,
       parseInt(uid, 10),
-      RtcRole.PUBLISHER,
+      1,
       expireTimestamp
     );
     console.log(`Generated token: ${token}`);

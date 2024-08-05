@@ -79,3 +79,19 @@ export const index = async (req: Request, res: Response) => {
     res.redirect("/");
   }
 };
+
+export const actionLogout = async (req: Request, res: Response) => {
+  // Menghancurkan sesi
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Error destroying session:", err);
+      return res.status(500).send("Error logging out.");
+    }
+
+    // Menghapus cookie sesi (opsional, jika diperlukan)
+    res.clearCookie("connect.sid"); // 'connect.sid' adalah nama cookie default, sesuaikan jika berbeda
+
+    // Redirect ke halaman login
+    res.redirect("/admin/login");
+  });
+};
