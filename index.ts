@@ -11,13 +11,17 @@ import flash from "connect-flash";
 import giftRouter from "./src/api/user/gift/router";
 import merchantRouter from "./src/api/user/merchant/router";
 import gameRouter from "./src/api/user/game/router";
-import tokenouter from "./src/api/streamer/token/router";
+import tokenouter from "./src/api/token/router";
 import agentRouter from "./src/api/streamer/agent/router";
-import streamSessionRouter from "./src/api/streamer/streamSession/router";
 import agentAuthRouter from "./src/api/streamer/auth/router";
 import streamResultRouter from "./src/api/streamer/streamResults/router";
 import streamerRouter from "./src/api/user/getStream/router";
 import userAuthRouter from "./src/api/user/auth/router";
+
+//api v2
+import userAuth from "./src/api/profile/auth/router";
+import streamSessionRouter from "./src/api/live/streamSession/router";
+import viewStreamRouter from "./src/api/live/viewStream/router";
 
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
@@ -84,8 +88,12 @@ app.use(`${URL}/streamer`, streamerRouter);
 app.use(`${URL}/agent`, agentRouter);
 app.use(`${URL}/user/auth`, userAuthRouter);
 
-// Route for the api agent / streamer
+//api v2
+app.use(`${URL}/auth`, userAuth);
 app.use(`${URL}/stream_session`, streamSessionRouter);
+app.use(`${URL}/view_stream`, viewStreamRouter);
+
+// Route for the api agent / streamer
 app.use(`${URL}/agentAuth`, agentAuthRouter);
 app.use(`${URL}/stream_result`, streamResultRouter);
 

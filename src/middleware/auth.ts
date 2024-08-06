@@ -58,7 +58,7 @@ export const isLoginAgent = (
   }
 };
 
-export const isLoginViewer = (
+export const isLoginUser = (
   req: CustomRequest,
   res: Response,
   next: NextFunction
@@ -78,7 +78,7 @@ export const isLoginViewer = (
       }
 
       req.user = decoded.userData; // Ensure this contains valid token type
-      console.log("req.agent", req.user);
+      console.log("req.user", req.user);
       next();
     });
   } catch (error) {

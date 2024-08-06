@@ -40,7 +40,7 @@ export const login = async (req: Request, res: Response) => {
 
     const description = "Logged in";
     const [login_session]: any = await pool.query(
-      "INSERT INTO agent_login_log (agentid, description) VALUES (?, ?)",
+      "INSERT INTO agent_login_log (userId, description) VALUES (?, ?)",
       [agent.id, description]
     );
 
@@ -63,9 +63,9 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   // Verifikasi token dan dapatkan data agent
-  const agentId = req.agent?.id;
+  const userId = req.user?.id;
 
-  if (!agentId) {
+  if (!userId) {
     return res
       .status(400)
       .json({ success: false, message: "Agent ID not found in session" });
@@ -73,8 +73,8 @@ export const logout = async (req: Request, res: Response) => {
 
   const description = "Logged out";
   await pool.query(
-    "INSERT INTO agent_login_log (agentid, description) VALUES (?, ?)",
-    [agentId, description]
+    "INSERT INTO agent_login_log (userId, description) VALUES (?, ?)",
+    [userId, description]
   );
 
   const token = req.headers.authorization?.replace("Bearer ", "") ?? null;

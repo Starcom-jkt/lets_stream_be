@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import pool from "../../../../db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { v4 as uuidv4 } from "uuid";
-import { generateRtcToken } from "../token/controller";
+import { generateRtcToken } from "../../token/controller";
 
 declare global {
   namespace Express {
