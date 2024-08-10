@@ -145,108 +145,58 @@ export const endStreamSession = async (req: Request, res: Response) => {
 };
 
 export const getStreamSession = async (req: Request, res: Response) => {
-  try {
-    // Adjust query to join on the correct fields
-    const [rows]: any = await pool.query(`
-      SELECT stream_session.*, user.id AS userId, user.name, user.username, user.profilePicture, user.streamChannel
-      FROM stream_session 
-      LEFT JOIN user ON stream_session.userId = user.id
-      WHERE stream_session.status = 1
-    `);
+  const userId = req.user?.id; // Get the logged-in user's ID from the request object
+  console.log(`Logged in user ID: ${userId}`);
 
-    // Map the result to the desired structure
+  if (!userId) {
+    return res.status(400).json({
+      success: false,
+      message: "User ID is required",
+    });
+  }
+
+  try {
+    // Execute the query to fetch stream sessions where status is 1 and userId matches
+    const [rows]: any = await pool.query(
+      `
+      SELECT 
+        id,
+        userId,
+        thumbnail,
+        title,
+        status,
+        token,
+        createdAt
+      FROM stream_session
+      WHERE status = 1 AND userId = ?
+    `,
+      [userId]
+    ); // Use parameterized queries to prevent SQL injection
+    const [userData]: any = await pool.query(
+      "SELECT * FROM user WHERE id = ?",
+      [userId]
+    );
+
+    // Map the results to the desired structure (if necessary)
     const data = rows.map((row: any) => ({
       id: row.id,
-      streamId: row.streamId,
+      userId: row.userId,
+      userData: userData[0],
+      thumbnail: row.thumbnail,
+      title: row.title,
+      status: row.status,
       token: row.token,
       createdAt: row.createdAt,
-      status: row.status,
-      user: row.userId
-        ? {
-            id: row.userId,
-            name: row.name,
-            username: row.username,
-            profilePicture: row.profilePicture,
-            streamChannel: row.streamChannel,
-          }
-        : null,
     }));
 
+    // Return the formatted data in the response
     res.json({ success: true, data });
-  } catch (error) {
+  } catch (error: any) {
+    console.error("Error fetching stream_session:", error);
     res.status(500).json({
       success: false,
       message: "Error fetching stream_session",
-      error,
+      error: error.message, // Send only the error message to the client
     });
-  }
-};
-
-export const getDetailStreamSession = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  try {
-    const [rows]: any = await pool.query(
-      `
-      SELECT stream_session.*, user.id AS userId, user.name, user.username, user.profilePicture, user.streamChannel
-      FROM stream_session 
-      LEFT JOIN user ON stream_session.userId = user.id
-      WHERE stream_session.id = ?
-    `,
-      [id]
-    );
-
-    const data = rows.map((row: any) => ({
-      id: row.id,
-      streamId: row.streamId,
-      token: row.token,
-      createdAt: row.createdAt,
-      status: row.status,
-      user: row.userId
-        ? {
-            id: row.userId,
-            name: row.name,
-            username: row.username,
-            profilePicture: row.profilePicture,
-            streamChannel: row.streamChannel,
-          }
-        : null,
-    }));
-
-    res.json({ success: true, data });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ success: true, message: "Error fetching stream_session", error });
-  }
-};
-
-export const getAllStreamSession = async (req: Request, res: Response) => {
-  try {
-    const [rows]: any = await pool.query(`
-      SELECT stream_session.*, user.id AS userId, user.name, user.username, user.profilePicture, user.streamChannel
-      FROM stream_session 
-      LEFT JOIN user ON stream_session.streamId = user.id
-    `);
-
-    const data = rows.map((row: any) => ({
-      id: row.id,
-      streamId: row.streamId,
-      token: row.token,
-      createdAt: row.createdAt,
-      status: row.status,
-      user: row.userId
-        ? {
-            id: row.userId,
-            name: row.name,
-            username: row.username,
-            profilePicture: row.profilePicture,
-            streamChannel: row.streamChannel,
-          }
-        : null,
-    }));
-
-    res.json({ success: true, data });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching stream_session", error });
   }
 };

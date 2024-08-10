@@ -14,13 +14,13 @@ import gameRouter from "./src/api/user/game/router";
 import tokenouter from "./src/api/token/router";
 import agentRouter from "./src/api/streamer/agent/router";
 import agentAuthRouter from "./src/api/streamer/auth/router";
-import streamResultRouter from "./src/api/streamer/streamResults/router";
 import streamerRouter from "./src/api/user/getStream/router";
 import userAuthRouter from "./src/api/user/auth/router";
 
 //api v2
 import userAuth from "./src/api/profile/auth/router";
 import streamSessionRouter from "./src/api/live/streamSession/router";
+import streamResultRouter from "./src/api/live/streamResults/router";
 import viewStreamRouter from "./src/api/live/viewStream/router";
 
 // admin view

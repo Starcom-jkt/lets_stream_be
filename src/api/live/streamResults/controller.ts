@@ -2,18 +2,18 @@ import { Request, Response } from "express";
 import pool from "../../../../db";
 
 export const getAllStreamResults = async (req: Request, res: Response) => {
-  const agentId = req.agent?.id;
-
-  if (!agentId) {
-    return res.status(401).json({ message: "Error: No agentId found" });
+  const userId = req.user?.id;
+  console.log("userId", userId);
+  if (!userId) {
+    return res.status(401).json({ message: "Error: No userId found" });
   }
 
   try {
     const [data] = await pool.query(
       `
-        SELECT * FROM stream_result where stream_sessionId IN (SELECT id FROM stream_session where agentId = ?)
+        SELECT * FROM stream_result where stream_sessionId IN (SELECT id FROM stream_session where userId = ?)
           `,
-      [agentId]
+      [userId]
     );
 
     res.json({ success: true, data });

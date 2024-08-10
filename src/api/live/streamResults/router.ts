@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { getDetailStreamResult, getAllStreamResults } from "./controller";
 
-import { isLoginAgent } from "../../../middleware/auth";
+import { isLoginUser } from "../../../middleware/auth";
 
 const router = Router();
 
-router.get("/", isLoginAgent, getAllStreamResults);
-router.get("/:id", isLoginAgent, getDetailStreamResult);
+router.get("/", isLoginUser, getAllStreamResults);
+router.get("/:id", isLoginUser, getDetailStreamResult);
 
 export default router;

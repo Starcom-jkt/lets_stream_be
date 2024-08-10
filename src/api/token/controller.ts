@@ -19,125 +19,125 @@ if (!appID || !appCertificate) {
   process.exit(1);
 }
 
-// export const testRoutes = (req: Request, res: Response): void => {
-//   res.json({ success: true });
-// };
+export const testRoutes = (req: Request, res: Response): void => {
+  res.json({ success: true });
+};
 
-// export const getRtcToken = (req: Request, res: Response): void => {
-//   const { channelName, role, tokentype, uid } = req.params;
-//   const expireTime = parseInt(req.query.expiry as string) || 3600;
+export const getRtcToken = (req: Request, res: Response): void => {
+  const { channelName, role, tokentype, uid } = req.params;
+  const expireTime = parseInt(req.query.expiry as string) || 3600;
 
-//   const currentTimestamp = Math.floor(Date.now() / 1000);
-//   const expireTimestamp = currentTimestamp + expireTime;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const expireTimestamp = currentTimestamp + expireTime;
 
-//   try {
-//     let token: string;
+  try {
+    let token: string;
 
-//     if (tokentype === "userAccount") {
-//       token = RtcTokenBuilder.buildTokenWithAccount(
-//         appID,
-//         appCertificate,
-//         channelName,
-//         uid,
-//         getRole(role),
-//         expireTimestamp
-//       );
-//     } else if (tokentype === "uid") {
-//       token = RtcTokenBuilder.buildTokenWithUid(
-//         appID,
-//         appCertificate,
-//         channelName,
-//         parseInt(uid, 10),
-//         getRole(role),
-//         expireTimestamp
-//       );
-//     } else {
-//       throw new Error(`Unknown tokentype: ${tokentype}`);
-//     }
-//     res.json({ rtcToken: token });
-//   } catch (err: any) {
-//     console.error(err);
-//     res.status(400).json({
-//       message: `Error Generating RTC token: ${err.message}`,
-//       status: 400,
-//     });
-//   }
-// };
+    if (tokentype === "userAccount") {
+      token = RtcTokenBuilder.buildTokenWithAccount(
+        appID,
+        appCertificate,
+        channelName,
+        uid,
+        getRole(role),
+        expireTimestamp
+      );
+    } else if (tokentype === "uid") {
+      token = RtcTokenBuilder.buildTokenWithUid(
+        appID,
+        appCertificate,
+        channelName,
+        parseInt(uid, 10),
+        getRole(role),
+        expireTimestamp
+      );
+    } else {
+      throw new Error(`Unknown tokentype: ${tokentype}`);
+    }
+    res.json({ rtcToken: token });
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({
+      message: `Error Generating RTC token: ${err.message}`,
+      status: 400,
+    });
+  }
+};
 
-// export const getRtmToken = (req: Request, res: Response): void => {
-//   const { uid } = req.params;
-//   const expireTime = parseInt(req.query.expiry as string) || 3600;
+export const getRtmToken = (req: Request, res: Response): void => {
+  const { uid } = req.params;
+  const expireTime = parseInt(req.query.expiry as string) || 3600;
 
-//   const currentTimestamp = Math.floor(Date.now() / 1000);
-//   const expireTimestamp = currentTimestamp + expireTime;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const expireTimestamp = currentTimestamp + expireTime;
 
-//   try {
-//     const token = RtmTokenBuilder.buildToken(
-//       appID,
-//       appCertificate,
-//       uid,
-//       RtmRole.Rtm_User,
-//       expireTimestamp
-//     );
-//     res.json({ rtmToken: token });
-//   } catch (err: any) {
-//     console.error(err);
-//     res.status(400).json({
-//       message: `Error Generating RTM token: ${err.message}`,
-//       status: 400,
-//     });
-//   }
-// };
+  try {
+    const token = RtmTokenBuilder.buildToken(
+      appID,
+      appCertificate,
+      uid,
+      RtmRole.Rtm_User,
+      expireTimestamp
+    );
+    res.json({ rtmToken: token });
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({
+      message: `Error Generating RTM token: ${err.message}`,
+      status: 400,
+    });
+  }
+};
 
-// export const getBothTokens = (req: Request, res: Response): void => {
-//   const { channelName, role, tokentype, uid } = req.params;
-//   const expireTime = parseInt(req.query.expiry as string) || 3600;
+export const getBothTokens = (req: Request, res: Response): void => {
+  const { channelName, role, tokentype, uid } = req.params;
+  const expireTime = parseInt(req.query.expiry as string) || 3600;
 
-//   const currentTimestamp = Math.floor(Date.now() / 1000);
-//   const expireTimestamp = currentTimestamp + expireTime;
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const expireTimestamp = currentTimestamp + expireTime;
 
-//   try {
-//     let rtcToken: string;
+  try {
+    let rtcToken: string;
 
-//     if (tokentype === "userAccount") {
-//       rtcToken = RtcTokenBuilder.buildTokenWithAccount(
-//         appID,
-//         appCertificate,
-//         channelName,
-//         uid,
-//         getRole(role),
-//         expireTimestamp
-//       );
-//     } else if (tokentype === "uid") {
-//       rtcToken = RtcTokenBuilder.buildTokenWithUid(
-//         appID,
-//         appCertificate,
-//         channelName,
-//         parseInt(uid, 10),
-//         getRole(role),
-//         expireTimestamp
-//       );
-//     } else {
-//       throw new Error(`Unknown tokentype: ${tokentype}`);
-//     }
+    if (tokentype === "userAccount") {
+      rtcToken = RtcTokenBuilder.buildTokenWithAccount(
+        appID,
+        appCertificate,
+        channelName,
+        uid,
+        getRole(role),
+        expireTimestamp
+      );
+    } else if (tokentype === "uid") {
+      rtcToken = RtcTokenBuilder.buildTokenWithUid(
+        appID,
+        appCertificate,
+        channelName,
+        parseInt(uid, 10),
+        getRole(role),
+        expireTimestamp
+      );
+    } else {
+      throw new Error(`Unknown tokentype: ${tokentype}`);
+    }
 
-//     const rtmToken = RtmTokenBuilder.buildToken(
-//       appID,
-//       appCertificate,
-//       uid,
-//       RtmRole.Rtm_User,
-//       expireTimestamp
-//     );
+    const rtmToken = RtmTokenBuilder.buildToken(
+      appID,
+      appCertificate,
+      uid,
+      RtmRole.Rtm_User,
+      expireTimestamp
+    );
 
-//     res.json({ rtcToken, rtmToken });
-//   } catch (err: any) {
-//     console.error(err);
-//     res.status(400).json({
-//       message: `Error Generating Token: ${err.message}`,
-//       status: 400,
-//     });
-//   }
-// };
+    res.json({ rtcToken, rtmToken });
+  } catch (err: any) {
+    console.error(err);
+    res.status(400).json({
+      message: `Error Generating Token: ${err.message}`,
+      status: 400,
+    });
+  }
+};
 
 const APP_ID = process.env.APP_ID || "";
 const APP_CERTIFICATE = process.env.APP_CERTIFICATE || "";
@@ -169,7 +169,7 @@ export const generateRtcToken = (
       APP_CERTIFICATE,
       channelName,
       parseInt(uid, 10),
-      RtcRole.PUBLISHER,
+      RtcRole.SUBSCRIBER,
       expireTimestamp
     );
     console.log(`Generated token: ${token}`);
@@ -196,7 +196,7 @@ export const generateRtcTokenView = (
       APP_CERTIFICATE!,
       channelName,
       parseInt(uid, 10),
-      RtcRole.SUBSCRIBER, // Role for viewing
+      RtcRole.SUBSCRIBER,
       expireTimestamp
     );
     console.log(`Generated token: ${token}`);

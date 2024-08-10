@@ -4,12 +4,12 @@ import { RowDataPacket } from "mysql2";
 
 export const index = async (req: Request, res: Response) => {
   try {
-    const [agentRows] = await pool.query<RowDataPacket[]>(
-      "SELECT COUNT(*) AS count FROM agent"
-    );
-    const [userRows] = await pool.query<RowDataPacket[]>(
-      "SELECT COUNT(*) AS count FROM user"
-    );
+    // const [agentRows] = await pool.query<RowDataPacket[]>(
+    //   "SELECT COUNT(*) AS count FROM agent"
+    // );
+    // const [userRows] = await pool.query<RowDataPacket[]>(
+    //   "SELECT COUNT(*) AS count FROM user"
+    // );
     const [gameRows] = await pool.query<RowDataPacket[]>(
       "SELECT COUNT(*) AS count FROM game"
     );
@@ -21,8 +21,8 @@ export const index = async (req: Request, res: Response) => {
       name: req.session.user?.username,
       title: "Halaman Admin",
       count: {
-        agent: agentRows[0].count,
-        user: userRows[0].count,
+        // agent: agentRows[0].count,
+        // user: userRows[0].count,
         game: gameRows[0].count,
         gift: giftRows[0].count,
       },

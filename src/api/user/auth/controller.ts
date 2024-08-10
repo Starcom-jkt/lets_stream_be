@@ -103,6 +103,7 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
 };
 
 export const register = async (req: Request, res: Response) => {
+  console.log("test register user");
   const { email, username, password, nickname } = req.body;
   const profilePicture = req.file?.filename || "default.png";
   const saltRounds = 10;

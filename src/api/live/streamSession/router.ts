@@ -1,8 +1,6 @@
 import { Router } from "express";
 import {
   endStreamSession,
-  getAllStreamSession,
-  getDetailStreamSession,
   getStreamSession,
   startStreamSession,
 } from "./controller";
@@ -13,8 +11,6 @@ import { uploadSingle } from "../../../middleware/uploadImage";
 const router = Router();
 
 router.get("/", isLoginUser, getStreamSession);
-router.get("/all", isLoginUser, getAllStreamSession);
-router.get("/detail/:id", isLoginUser, getDetailStreamSession);
 router.post(
   "/start",
   isLoginUser,
