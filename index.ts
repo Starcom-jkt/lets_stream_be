@@ -7,21 +7,19 @@ import cors from "cors";
 import methodOverride from "method-override";
 import flash from "connect-flash";
 
-// api
-import giftRouter from "./src/api/user/gift/router";
-import merchantRouter from "./src/api/user/merchant/router";
-import gameRouter from "./src/api/user/game/router";
-import tokenouter from "./src/api/token/router";
-import agentRouter from "./src/api/streamer/agent/router";
-import agentAuthRouter from "./src/api/streamer/auth/router";
-import streamerRouter from "./src/api/user/getStream/router";
-import userAuthRouter from "./src/api/user/auth/router";
-
 //api v2
+import merchantRouter from "./src/api/merchant/router";
+import tokenouter from "./src/api/token/router";
+import giftRouter from "./src/api/gift/router";
+import gameRouter from "./src/api/games/game/router";
+import genreRouter from "./src/api/games/genre/router";
 import userAuth from "./src/api/profile/auth/router";
 import streamSessionRouter from "./src/api/live/streamSession/router";
 import streamResultRouter from "./src/api/live/streamResults/router";
 import viewStreamRouter from "./src/api/live/viewStream/router";
+
+// apijoyo
+import apiV2Routes from "./src/apiv2/token/router";
 
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
@@ -80,21 +78,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Route for the api
+app.use(`${URL}/token`, tokenouter);
 app.use(`${URL}/gift`, giftRouter);
 app.use(`${URL}/merchant`, merchantRouter);
 app.use(`${URL}/game`, gameRouter);
-app.use(`${URL}/token`, tokenouter);
-app.use(`${URL}/streamer`, streamerRouter);
-app.use(`${URL}/agent`, agentRouter);
-app.use(`${URL}/user/auth`, userAuthRouter);
-
-//api v2
+app.use(`${URL}/genre`, genreRouter);
 app.use(`${URL}/auth`, userAuth);
 app.use(`${URL}/stream_session`, streamSessionRouter);
 app.use(`${URL}/view_stream`, viewStreamRouter);
-
-// Route for the api agent / streamer
-app.use(`${URL}/agentAuth`, agentAuthRouter);
 app.use(`${URL}/stream_result`, streamResultRouter);
 
 // Route for the admin view
@@ -108,6 +99,9 @@ app.use("/admin/merchant", merchantRoutes);
 app.use("/admin/currency", currencyRoutes);
 app.use("/admin/language", languageRoutes);
 app.use("/test", testRoutes);
+
+// api v2
+app.use("/", apiV2Routes);
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);

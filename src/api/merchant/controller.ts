@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import pool from "../../../../db";
+import pool from "../../../db";
 import { ResultSetHeader } from "mysql2";
 
 export const getAllMerchant = async (req: Request, res: Response) => {

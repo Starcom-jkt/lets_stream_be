@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import pool from "../../../../db";
 import { ResultSetHeader } from "mysql2";
 
-export const getAllGame = async (req: Request, res: Response) => {
+export const getAllGenre = async (req: Request, res: Response) => {
   try {
-    const [data] = await pool.query("SELECT * FROM game");
+    const [data] = await pool.query("SELECT * FROM genre");
     res.json({ success: true, data });
   } catch (error) {
     res
@@ -13,10 +13,10 @@ export const getAllGame = async (req: Request, res: Response) => {
   }
 };
 
-export const getDetailGame = async (req: Request, res: Response) => {
+export const getDetailGenre = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const [data] = await pool.query("SELECT * FROM game where id = ?", [id]);
+    const [data] = await pool.query("SELECT * FROM genre where id = ?", [id]);
     res.json({ success: true, data });
   } catch (error) {
     res
@@ -25,25 +25,25 @@ export const getDetailGame = async (req: Request, res: Response) => {
   }
 };
 
-export const postGame = async (req: Request, res: Response) => {
-  const { gameCode, gameName, gameLink } = req.body;
-  const gameImg = req.file?.filename || "";
+export const postGenre = async (req: Request, res: Response) => {
+  const genreName = req.body.genreName;
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO game (gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?)",
-      [gameCode, gameName, gameLink, gameImg]
+      "INSERT INTO genre (genreName) VALUES (?)",
+      [genreName]
     );
     res.json({
+      success: true,
       id: result.insertId,
-      gameCode,
-      gameName,
+      genreName,
+      message: "genre added successfully",
     });
   } catch (error) {
     res.status(500).json({ message: "Error adding game", error });
   }
 };
 
-export const editGame = async (req: Request, res: Response) => {
+export const editGenre = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
   console.log("updates", updates);
@@ -55,32 +55,32 @@ export const editGame = async (req: Request, res: Response) => {
 
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      `UPDATE game SET ${setClause} WHERE id = ?`,
+      `UPDATE genre SET ${setClause} WHERE id = ?`,
       [...values, id]
     );
     if (result.affectedRows === 0) {
-      res.status(404).json({ message: "game not found" });
+      res.status(404).json({ message: "genre not found" });
     } else {
       res.json({ id, ...updates });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating game", error });
+    res.status(500).json({ message: "Error updating genre", error });
   }
 };
 
-export const deleteGame = async (req: Request, res: Response) => {
+export const deleteGenre = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM game WHERE id = ?",
+      "DELETE FROM genre WHERE id = ?",
       [id]
     );
     if (result.affectedRows === 0) {
-      res.status(404).json({ message: "game not found" });
+      res.status(404).json({ message: "genre not found" });
     } else {
-      res.json({ message: "game deleted successfully" });
+      res.json({ message: "genre deleted successfully" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting game", error });
+    res.status(500).json({ message: "Error deleting genre", error });
   }
 };

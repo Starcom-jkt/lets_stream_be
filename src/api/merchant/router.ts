@@ -6,8 +6,8 @@ import {
   getDetailmerchant,
   postmerchant,
 } from "./controller";
-import { isLoginUser } from "../../../middleware/auth";
-import { uploadSingle } from "../../../middleware/uploadImage";
+import { isLoginUser } from "../../middleware/auth";
+import { uploadSingle } from "../../middleware/uploadImage";
 
 const router = Router();
 

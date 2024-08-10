@@ -4,8 +4,21 @@ import { ResultSetHeader } from "mysql2";
 
 export const getAllGame = async (req: Request, res: Response) => {
   try {
-    const [data] = await pool.query("SELECT * FROM game");
-    res.json({ success: true, data });
+    const [data]: any = await pool.query("SELECT * FROM game");
+    const [genreResult] = await pool.query("SELECT * FROM genre WHERE id = ?", [
+      data.genre,
+    ]);
+    const dataGame = data.map((row: any) => ({
+      id: row.id,
+      genre: row.genre,
+      // genreName: genre[0].genreName,
+      gameCode: row.gameCode,
+      gameName: row.gameName,
+      gameLink: row.gameLink,
+      gameImg: row.gameImg,
+      createdAt: row.createdAt,
+    }));
+    res.json({ success: true, dataGame, genreResult });
   } catch (error) {
     res
       .status(500)
@@ -26,17 +39,22 @@ export const getDetailGame = async (req: Request, res: Response) => {
 };
 
 export const postGame = async (req: Request, res: Response) => {
-  const { gameCode, gameName, gameLink } = req.body;
-  const gameImg = req.file?.filename || "";
+  const { genre, gameCode, gameName, gameLink } = req.body;
+  // const gameImg = req.file?.filename || "";
+  const gameImg = req.body.gameImg;
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO game (gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?)",
-      [gameCode, gameName, gameLink, gameImg]
+      "INSERT INTO game (genre, gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?, ?)",
+      [genre, gameCode, gameName, gameLink, gameImg]
     );
     res.json({
+      success: true,
       id: result.insertId,
       gameCode,
       gameName,
+      gameLink,
+      gameImg,
+      message: "game added successfully",
     });
   } catch (error) {
     res.status(500).json({ message: "Error adding game", error });
