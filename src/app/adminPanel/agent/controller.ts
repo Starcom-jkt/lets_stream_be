@@ -17,8 +17,8 @@ interface Agent extends RowDataPacket {
   id: number;
   name: string;
   username: string;
-  create_time: Date;
-  profile_picture: Date;
+  channelName: string;
+  profilePicture: Date;
 }
 
 export const index = async (req: Request, res: Response) => {
@@ -26,10 +26,8 @@ export const index = async (req: Request, res: Response) => {
     // Ambil data dari tabel agent
     const alertMessage = req.flash("alertMessage");
     const alertStatus = req.flash("alertStatus");
-
     const alert = { message: alertMessage, status: alertStatus };
-    const [agent] = await pool.query("SELECT * FROM agent");
-
+    const [agent] = await pool.query("SELECT * FROM user where stream = 1");
     // Render halaman dengan data agent
     res.render("admin/agent/index", {
       agent,
@@ -46,10 +44,14 @@ export const index = async (req: Request, res: Response) => {
 };
 
 export const indexCreate = async (req: Request, res: Response) => {
+  const alertMessage = req.flash("alertMessage");
+  const alertStatus = req.flash("alertStatus");
+  const alert = { message: alertMessage, status: alertStatus };
   try {
     // Render halaman dengan data agent
     res.render("admin/agent/create", {
       // agent,
+      alert,
       // name: req.session.user.name,
       title: "Halaman create Agent",
     });
@@ -63,20 +65,46 @@ export const indexCreate = async (req: Request, res: Response) => {
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { name, username, password } = req.body;
+    const { channelName, username, password, email } = req.body;
     const saltRounds = 10;
-    const profile_picture = req.file?.filename || "";
+    const profilePicture = req.file?.filename || "";
+    const [checkChannelName] = await pool.query<Agent[]>(
+      "SELECT * FROM user WHERE channelName = ?",
+      [channelName]
+    );
+    if (checkChannelName.length > 0) {
+      req.flash("alertMessage", "Channel name already exists");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent/create");
+    }
 
-    // Hash the password
-    const passwordBrcypted = await bcrypt.hash(password, saltRounds);
-
-    const createTime = formatDate(new Date());
-    const [rows] = await pool.query(
-      "INSERT INTO agent (create_time, name, username, profile_picture, password) VALUES (?, ?, ?, ?, ?)",
-      [createTime, name, username, profile_picture, passwordBrcypted]
+    const [checkEmail] = await pool.query<Agent[]>(
+      "SELECT * FROM user WHERE email = ?",
+      [email]
+    );
+    if (checkEmail.length > 0) {
+      req.flash("alertMessage", "Email already exists");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent/create");
+    }
+    const [checkUsername] = await pool.query<Agent[]>(
+      "SELECT * FROM user WHERE username = ?",
+      [username]
     );
 
-    console.log(profile_picture);
+    if (checkUsername.length > 0) {
+      req.flash("alertMessage", "Username already exists");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent/create");
+    }
+    // Hash the password
+    const passwordBrcypted = await bcrypt.hash(password, saltRounds);
+    const stream = 1;
+    await pool.query(
+      "INSERT INTO user ( email, username, password, profilePicture, stream, channelName) VALUES (?, ?, ?, ?, ?, ?);",
+      [email, username, passwordBrcypted, profilePicture, stream, channelName]
+    );
+
     res.redirect("/admin/agent");
   } catch (err: any) {
     res.status(500).send(err.message);
@@ -88,7 +116,7 @@ export const actionDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
-      "DELETE FROM agent WHERE id = ?",
+      "DELETE FROM user WHERE id = ?",
       [id]
     );
 
@@ -100,22 +128,25 @@ export const actionDelete = async (req: Request, res: Response) => {
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
 export const indexEdit = async (req: Request, res: Response) => {
   try {
+    const alertMessage = req.flash("alertMessage");
+    const alertStatus = req.flash("alertStatus");
+    const alert = { message: alertMessage, status: alertStatus };
     // Ambil ID dari parameter request
     const { id } = req.params;
 
     // Ambil data dari tabel agent
     const [rows] = await pool.query<Agent[]>(
-      "SELECT * FROM agent WHERE id = ?",
+      "SELECT * FROM user WHERE id = ?",
       [id]
     );
 
@@ -123,7 +154,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
 
     const agent = rows[0];
@@ -131,6 +162,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Render halaman dengan data agent
     res.render("admin/agent/edit", {
       agent,
+      alert,
       // name: req.session.user.name,
       title: "Halaman Edit Agent",
     });
@@ -138,7 +170,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman agent
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -146,25 +178,68 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, username, profile_picture } = req.body;
+    const { username, password, channelName } = req.body;
+    const passwordBrcypted = await bcrypt.hash(password, 10);
+    const profilePicture = req.file?.filename || "";
+
+    const [checkChannelName] = await pool.query<Agent[]>(
+      "SELECT * FROM user WHERE channelName = ?",
+      [channelName]
+    );
+    if (checkChannelName.length > 0) {
+      req.flash("alertMessage", "Channel name already exists");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent/create");
+    }
+    const [checkUsername] = await pool.query<Agent[]>(
+      "SELECT * FROM user WHERE username = ?",
+      [username]
+    );
+    if (checkUsername.length > 0) {
+      req.flash("alertMessage", "Username already exists");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent/create");
+    }
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE agent SET name = ?, username = ?, profile_picture = ? WHERE id = ?",
-      [name, username, profile_picture, id]
+      "UPDATE user SET  username = ?, profilePicture = ?, channelName = ?, password = ? WHERE id = ?",
+      [username, profilePicture, channelName, passwordBrcypted, id]
     );
 
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
 
     req.flash("alertMessage", "Berhasil mengedit agent");
     req.flash("alertStatus", "success");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
+  }
+};
+
+export const changeStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [result] = await pool.query<ResultSetHeader>(
+      "UPDATE user SET status = !status WHERE id = ?",
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      req.flash("alertMessage", "Agent not found");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent");
+    }
+    req.flash("alertMessage", "Berhasil mengubah status agent");
+    req.flash("alertStatus", "success");
+    res.redirect("/admin/agent");
+  } catch (err: any) {
+    req.flash("alertMessage", `${err.message}`);
+    req.flash("alertStatus", "danger");
+    res.redirect("/admin/agent");
   }
 };

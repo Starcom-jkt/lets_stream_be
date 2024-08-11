@@ -89,6 +89,11 @@ app.use(`${URL}/view_stream`, viewStreamRouter);
 app.use(`${URL}/stream_result`, streamResultRouter);
 
 // Route for the admin view
+// app.get("/", (req: Request, res: Response) => {
+//   // res.redirect("/admin");
+//   res.send("Hello World!");
+// });
+
 app.use("/admin/login", authRoutes);
 app.use("/admin", adminRoutes);
 app.use("/admin/agent", agentRoutes);

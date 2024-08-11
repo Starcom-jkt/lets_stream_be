@@ -294,3 +294,19 @@ export const changeStatusUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error updating user status", error });
   }
 };
+
+export const requestStream = async (req: Request, res: Response) => {
+  const userId = req.user?.userId;
+  try {
+    await pool.query<ResultSetHeader>(
+      "INSERT INTO stream_request (user_id) VALUES (?)",
+      [userId]
+    );
+    res.json({
+      success: true,
+      message: "Your request has been sent",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error requesting stream", error });
+  }
+};
