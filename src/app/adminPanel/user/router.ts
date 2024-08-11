@@ -6,16 +6,19 @@ import {
   indexCreate,
   actionEdit,
   indexEdit,
+  changeStatus,
 } from "./controller";
+import { uploadSingle } from "../../../middleware/uploadImage";
 
 const router = Router();
 
 // Rute untuk menampilkan halaman agent
 router.get("/", index);
 router.get("/create", indexCreate);
-router.post("/create", actionCreate);
+router.post("/create", uploadSingle("profilePicture"), actionCreate);
 router.delete("/delete/:id", actionDelete);
 router.get("/edit/:id", indexEdit);
-router.put("/edit/:id", actionEdit);
+router.put("/edit/:id", uploadSingle("profilePicture"), actionEdit);
+router.post("/status/:id", changeStatus);
 
 export default router;

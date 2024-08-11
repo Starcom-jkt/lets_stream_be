@@ -1,34 +1,70 @@
 <table id="example2" class="table table-bordered table-hover table-striped" style="width: 100%">
-    <thead>
+  <thead>
+    <tr>
+      <th style="width: 7%">No</th>
+      <th>Profile Picture</th>
+      <th>Username</th>
+      <th>Balance</th>
+      <th>Status</th>
+      <th style="width: 20%">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% for(let i = 0; i < user.length; i++){ %>
       <tr>
-        <th style="width: 7%">No</th>
-        <th>Player Id</th>
-        <th>Username</th>
-        <th>Nickname</th>
-        <th>Balance</th>
-        <th style="width: 20%">Actions</th>
+        <td><%= i + 1 %></td>
+        <td>
+
+          <% if (user[i].profilePicture && user[i].profilePicture.startsWith('http')) { %>
+            <!-- Menampilkan gambar dari URL HTTPS -->
+            <img 
+              src="<%= user[i].profilePicture %>" 
+              alt="Profile Picture" 
+              class="img-thumbnail" 
+              style="width: 100px; height: 100px; border-radius: 100%;" 
+            />
+          <% } else if (user[i].profilePicture) { %>
+            <!-- Menampilkan gambar dari folder /uploads -->
+            <img 
+              src="/uploads/<%= user[i].profilePicture %>" 
+              alt="Profile Picture" 
+              class="img-thumbnail" 
+              style="width: 100px; height: 100px; border-radius: 100%;" 
+            />
+          <% } %>
+        </td>
+        <td><%= user[i].username %></td>
+        <td><%= user[i].balance %></td>
+        <td>
+          <form action="/admin/user/status/<%= user[i].id %>" method="POST" id="form<%= user[i].id %>">
+              <!-- Checkbox with data-id attribute -->
+              <input 
+                  class="tgl tgl-flat" 
+                  id="cb<%= user[i].id %>" 
+                  type="checkbox" 
+                  <%= user[i].status === 1 ? 'checked' : '' %> 
+                  onchange="document.getElementById('form<%= user[i].id %>').submit();"  <!-- Submit form on change -->
+              
+              <label class="tgl-btn" for="cb<%= user[i].id %>"></label>
+              <!-- Display the current status for visual confirmation -->
+              <span id="statusText<%= user[i].id %>"><%= user[i].status === 1 ? 'Active' : 'Inactive' %></span>
+          </form>
+      </td>
+      
+      
+        <td>
+          <form action="/admin/user/delete/<%= user[i].id %>?_method=DELETE" method="POST">
+            <a href="/admin/user/edit/<%= user[i].id %>" class="btn btn-warning">
+              <i class="fas fa-pencil-alt"></i> Edit
+            </a>
+            <button type="submit" class="btn btn-danger">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+          </form>
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      <% for(let i = 0; i < user.length; i++){ %>
-        <tr>
-          <td><%= i + 1 %></td>
-          <td><%= user[i].playerId %></td>
-          <td><%= user[i].username %></td>
-          <td><%= user[i].nickname %></td>
-          <td><%= user[i].balance %></td>
-          <td>
-            <form action="/admin/user/delete/<%= user[i].id %>?_method=DELETE" method="POST">
-              <a href="/admin/user/edit/<%= user[i].id %>" class="btn btn-warning">
-                <i class="fas fa-pencil-alt"></i> Edit
-              </a>
-              <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash-alt"></i> Delete
-              </button>
-            </form>
-          </td>
-        </tr>
-      <% } %>
-    </tbody>
-  </table>
-  
+    <% } %>
+  </tbody>
+</table>
+
+

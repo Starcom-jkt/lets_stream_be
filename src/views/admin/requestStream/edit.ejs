@@ -9,12 +9,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>User</h1>
+            <h1>Agent</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="/">Home</a></li>
-              <li class="breadcrumb-item"><a href="/admin/user">User</a></li>
+              <li class="breadcrumb-item"><a href="/agent">Agent</a></li>
               <li class="breadcrumb-item active">Edit</li>
             </ol>
           </div>
@@ -32,17 +32,23 @@
                 <div class="card-body">
                   <div class="card card-primary">
                     <div class="card-header">
-                      <h3 class="card-title">Form edit data user <%= user.username %></h3>
+                      <h3 class="card-title">Form edit data agent <%= agent.username %></h3>
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
 
-                    <form action="/admin/user/edit/<%= user.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                    <form action="/admin/agent/edit/<%= agent.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
                       <div class="card-body">
                         <div class="form-group">
                           <label for="name">Username</label>
-                          <input type="text" name="username" class="form-control" id="username" value="<%= user.username %>" placeholder="username" />
+                          <input type="text" name="username" class="form-control" id="username" value="<%= agent.username %>" placeholder="username" />
                         </div>
+
+                        <div class="form-group">
+                          <label for="name">Channel Name</label>
+                          <input type="text" name="channelName" class="form-control" id="channelName" value="<%= agent.channelName %>" placeholder="channel name" />
+                        </div>
+
 
                         <div class="form-group">
                           <label for="profilePicture">Profile Picture</label>
@@ -52,7 +58,7 @@
                         <div style="display: flex; align-items: center;">
                           <div style="text-align: center; margin-right: 20px;">
                             <p style="margin-bottom: 10px;">before:</p>
-                            <img src="<%= user.profilePicture %>" style="border-radius: 100%; width: 100px; height: 100px;" alt="" class="img-thumbnail">
+                            <img src="<%= agent.profilePicture %>" style="border-radius: 100%; width: 100px; height: 100px;" alt="" class="img-thumbnail">
                           </div>
                           
                           <div style="text-align: center;">
@@ -74,7 +80,7 @@
                       <div class="card-footer">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
                         <button type="button" class="btn btn-secondary">
-                          <a href="/admin/user" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
+                          <a href="/agent" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
                         </button>
                       </div>
                     </form>
