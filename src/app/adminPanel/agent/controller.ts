@@ -214,9 +214,33 @@ export const actionEdit = async (req: Request, res: Response) => {
 
 export const changeStatus = async (req: Request, res: Response) => {
   try {
+    console.log("berhasil status");
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
       "UPDATE user SET status = !status WHERE id = ?",
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      req.flash("alertMessage", "Agent not found");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admin/agent");
+    }
+    req.flash("alertMessage", "Berhasil mengubah status agent");
+    req.flash("alertStatus", "success");
+    res.redirect("/admin/agent");
+  } catch (err: any) {
+    req.flash("alertMessage", `${err.message}`);
+    req.flash("alertStatus", "danger");
+    res.redirect("/admin/agent");
+  }
+};
+
+export const changeStatusStream = async (req: Request, res: Response) => {
+  console.log("berhasil stream");
+  try {
+    const { id } = req.params;
+    const [result] = await pool.query<ResultSetHeader>(
+      "UPDATE user SET stream = !stream WHERE id = ?",
       [id]
     );
     if (result.affectedRows === 0) {

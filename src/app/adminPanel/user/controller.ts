@@ -18,7 +18,6 @@ export const index = async (req: Request, res: Response) => {
     const alertStatus = req.flash("alertStatus");
     const alert = { message: alertMessage, status: alertStatus };
     const [user] = await pool.query("SELECT * FROM user where stream = 0");
-    console.log(user);
     // Render halaman dengan data user
     res.render("admin/user/index", {
       user,
@@ -52,46 +51,6 @@ export const indexCreate = async (req: Request, res: Response) => {
     res.redirect("/admin/user");
   }
 };
-
-// export const actionCreate = async (req: Request, res: Response) => {
-//   try {
-//     const { username, password, email } = req.body;
-//     const saltRounds = 10;
-//     const profilePicture = req.file?.filename || "";
-
-//     const [checkEmail] = await pool.query<User[]>(
-//       "SELECT * FROM user WHERE email = ?",
-//       [email]
-//     );
-//     if (checkEmail.length > 0) {
-//       req.flash("alertMessage", "Email already exists");
-//       req.flash("alertStatus", "danger");
-//       return res.redirect("/admin/user/create");
-//     }
-//     const [checkUsername] = await pool.query<User[]>(
-//       "SELECT * FROM user WHERE username = ?",
-//       [username]
-//     );
-
-//     if (checkUsername.length > 0) {
-//       req.flash("alertMessage", "Username already exists");
-//       req.flash("alertStatus", "danger");
-//       return res.redirect("/admin/user/create");
-//     }
-//     // Hash the password
-//     const passwordBrcypted = await bcrypt.hash(password, saltRounds);
-//     const stream = 1;
-//     await pool.query(
-//       "INSERT INTO user ( email, username, password, profilePicture, stream) VALUES (?, ?, ?, ?, ?);",
-//       [email, username, passwordBrcypted, profilePicture, stream]
-//     );
-
-//     res.redirect("/admin/user");
-//   } catch (err: any) {
-//     res.status(500).send(err.message);
-//     console.log(err);
-//   }
-// };
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
@@ -131,6 +90,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
 export const actionDelete = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

@@ -11,12 +11,12 @@
             <div class="container-fluid">
               <div class="row mb-2">
                 <div class="col-sm-6">
-                  <h1>Agent</h1>
+                  <h1>Request</h1>
                 </div>
                 <div class="col-sm-6">
                   <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="/admin">Home</a></li>
-                    <li class="breadcrumb-item active">Agent</li>
+                    <li class="breadcrumb-item active">Request</li>
                   </ol>
                 </div>
               </div>
@@ -30,17 +30,9 @@
               <div class="row">
                 <div class="col-12">
                   <div class="card">
-                    <div class="card-header">
-                      <h3 class="card-title">
-                        <a href="/admin/agent/create" class="btn btn-primary">
-                          <i class="nav-icon far fa-plus-square"></i>
-                          Tambah
-                        </a>
-                      </h3>
-                    </div>
                     <!-- /.card-header -->
                     <div class="card-body">
-                      <%- include ('../agent/table.ejs') %>
+                      <%- include ('../request_stream/table.ejs') %>
                     </div>
                     <!-- /.card-body -->
                   </div>

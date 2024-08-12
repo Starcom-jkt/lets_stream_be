@@ -6,6 +6,7 @@
         <th>Username</th>
         <th>Channel Name</th>
         <th>Status</th>
+        <th>Stream</th>
         <th style="width: 20%">Actions</th>
       </tr>
     </thead>
@@ -36,18 +37,33 @@
           <td><%= agent[i].username %></td>
           <td><%= agent[i].channelName %></td>
           <td>
-            <form action="/admin/agent/status/<%= agent[i].id %>" method="POST" id="form<%= agent[i].id %>">
+            <form action="/admin/agent/status/<%= agent[i].id %>" method="POST" id="form-status<%= agent[i].id %>">
                 <!-- Checkbox with data-id attribute -->
                 <input 
                     class="tgl tgl-flat" 
-                    id="cb<%= agent[i].id %>" 
+                    id="cb-status<%= agent[i].id %>" 
                     type="checkbox" 
                     <%= agent[i].status === 1 ? 'checked' : '' %> 
-                    onchange="document.getElementById('form<%= agent[i].id %>').submit();"  <!-- Submit form on change -->
+                    onchange="document.getElementById('form-status<%= agent[i].id %>').submit();"  <!-- Submit form on change -->
                 
-                <label class="tgl-btn" for="cb<%= agent[i].id %>"></label>
+                <label class="tgl-btn" for="cb-status<%= agent[i].id %>"></label>
                 <!-- Display the current status for visual confirmation -->
                 <span id="statusText<%= agent[i].id %>"><%= agent[i].status === 1 ? 'Active' : 'Inactive' %></span>
+            </form>
+        </td>
+        <td>
+            <form action="/admin/agent/stream/<%= agent[i].id %>" method="POST" id="form-stream<%= agent[i].id %>">
+                <!-- Checkbox with data-id attribute -->
+                <input 
+                    class="tgl tgl-flat" 
+                    id="cb-stream<%= agent[i].id %>" 
+                    type="checkbox" 
+                    <%= agent[i].stream === 1 ? 'checked' : '' %> 
+                    onchange="document.getElementById('form-stream<%= agent[i].id %>').submit();"  <!-- Submit form on change -->
+                
+                <label class="tgl-btn" for="cb-stream<%= agent[i].id %>"></label>
+                <!-- Display the current status for visual confirmation -->
+                <span id="statusText<%= agent[i].id %>"><%= agent[i].stream === 1 ? 'Active' : 'Inactive' %></span>
             </form>
         </td>
         

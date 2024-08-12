@@ -17,6 +17,6 @@ router.get("/create", indexCreate);
 router.post("/create", uploadSingle("gameImg"), actionCreate);
 router.delete("/delete/:id", actionDelete);
 router.get("/edit/:id", indexEdit);
-router.put("/edit/:id", actionEdit);
+router.put("/edit/:id", uploadSingle("gameImg"), actionEdit);
 
 export default router;

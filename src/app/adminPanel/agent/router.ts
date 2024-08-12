@@ -7,6 +7,7 @@ import {
   actionEdit,
   indexEdit,
   changeStatus,
+  changeStatusStream,
 } from "./controller";
 import { uploadSingle } from "../../../middleware/uploadImage";
 
@@ -20,5 +21,6 @@ router.delete("/delete/:id", actionDelete);
 router.get("/edit/:id", indexEdit);
 router.put("/edit/:id", uploadSingle("profilePicture"), actionEdit);
 router.post("/status/:id", changeStatus);
+router.post("/stream/:id", changeStatusStream);
 
 export default router;

@@ -3,19 +3,6 @@ import pool from "../../../../db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { generateRtcToken, generateRtcTokenView } from "../../token/controller";
 
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        userId?: number;
-        channelName?: string;
-        streamer?: string;
-        id?: number;
-      };
-    }
-  }
-}
-
 export const getAllStreams = async (req: Request, res: Response) => {
   try {
     const [data] = await pool.query<RowDataPacket[]>(

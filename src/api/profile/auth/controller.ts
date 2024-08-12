@@ -18,13 +18,6 @@ const oauth2Client = new google.auth.OAuth2(
   REDIRECT_URI
 );
 
-interface User {
-  id: number;
-  username: string;
-  password: string;
-  email: string;
-}
-
 export const loginWithGoogle = async (req: Request, res: Response) => {
   try {
     const code = req.body.code as string;
@@ -93,7 +86,6 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
     res.json({ success: true, token, message: "Logged in successfully" });
 
     // Send response with user information
-    console.log({ success: true, token, message: "Logged in successfully" });
   } catch (error) {
     console.error("Error during Google OAuth login:", error);
     res.status(500).send("Internal Server Error");
@@ -105,12 +97,6 @@ export const register = async (req: Request, res: Response) => {
   const profilePicture = req.file?.filename || "default.png";
   const saltRounds = 10;
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);
-  const stream = 0;
-  const channelName = null;
-  const balance = 0;
-  const followers = 0;
-  const following = 0;
-  const status = 1;
 
   try {
     // Check if the username or streamChannel already exists
@@ -127,19 +113,8 @@ export const register = async (req: Request, res: Response) => {
 
     // Insert the new user into the database
     await pool.query<ResultSetHeader>(
-      "INSERT INTO user (email, username, profilePicture, password, stream, channelName, balance, followers, following, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [
-        email,
-        username,
-        profilePicture,
-        bcryptedPassword,
-        stream,
-        channelName,
-        balance,
-        followers,
-        following,
-        status,
-      ]
+      "INSERT INTO user (email, username, profilePicture, password) VALUES (?, ?, ?, ?)",
+      [email, username, profilePicture, bcryptedPassword]
     );
 
     res.json({
@@ -202,7 +177,6 @@ export const login = async (req: Request, res: Response) => {
     const [rows]: any = await pool.query("SELECT * FROM user WHERE email = ?", [
       email,
     ]);
-    console.log(rows);
     if (rows.length === 0) {
       return res
         .status(401)
@@ -296,10 +270,29 @@ export const changeStatusUser = async (req: Request, res: Response) => {
 };
 
 export const requestStream = async (req: Request, res: Response) => {
-  const userId = req.user?.userId;
   try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(400).json({ message: "User ID not found" });
+    }
+
+    // Cek apakah user sudah pernah melakukan request
+    const [existingRequest] = await pool.query<ResultSetHeader[]>(
+      "SELECT * FROM request_stream WHERE userId = ?",
+      [userId]
+    );
+
+    if (existingRequest.length > 0) {
+      // Jika sudah ada request, kembalikan respons bahwa user tidak bisa request lagi
+      return res.status(400).json({
+        success: false,
+        message:
+          "Your request is being processed. Please wait for the confirmation.",
+      });
+    }
+
     await pool.query<ResultSetHeader>(
-      "INSERT INTO stream_request (user_id) VALUES (?)",
+      "INSERT INTO request_stream (userId) VALUES (?)",
       [userId]
     );
     res.json({

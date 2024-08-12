@@ -36,24 +36,64 @@
                     </div>
                     <!-- /.card-header -->
                     <!-- form start -->
-                    <form action="/admin/game/edit/<%= game.id %>?_method=PUT" method="POST">
+                    <form action="/admin/game/edit/<%= game.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
                       <div class="card-body">
 
-                        <div class="form-group">
-                          <label for="gameCode">Game Code</label>
-                          <input type="text" name="gameCode" class="form-control" id="gameCode" value="<%= game.gameCode %>" placeholder="Game Code" required />
+                      <div class="form-group">
+                        <label for="gameImg">Game Image</label>
+                        <input type="file" name="gameImg" class="form-control" id="gameImg" accept="image/*" onchange="previewImage(event)" />
+                      </div>
+                      
+                      <div style="display: flex; align-items: center;">
+                        <div style="text-align: center; margin-right: 20px;">
+                          <p style="margin-bottom: 10px;">before:</p>
+                          <img src="<%= game.gameImg %>" style="border-radius: 100%; width: 100px; height: 100px;" alt="" class="img-thumbnail">
                         </div>
+                        
+                        <div style="text-align: center;">
+                          <p style="margin-bottom: 10px;">after:</p>
+                          <img id="game-preview" src="" alt="game Preview" style="display: none; border-radius: 100%; width: 100px; height: 100px;" class="img-thumbnail" />
+                        </div>
+                      </div>
 
-                        <div class="form-group">
-                          <label for="gameName">Game Name</label>
-                          <input type="text" name="gameName" class="form-control" id="gameName" value="<%= game.gameName %>" placeholder="Game Name" required />
-                        </div>
+                      <div class="form-group">
+                        <label for="gameCode">Game Code</label>
+                        <input type="text" name="gameCode" class="form-control" id="gameCode" value="<%= game.gameCode %>" placeholder="Game Code" required />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="genre">Game Genre</label>
+                       
+                        <select name="genre" 
+                        value="<%= game.genre %>"
+                        class="form-control" id="genre" required>
+                          <option value="" disabled selected>Select a genre</option>
+                          <% genre.forEach(function(item) { %>
+                            <option value="<%= item.id %>"><%= item.genreName %></option>
+                          <% }); %>
+                        </select>
+                      </div>
+                      
+  
+                 
+
+                      <div class="form-group">
+                        <label for="gameName">Game Name</label>
+                        <input type="text" name="gameName" class="form-control" id="gameName" value="<%= game.gameName %>" placeholder="Game Name" required />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="gameLink">Game Url</label>
+                        <input type="text" name="gameLink" class="form-control" id="gameLink" value="<%= game.gameLink %>" placeholder="Game Name" required />
+                      </div>
+                 
+
                       </div>
 
                       <div class="card-footer">
                         <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
                         <button type="button" class="btn btn-secondary">
-                          <a href="/game" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
+                          <a href="/admin/game" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
                         </button>
                       </div>
                     </form>
@@ -70,5 +110,21 @@
       </section>
     <!-- /.content -->
 </div>
+
+<script>
+  function previewImage(event) {
+    var input = event.target;
+    var reader = new FileReader();
+
+    reader.onload = function() {
+      var dataURL = reader.result;
+      var output = document.getElementById('game-preview');
+      output.src = dataURL;
+      output.style.display = 'block';
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+</script>
 
   <%- include('../../components/footer.ejs') %>

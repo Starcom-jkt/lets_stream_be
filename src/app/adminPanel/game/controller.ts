@@ -44,9 +44,11 @@ export const index = async (req: Request, res: Response) => {
 
 export const indexCreate = async (req: Request, res: Response) => {
   try {
+    const [genre] = await pool.query("SELECT * FROM genre");
     // Render halaman dengan data game
     res.render("admin/game/create", {
       // name: req.session.user.name,
+      genre,
       title: "Halaman create game",
     });
   } catch (err: any) {
@@ -59,13 +61,12 @@ export const indexCreate = async (req: Request, res: Response) => {
 
 export const actionCreate = async (req: Request, res: Response) => {
   try {
-    const { gameCode, gameName, gameLink } = req.body;
-    const createTime = formatDate(new Date());
+    const { gameCode, gameName, gameLink, genre } = req.body;
     const gameImg = req.file?.filename || "";
 
     const [rows] = await pool.query(
-      "INSERT INTO game (gameCode, gameName, created_at, gameLink, gameImg) VALUES (?, ?, ?, ?, ?)",
-      [gameCode, gameName, createTime, gameLink, gameImg]
+      "INSERT INTO game (genre, gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?, ?)",
+      [genre, gameCode, gameName, gameLink, gameImg]
     );
     res.redirect("/admin/game");
   } catch (err) {
@@ -101,7 +102,7 @@ export const indexEdit = async (req: Request, res: Response) => {
   try {
     // Ambil ID dari parameter request
     const { id } = req.params;
-
+    const [genre] = await pool.query("SELECT * FROM genre");
     // Ambil data dari tabel game
     const [rows] = await pool.query<game[]>("SELECT * FROM game WHERE id = ?", [
       id,
@@ -119,6 +120,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Render halaman dengan data game
     res.render("admin/game/edit", {
       game,
+      genre,
       // name: req.session.user.name,
       title: "Halaman Edit game",
     });
@@ -134,11 +136,12 @@ export const indexEdit = async (req: Request, res: Response) => {
 export const actionEdit = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { gameName, gameCode, gameLink, gameImg } = req.body;
+    const { genre, gameName, gameCode, gameLink } = req.body;
+    const gameImg = req.file?.filename || "";
 
     const [result] = await pool.query<ResultSetHeader>(
-      "UPDATE game SET gameCode = ?, gameName = ?, gameLink = ?, gameImg = ? WHERE id = ?",
-      [gameCode, gameName, gameLink, gameImg, id]
+      "UPDATE game SET genre = ?, gameCode = ?, gameName = ?, gameLink = ?, gameImg = ? WHERE id = ?",
+      [genre, gameCode, gameName, gameLink, gameImg, id]
     );
 
     if (result.affectedRows === 0) {
