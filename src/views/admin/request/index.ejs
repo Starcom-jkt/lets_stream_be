@@ -1,0 +1,51 @@
+<%- include('../../components/header.ejs') %>
+<body class="hold-transition sidebar-mini">
+  <div class="wrapper">
+<%- include('../../components/navbar.ejs') %>
+    <!-- Content Wrapper -->
+    <div class="content-wrapper">
+      <section class="content">
+        <div class="container-fluid">
+          <%- include ('../../components/messages.ejs')%>
+          <section class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-sm-6">
+                  <h1>Request</h1>
+                </div>
+                <div class="col-sm-6">
+                  <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="/admin">Home</a></li>
+                    <li class="breadcrumb-item active">Request</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+            <!-- /.container-fluid -->
+          </section>
+        
+          <!-- Main content -->
+          <section class="content">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                      <%- include ('../request_stream/table.ejs') %>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                  <!-- /.card -->
+                  <!-- /.card -->
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </section>
+        </div>
+      </section>
+    </div>
+<%- include ('../../components/footer.ejs') %>
