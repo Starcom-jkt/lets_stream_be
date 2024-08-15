@@ -3,6 +3,7 @@ import pool from "../../../../db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { generateRtcToken, generateRtcTokenView } from "../../token/controller";
 import { access_tokenview } from "../../../apiv2/token/controller";
+import { RtcRole, RtcTokenBuilder } from "agora-access-token";
 
 export const getAllStreams = async (req: Request, res: Response) => {
   try {
@@ -38,8 +39,23 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
 
       if (dataStreamer.length > 0) {
         const channelName = dataStreamer[0].channelName;
-        const tokenView = access_tokenview(channelName, role, uid);
-        res.json({ success: true, data: rows, tokenView });
+
+        // generate agora token for views
+        const APP_ID = process.env.APP_ID as string;
+        const APP_CERTIFICATE = process.env.APP_CERTIFICATE as string;
+        const expirationTimeInSeconds = 3600;
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+        const token = RtcTokenBuilder.buildTokenWithUid(
+          APP_ID,
+          APP_CERTIFICATE,
+          channelName,
+          uid,
+          RtcRole.SUBSCRIBER,
+          privilegeExpiredTs
+        );
+        res.json({ success: true, data: rows, tokenView: token });
       } else {
         res.status(404).json({ success: false, message: "User not found" });
       }

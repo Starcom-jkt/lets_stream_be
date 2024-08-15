@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import pool from "../../../../db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { generateRtcToken } from "../../token/controller";
+import { RtcRole, RtcTokenBuilder } from "agora-access-token";
 
 declare global {
   namespace Express {
@@ -39,7 +40,23 @@ export const startStreamSession = async (req: Request, res: Response) => {
 
     const thumbnail = req.file?.filename || "";
 
-    const token = generateRtcToken(channelName, uid);
+    // const token = generateRtcToken(channelName, uid);
+
+    // generate agora token for views
+    const APP_ID = process.env.APP_ID as string;
+    const APP_CERTIFICATE = process.env.APP_CERTIFICATE as string;
+    const expirationTimeInSeconds = 3600;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+    const token = RtcTokenBuilder.buildTokenWithUid(
+      APP_ID,
+      APP_CERTIFICATE,
+      channelName,
+      userId,
+      RtcRole.SUBSCRIBER,
+      privilegeExpiredTs
+    );
     const status = 1;
 
     const [result] = await pool.query<ResultSetHeader>(
