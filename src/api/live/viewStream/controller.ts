@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import pool from "../../../../db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { generateRtcToken, generateRtcTokenView } from "../../token/controller";
+import { access_tokenview } from "../../../apiv2/token/controller";
 
 export const getAllStreams = async (req: Request, res: Response) => {
   try {
@@ -20,13 +21,14 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
   const id = req.params.id;
 
   try {
+    const role = "audience";
     const [rows] = await pool.query<RowDataPacket[]>(
       "SELECT * FROM stream_session WHERE id = ? AND status = 1",
       [id]
     );
 
     if (rows.length > 0) {
-      const uid = String(rows[0].userId); // Convert uid to string
+      const uid = rows[0].userId; // Convert uid to string
       const userId = rows[0].userId;
 
       const [dataStreamer] = await pool.query<RowDataPacket[]>(
@@ -36,7 +38,7 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
 
       if (dataStreamer.length > 0) {
         const channelName = dataStreamer[0].channelName;
-        const tokenView = generateRtcTokenView(channelName, uid);
+        const tokenView = access_tokenview(channelName, role, uid);
         res.json({ success: true, data: rows, tokenView });
       } else {
         res.status(404).json({ success: false, message: "User not found" });
