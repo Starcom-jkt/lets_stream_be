@@ -19,7 +19,7 @@ export const actionSignin = async (req: Request, res: Response) => {
     if (rows.length > 0) {
       const admin = rows[0];
       // Cek status admin
-      if (admin.status === "Y") {
+      if (admin.status === 1) {
         // Cek password
         // const checkPassword = await bcrypt.compare(password, admin.password);
 

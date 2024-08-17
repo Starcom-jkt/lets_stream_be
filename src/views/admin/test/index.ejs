@@ -1,50 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login with Google</title>
-  <!-- <script>
-    async function handleRedirect() {
-      // Mendapatkan authorization code dari URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const code = urlParams.get('code');
-
-      if (code) {
-        try {
-          // Mengirimkan authorization code ke backend
-          const response = await fetch('http://localhost:3006/api/v1/user/auth/loginGoogle', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ code })
-          });
-
-          const result = await response.json();
-          console.log('Result:', result);
-        } catch (error) {
-          console.error('Error during login process:', error);
-        }
-      }
-    }
-
-    window.onload = handleRedirect;
-  </script> -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 </head>
 <body>
+    <h1>WebSocket Test</h1>
 
+    <p>Enter User ID:</p>
+    <input type="number" id="userIdInput" placeholder="Enter User ID">
+    <button id="connectButton">Connect</button>
 
+    <div id="channelInfo" style="display:none; margin-top: 20px;">
+        <h2>Connected to Channel: <span id="channelName"></span></h2>
+    </div>
 
-  <script 
-  src="https://cdn.htmlgames.com/embed.js?game=BubbleThrow&amp;bgcolor=white" >
-  </script>
+    <div id="commentSection" style="display:none; margin-top: 20px;">
+        <p>Enter Comment:</p>
+        <input type="text" id="commentInput" placeholder="Enter your comment">
+        <button id="sendCommentButton">Send Comment</button>
 
-  <h1>Login with Google</h1>
-  <!-- <p>
-    <a href="https://accounts.google.com/o/oauth2/auth?client_id=1038226218211-ucf52g8l5stqaft5m05cmomblukfjvjt.apps.googleusercontent.com&redirect_uri=http://localhost:3006/test&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile">
-      <button>Login with Google</button>
-    </a>
-  </p> -->
+        <div id="commentDisplay" style="margin-top: 20px;">
+            <h3>Comments:</h3>
+            <ul id="commentList"></ul>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+
+        document.getElementById('connectButton').addEventListener('click', () => {
+            const userId = document.getElementById('userIdInput').value;
+            if (!userId) {
+                alert('Please enter a User ID');
+                return;
+            }
+
+            console.log('Attempting to connect with userId:', userId);
+            socket = io('http://localhost:3006');
+
+            socket.on('connect', () => {
+                console.log('Connected to WebSocket server');
+                socket.emit('join', { userId: Number(userId) });  // Emit with userId from input
+            });
+
+            socket.on('message', (msg) => {
+                console.log('Message from server:', msg);
+
+                // Assuming the server sends the channelName as part of the message
+                if (msg.channelName) {
+                    document.getElementById('channelName').textContent = msg.channelName;
+                    document.getElementById('channelInfo').style.display = 'block'; // Show the channel name
+                    document.getElementById('commentSection').style.display = 'block'; // Show comment section
+                } else {
+                    console.error('Channel name is missing in the server response.');
+                    alert('Channel name is missing in the server response.');
+                }
+            });
+
+            socket.on('comment', (commentData) => {
+                console.log('Comment received:', commentData);
+
+                const commentList = document.getElementById('commentList');
+                const newComment = document.createElement('li');
+                newComment.textContent = `[${new Date(commentData.createdAt).toLocaleString()}] ${commentData.comment}`;
+                commentList.appendChild(newComment);
+            });
+
+            socket.on('error', (err) => {
+                console.error('Error:', err);
+                alert('Error received: ' + err);
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from WebSocket server');
+                document.getElementById('channelInfo').style.display = 'none'; // Hide channel name
+                document.getElementById('commentSection').style.display = 'none'; // Hide comment section
+            });
+        });
+
+        document.getElementById('sendCommentButton').addEventListener('click', () => {
+            const comment = document.getElementById('commentInput').value;
+            if (!comment) {
+                alert('Please enter a comment');
+                return;
+            }
+
+            if (socket && socket.connected) {
+                const userId = document.getElementById('userIdInput').value;
+                console.log('Sending comment:', comment);
+                socket.emit('comment', { userId: Number(userId), comment: comment });  // Emit comment with userId and comment
+                document.getElementById('commentInput').value = ''; // Clear the comment input after sending
+            } else {
+                alert('You are not connected to the WebSocket server');
+            }
+        });
+    </script>
 </body>
 </html>

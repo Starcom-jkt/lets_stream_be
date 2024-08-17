@@ -1,7 +1,6 @@
 import pool from "../../../../db";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import bcrypt from "bcrypt";
 
 interface User extends RowDataPacket {
   id: number;
@@ -25,7 +24,7 @@ export const index = async (req: Request, res: Response) => {
       WHERE u.stream = 0
     `);
     // Render halaman dengan data user
-    res.render("admin/request_stream/index", {
+    res.render("admin/request/index", {
       usersInRequestStream,
       alert,
       // users,
@@ -63,7 +62,7 @@ export const requestDetail = async (req: Request, res: Response) => {
     const user = rows[0];
 
     // Render halaman dengan data user
-    res.render("admin/request_stream/detail", {
+    res.render("admin/request/detail", {
       // request,
       alert,
       user,
@@ -105,10 +104,15 @@ export const confirmStream = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
+    const [dataUser] = await pool.query<User[]>(
+      "SELECT * FROM user WHERE id = ?",
+      [id]
+    );
+
     // Lakukan update pada stream user
     const [updateResult] = await pool.query<ResultSetHeader>(
-      "UPDATE user SET stream = !stream WHERE id = ?",
-      [id]
+      "UPDATE user SET stream = ?, channelName = ? WHERE id = ?",
+      [1, dataUser[0].username, id]
     );
 
     // Cek apakah update berhasil
@@ -117,6 +121,15 @@ export const confirmStream = async (req: Request, res: Response) => {
       req.flash("alertStatus", "danger");
       return res.redirect("/admin/request");
     }
+
+    const [sendNotif] = await pool.query<ResultSetHeader>(
+      "INSERT INTO notifications (userId, title, message) VALUES (?, ?, ?)",
+      [
+        id,
+        "New Message",
+        "Your request to stream is accepted! Please download the app for streaming",
+      ]
+    );
 
     // Hapus entri dari request_stream berdasarkan userId (asumsi ini yang dimaksud)
     const [deleteResult] = await pool.query<ResultSetHeader>(

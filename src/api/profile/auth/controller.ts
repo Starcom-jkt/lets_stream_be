@@ -94,12 +94,12 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
-  const profilePicture = req.file?.filename || "default.png";
+  const profilePicture = req.file?.filename || "avatardefault1.jpeg";
   const saltRounds = 10;
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);
 
   try {
-    // Check if the username or streamChannel already exists
+    // Check if the email already exists
     const [existingEmail]: any = await pool.query(
       "SELECT * FROM user WHERE email = ? ",
       [email]
@@ -108,6 +108,18 @@ export const register = async (req: Request, res: Response) => {
     if (existingEmail.length > 0) {
       return res.status(400).json({
         message: "Email already exists",
+      });
+    }
+
+    // Check if the username  already exists
+    const [existingUsername]: any = await pool.query(
+      "SELECT * FROM user WHERE username = ? ",
+      [username]
+    );
+
+    if (existingUsername.length > 0) {
+      return res.status(400).json({
+        message: "Username already exists",
       });
     }
 
@@ -198,6 +210,7 @@ export const login = async (req: Request, res: Response) => {
 
     res.json({ success: true, token, message: "Logged in successfully" });
   } catch (error) {
+    console.error("Error during authentication:", error);
     res.status(500).json({ message: "Error during authentication", error });
   }
 };

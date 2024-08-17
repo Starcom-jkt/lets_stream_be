@@ -58,6 +58,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     const { channelName, username, password, email } = req.body;
     const saltRounds = 10;
     const profilePicture = req.file?.filename || "";
+
     const [checkChannelName] = await pool.query<Agent[]>(
       "SELECT * FROM user WHERE channelName = ?",
       [channelName]

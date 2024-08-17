@@ -12,6 +12,7 @@ declare global {
         channelName?: string;
         streamer?: string;
         id?: number;
+        profilePicture?: string;
       };
     }
   }
@@ -38,7 +39,7 @@ export const startStreamSession = async (req: Request, res: Response) => {
         .json({ success: true, message: "You're on the live" });
     }
 
-    const thumbnail = req.file?.filename || "";
+    const thumbnail = req.file?.filename || req.user?.profilePicture;
 
     // const token = generateRtcToken(channelName, uid);
 
