@@ -18,29 +18,106 @@ export const getAllStreams = async (req: Request, res: Response) => {
   }
 };
 
+// export const getDetailStreamSession = async (req: Request, res: Response) => {
+//   const id = req.params.id;
+
+//   try {
+//     let roleNumber: number;
+//     const role = "audience";
+
+//     if (role === "audience") {
+//       roleNumber = RtcRole.SUBSCRIBER;
+//     }
+
+//     const [rows] = await pool.query<RowDataPacket[]>(
+//       "SELECT * FROM stream_session WHERE id = ? AND status = 1",
+//       [id]
+//     );
+
+//     if (rows.length > 0) {
+//       const uid = rows[0].userId; // Convert uid to string
+//       const userId = rows[0].userId;
+
+//       const [dataStreamer] = await pool.query<RowDataPacket[]>(
+//         "SELECT * FROM user WHERE id = ?",
+//         [userId]
+//       );
+
+//       if (dataStreamer.length > 0) {
+//         const channelName = dataStreamer[0].channelName;
+
+//         // generate agora token for views
+//         const APP_ID = process.env.APP_ID as string;
+//         const APP_CERTIFICATE = process.env.APP_CERTIFICATE as string;
+//         const expirationTimeInSeconds = 3600;
+//         const currentTimestamp = Math.floor(Date.now() / 1000);
+//         const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+//         const token = RtcTokenBuilder.buildTokenWithUid(
+//           APP_ID,
+//           APP_CERTIFICATE,
+//           channelName,
+//           uid,
+//           roleNumber,
+//           privilegeExpiredTs
+//         );
+
+//         res.json({ success: true, data: rows, channelName, tokenView: token });
+//       } else {
+//         res.status(404).json({ success: false, message: "User not found" });
+//       }
+//     } else {
+//       res
+//         .status(404)
+//         .json({ success: false, message: "Stream session not found" });
+//     }
+//   } catch (error) {
+//     console.error("Error fetching stream session:", error);
+//     res
+//       .status(500)
+//       .json({ success: false, message: "Error fetching stream session" });
+//   }
+// };
+
 export const getDetailStreamSession = async (req: Request, res: Response) => {
   const id = req.params.id;
 
   try {
     const role = "audience";
+    let roleNumber: number;
+
+    // Validate and assign role
+    if (role === "audience") {
+      roleNumber = RtcRole.SUBSCRIBER;
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid role provided" });
+    }
+
+    // Query the stream session from the database
     const [rows] = await pool.query<RowDataPacket[]>(
       "SELECT * FROM stream_session WHERE id = ? AND status = 1",
       [id]
     );
 
     if (rows.length > 0) {
-      const uid = rows[0].userId; // Convert uid to string
+      const uid = rows[0].userId; // Use userId as uid for token generation
       const userId = rows[0].userId;
 
+      // Query the streamer (user) data from the database
       const [dataStreamer] = await pool.query<RowDataPacket[]>(
         "SELECT * FROM user WHERE id = ?",
         [userId]
       );
 
+      const username = dataStreamer[0].username;
+      const profilePicture = dataStreamer[0].profilePicture;
+
       if (dataStreamer.length > 0) {
         const channelName = dataStreamer[0].channelName;
 
-        // generate agora token for views
+        // Generate Agora token
         const APP_ID = process.env.APP_ID as string;
         const APP_CERTIFICATE = process.env.APP_CERTIFICATE as string;
         const expirationTimeInSeconds = 3600;
@@ -52,21 +129,32 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
           APP_CERTIFICATE,
           channelName,
           uid,
-          RtcRole.SUBSCRIBER,
+          roleNumber,
           privilegeExpiredTs
         );
-        res.json({ success: true, data: rows, tokenView: token });
+
+        // Respond with the session details and token
+        return res.json({
+          success: true,
+          data: rows,
+          channelName,
+          username,
+          profilePicture,
+          // tokenView: token,
+        });
       } else {
-        res.status(404).json({ success: false, message: "User not found" });
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
       }
     } else {
-      res
+      return res
         .status(404)
         .json({ success: false, message: "Stream session not found" });
     }
   } catch (error) {
     console.error("Error fetching stream session:", error);
-    res
+    return res
       .status(500)
       .json({ success: false, message: "Error fetching stream session" });
   }

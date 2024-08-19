@@ -6,6 +6,7 @@ import {
   loginWithGoogle,
   logout,
   register,
+  registerAgent,
   removeUser,
   requestStream,
 } from "./controller";
@@ -18,8 +19,10 @@ router.post("/login", login);
 router.post("/loginGoogle", loginWithGoogle);
 router.post("/logout", logout);
 router.post("/register", uploadSingle("profilePicture"), register);
+router.post("/register/agent", uploadSingle("profilePicture"), registerAgent);
 router.post("/update/:id", uploadSingle("profilePicture"), changeStatusUser);
 router.delete("/remove/:id", removeUser);
 router.put("/edit/:id", uploadSingle("profilePicture"), editUser);
 router.post("/request", isLoginUser, requestStream);
+
 export default router;
