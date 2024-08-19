@@ -8,7 +8,7 @@ import { RtcRole, RtcTokenBuilder } from "agora-access-token";
 export const getAllStreams = async (req: Request, res: Response) => {
   try {
     const [data] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM stream_session WHERE status = 1"
+      "SELECT stream_session.id, stream_session.thumbnail,stream_session.title,stream_session.status,stream_session.createdAt,user.username,user.channelName, user.profilePicture FROM stream_session INNER JOIN user ON stream_session.userId = user.id WHERE stream_session.status = 1"
     );
     res.json({ success: true, data });
   } catch (error) {

@@ -106,7 +106,9 @@ export default function setupWebSocket(io: SocketIOServer) {
           return;
         }
 
-        const { stream, channelName } = userData[0];
+        // const { stream, channelName } = userData[0];
+        const stream = userData[0].stream;
+        const channelName = userData[0].channelName;
 
         if (stream === 1 && channelName) {
           // User is a streamer, they "own" the room

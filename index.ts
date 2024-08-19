@@ -21,6 +21,7 @@ import streamSessionRouter from "./src/api/live/streamSession/router";
 import streamResultRouter from "./src/api/live/streamResults/router";
 import viewStreamRouter from "./src/api/live/viewStream/router";
 import notificationRouter from "./src/api/notifications/router";
+import searchRouter from "./src/api/search/router";
 
 // apijoyo
 import apiV2Routes from "./src/apiv2/token/router";
@@ -118,6 +119,7 @@ app.use(`${URL}/view_stream`, viewStreamRouter);
 app.use(`${URL}/stream_result`, streamResultRouter);
 app.use(`${URL}/notifications`, notificationRouter);
 app.use(`${URL}/profile`, profileRouter);
+app.use(`${URL}/search`, searchRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);
