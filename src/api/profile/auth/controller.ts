@@ -138,6 +138,55 @@ export const register = async (req: Request, res: Response) => {
   }
 };
 
+export const registerAgent = async (req: Request, res: Response) => {
+  const { email, username, password } = req.body;
+  const profilePicture = req.file?.filename || "avatardefault1.jpeg";
+  const saltRounds = 10;
+  const bcryptedPassword = await bcrypt.hash(password, saltRounds);
+
+  try {
+    // Check if the email already exists
+    const [existingEmail]: any = await pool.query(
+      "SELECT * FROM user WHERE email = ? ",
+      [email]
+    );
+
+    if (existingEmail.length > 0) {
+      return res.status(400).json({
+        message: "Email already exists",
+      });
+    }
+
+    // Check if the username  already exists
+    const [existingUsername]: any = await pool.query(
+      "SELECT * FROM user WHERE username = ? ",
+      [username]
+    );
+
+    if (existingUsername.length > 0) {
+      return res.status(400).json({
+        message: "Username already exists",
+      });
+    }
+
+    const stream = 1;
+    const channelName = username;
+
+    // Insert the new user into the database
+    await pool.query<ResultSetHeader>(
+      "INSERT INTO user (email, username, profilePicture, password, stream, channelName) VALUES (?, ?, ?, ?, ?, ?)",
+      [email, username, profilePicture, bcryptedPassword, stream, channelName]
+    );
+
+    res.json({
+      success: true,
+      message: "Registered successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error during register", error });
+  }
+};
+
 export const editUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
