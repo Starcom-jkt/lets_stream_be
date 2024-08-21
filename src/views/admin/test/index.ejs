@@ -3,100 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test</title>
-    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            background-color: #34495e;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .message .username {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .message .text {
+            word-wrap: break-word;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input {
+            flex-grow: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: none;
+            margin-right: 10px;
+            background-color: #ecf0f1;
+            color: black;
+            font-size: 14px;
+        }
+        .chat-input button {
+            padding: 10px;
+            border-radius: 50%;
+            background-color: #2980b9;
+            border: none;
+            cursor: pointer;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <h1>WebSocket Test</h1>
 
-    <p>Enter User ID:</p>
-    <input type="number" id="userIdInput" placeholder="Enter User ID">
-    <button id="connectButton">Connect</button>
-
-    <div id="channelInfo" style="display:none; margin-top: 20px;">
-        <h2>Connected to Channel: <span id="channelName"></span></h2>
-    </div>
-
-    <div id="commentSection" style="display:none; margin-top: 20px;">
-        <p>Enter Comment:</p>
-        <input type="text" id="commentInput" placeholder="Enter your comment">
-        <button id="sendCommentButton">Send Comment</button>
-
-        <div id="commentDisplay" style="margin-top: 20px;">
-            <h3>Comments:</h3>
-            <ul id="commentList"></ul>
+    <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Say something...">
+            <button id="send-button">&#9658;</button>
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
-        let socket;
+        const socket = io("http://localhost:3006"); // Replace with your server URL
 
-        document.getElementById('connectButton').addEventListener('click', () => {
-            const userId = document.getElementById('userIdInput').value;
-            if (!userId) {
-                alert('Please enter a User ID');
-                return;
-            }
+        // Default username and channelName
+        const username = prompt("Enter your username:") || "Anonymous";
+        const channelName = prompt("Enter channel name:") || "default_channel";
 
-            console.log('Attempting to connect with userId:', userId);
-            socket = io('http://localhost:3006');
+        // Join the chat room
+        socket.emit("join room", channelName);
 
-            socket.on('connect', () => {
-                console.log('Connected to WebSocket server');
-                socket.emit('join', { userId: Number(userId) });  // Emit with userId from input
-            });
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const chatMessages = document.getElementById('chat-messages');
 
-            socket.on('message', (msg) => {
-                console.log('Message from server:', msg);
-
-                // Assuming the server sends the channelName as part of the message
-                if (msg.channelName) {
-                    document.getElementById('channelName').textContent = msg.channelName;
-                    document.getElementById('channelInfo').style.display = 'block'; // Show the channel name
-                    document.getElementById('commentSection').style.display = 'block'; // Show comment section
-                } else {
-                    console.error('Channel name is missing in the server response.');
-                    alert('Channel name is missing in the server response.');
-                }
-            });
-
-            socket.on('comment', (commentData) => {
-                console.log('Comment received:', commentData);
-
-                const commentList = document.getElementById('commentList');
-                const newComment = document.createElement('li');
-                newComment.textContent = `[${new Date(commentData.createdAt).toLocaleString()}] ${commentData.comment}`;
-                commentList.appendChild(newComment);
-            });
-
-            socket.on('error', (err) => {
-                console.error('Error:', err);
-                alert('Error received: ' + err);
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Disconnected from WebSocket server');
-                document.getElementById('channelInfo').style.display = 'none'; // Hide channel name
-                document.getElementById('commentSection').style.display = 'none'; // Hide comment section
-            });
+        // Listen for chat messages from the server
+        socket.on("chat message", (message, user) => {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.innerHTML = `
+                <div>
+                    <span class="username">${user}:</span>
+                    <span class="text">${message}</span>
+                </div>
+            `;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto scroll to bottom
         });
 
-        document.getElementById('sendCommentButton').addEventListener('click', () => {
-            const comment = document.getElementById('commentInput').value;
-            if (!comment) {
-                alert('Please enter a comment');
-                return;
+        // Send message on button click
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value;
+            if (message.trim() !== "") {
+                socket.emit("chat message", { channelName, message, username });
+                messageInput.value = ""; // Clear input
             }
+        });
 
-            if (socket && socket.connected) {
-                const userId = document.getElementById('userIdInput').value;
-                console.log('Sending comment:', comment);
-                socket.emit('comment', { userId: Number(userId), comment: comment });  // Emit comment with userId and comment
-                document.getElementById('commentInput').value = ''; // Clear the comment input after sending
-            } else {
-                alert('You are not connected to the WebSocket server');
+        // Send message on Enter key press
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendButton.click();
             }
         });
     </script>
+
 </body>
 </html>

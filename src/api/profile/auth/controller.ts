@@ -94,7 +94,17 @@ export const loginWithGoogle = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
-  const profilePicture = req.file?.filename || "avatardefault1.jpeg";
+  const profilePicture =
+    req.file?.filename ||
+    "avatardefault1.jpeg" ||
+    "avatardefault2.jpeg" ||
+    "avatardefault3.jpeg" ||
+    "avatardefault4.jpeg" ||
+    "avatardefault5.jpeg" ||
+    "avatardefault6.jpeg" ||
+    "avatardefault7.jpeg" ||
+    "avatardefault8.jpeg" ||
+    "avatardefault9.jpeg";
   const saltRounds = 10;
   const bcryptedPassword = await bcrypt.hash(password, saltRounds);
 
