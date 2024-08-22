@@ -39,6 +39,7 @@ import currencyRoutes from "./src/app/adminPanel/currency/router";
 import languageRoutes from "./src/app/adminPanel/language/router";
 
 import testRoutes from "./src/app/adminPanel/test/router";
+import test2Routes from "./src/app/adminPanel/test2/router";
 
 // Import the WebSocket server
 import setupWebSocket from "./src/websocket/comment";
@@ -133,6 +134,7 @@ app.use("/admin/merchant", merchantRoutes);
 app.use("/admin/currency", currencyRoutes);
 app.use("/admin/language", languageRoutes);
 app.use("/test", testRoutes);
+app.use("/test2", test2Routes);
 
 // api v2
 app.use("/", apiV2Routes);
