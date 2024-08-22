@@ -9,7 +9,6 @@ export default function setupWebSocket(io: SocketIOServer) {
     // Join a specific room based on channelName
     socket.on("join room", ({ channelName, username }) => {
       socket.join(channelName);
-      console.log(`${username} joined room: ${channelName}`);
 
       // Broadcast to the room that the user has joined
       io.to(channelName).emit(
@@ -20,6 +19,7 @@ export default function setupWebSocket(io: SocketIOServer) {
 
     // Listen for chat messages and broadcast to the specific room
     socket.on("chat message", ({ channelName, message, username }) => {
+      // Broadcast the message to all clients in the same room
       io.to(channelName).emit("chat message", message, username);
     });
 
@@ -84,6 +84,10 @@ export default function setupWebSocket(io: SocketIOServer) {
           img: giftDetails.img,
           price: giftDetails.price,
           userId,
+        });
+
+        io.to(channelName).emit("test", {
+          giftName: "babo",
         });
 
         console.log(
