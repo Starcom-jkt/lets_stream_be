@@ -70,6 +70,7 @@
 
   // Listen for received gifts
   socket.on("gift received", (gift) => {
+    console.log("Gift received:", gift);
     displayGift(gift);
   });
 
