@@ -148,10 +148,8 @@
     <div class="send-container">
       <label for="gift-select">Send a Gift:</label>
       <select id="gift-select">
-        <option value="1">Gift 1 - $10</option>
-        <option value="2">Gift 2 - $20</option>
-        <option value="3">Gift 3 - $30</option>
-        <option value="4">Gift 4 - $40</option>
+        <option value="5">chicken - 100</option>
+        <option value="6">hamster - 200</option>
       </select>
       <button id="send-gift-button">Send Gift</button>
     </div>
@@ -176,8 +174,8 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script>
-  const socket = io("http://localhost:3006"); // Replace with your server URL
   // const socket = io("https://2shop.codes"); // Replace with your server URL
+  const socket = io("http://localhost:3006"); // Replace with your server URL
 
   const joinButton = document.getElementById('joinButton');
   const usernameInput = document.getElementById('username');
@@ -257,12 +255,8 @@
 
   // Listen for received gifts from the server
   socket.on("gift received", (gift) => {
-    console.log(gift);
+    console.log("Gift received:", gift);
     displayGift(gift);
-  });
-
-  socket.on("test", (gift) => {
-    console.log(gift);
   });
 
   // Listen for error messages
@@ -271,6 +265,8 @@
   });
 
   function displayGift(gift) {
+    console.log("Displaying gift:", gift);
+     
     const giftContainer = document.getElementById("giftContainer");
     const giftImg = document.getElementById("giftImg");
     const giftName = document.getElementById("giftName");
@@ -280,14 +276,17 @@
     giftImg.src = gift.img;
     giftName.innerText = gift.giftName;
     giftPrice.innerText = `Price: ${gift.price}`;
-    senderId.innerText = `Sent by User ID: ${gift.userId}`;
+    senderId.innerText = `Sent by User ID: ${gift.senderId}`;
 
     // Show the gift container
     giftContainer.style.display = "flex";
 
+    console.log("Gift container should now be visible");
+
     // Hide the gift after 2 seconds
     setTimeout(() => {
       giftContainer.style.display = "none";
+      console.log("Gift container hidden");
     }, 2000);
   }
 
