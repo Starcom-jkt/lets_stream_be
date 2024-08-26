@@ -22,6 +22,8 @@ import streamResultRouter from "./src/api/live/streamResults/router";
 import viewStreamRouter from "./src/api/live/viewStream/router";
 import notificationRouter from "./src/api/notifications/router";
 import searchRouter from "./src/api/search/router";
+import activityRouter from "./src/api/activity/router";
+import giftTransactionRouter from "./src/api/transaction/gift_transaction/router";
 
 // apijoyo
 import apiV2Routes from "./src/apiv2/token/router";
@@ -121,6 +123,8 @@ app.use(`${URL}/stream_result`, streamResultRouter);
 app.use(`${URL}/notifications`, notificationRouter);
 app.use(`${URL}/profile`, profileRouter);
 app.use(`${URL}/search`, searchRouter);
+app.use(`${URL}/activity`, activityRouter);
+app.use(`${URL}/gift_transaction`, giftTransactionRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);

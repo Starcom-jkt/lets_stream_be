@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import pool from "../../../../db";
+import { RowDataPacket, FieldPacket } from "mysql2"; // Import types for MySQL results
 
 export const getAllStreamResults = async (req: Request, res: Response) => {
   const userId = req.user?.id;
@@ -17,6 +18,36 @@ export const getAllStreamResults = async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching stream results", error });
+  }
+};
+
+export const getTotalStream = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  console.log("userId", userId);
+  // const userId = req.params.id;
+  if (!userId) {
+    return res.status(401).json({ message: "Error: No userId found" });
+  }
+
+  try {
+    // Execute the SQL query to calculate the total duration for the user
+    const [rows, fields]: [RowDataPacket[], FieldPacket[]] = await pool.query(
+      `
+    SELECT SUM(COALESCE(sr.duration, 0)) as totalDuration
+        FROM stream_result sr
+        JOIN stream_session ss ON sr.stream_sessionId = ss.id
+        WHERE ss.userId = ?
+      `,
+      [userId]
+    );
+
+    // Access the total duration from the first row
+    const totalDuration = rows[0]?.totalDuration;
+
+    // Return the total duration as part of the JSON response
+    res.json({ success: true, data: { totalDuration } });
   } catch (error) {
     res.status(500).json({ message: "Error fetching stream results", error });
   }
