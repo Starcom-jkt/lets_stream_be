@@ -253,10 +253,10 @@ export default function setupWebSocket(io: SocketIOServer) {
         );
 
         const recipientUser = recipientRows[0];
-        console.log("giftDetails", giftDetails);
 
         // Broadcast the gift details to all clients in the room
         io.to(channelName).emit("gift received", {
+          giftDetails: giftDetails,
           giftName: giftDetails.giftName,
           img: giftDetails.img,
           giftLink: giftDetails.giftLink,
