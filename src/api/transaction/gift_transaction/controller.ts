@@ -15,7 +15,7 @@ export const getUserTransactions = async (req: Request, res: Response) => {
   try {
     // Mengambil semua transaksi dari pengguna yang sedang login
     const [transactions]: [RowDataPacket[], any] = await pool.query(
-      "SELECT * FROM gift_transaction WHERE userId = ?",
+      "SELECT * FROM gift_transaction WHERE userId = ? ORDER BY createdAt DESC",
       [userId]
     );
 
