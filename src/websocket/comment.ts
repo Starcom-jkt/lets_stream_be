@@ -243,13 +243,13 @@ export default function setupWebSocket(io: SocketIOServer) {
         ]);
 
         await pool.query(
-          "INSERT INTO gift_transaction (userId, giftId, amount, transactionType) VALUES (?, ?, ?, 'out')",
-          [userId, giftId, giftPrice]
+          "INSERT INTO gift_transaction (userId, giftId, giftName, amount, transactionType) VALUES (?, ?, ?, ?, 'out')",
+          [userId, giftId, giftDetails.giftName, giftPrice]
         );
 
         await pool.query(
-          "INSERT INTO gift_transaction (userId, giftId, amount, transactionType) VALUES (?, ?, ?, 'in')",
-          [recipientRows[0].id, giftId, giftPrice]
+          "INSERT INTO gift_transaction (userId, giftId, giftName, amount, transactionType) VALUES (?, ?, ?, ?, 'in')",
+          [recipientRows[0].id, giftId, giftDetails.giftName, giftPrice]
         );
 
         const recipientUser = recipientRows[0];
