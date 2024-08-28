@@ -9,7 +9,7 @@ import { isLoginUser } from "../../../middleware/auth";
 
 const router = Router();
 
-router.get("/", isLoginUser, getAllStreamResults);
+// router.get("/taol", isLoginUser, getAllStreamResults);
 router.get("/total", isLoginUser, getTotalStream);
 router.get("/:id", isLoginUser, getDetailStreamResult);
 
