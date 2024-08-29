@@ -4,6 +4,7 @@ import pool from "../../../../db"; // Sesuaikan dengan konfigurasi db Anda
 import { ResultSetHeader } from "mysql2";
 require("dotenv").config();
 
+// asdasdasd
 export const editUser = async (req: Request, res: Response) => {
   const id = req.user?.id;
   const updates = req.body;
