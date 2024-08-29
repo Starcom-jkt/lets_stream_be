@@ -8,7 +8,11 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix + "-" + file.originalname);
+
+    // Replace spaces with underscores in the original file name
+    const sanitizedOriginalName = file.originalname.replace(/\s+/g, "_");
+
+    cb(null, file.fieldname + "-" + uniqueSuffix + "-" + sanitizedOriginalName);
   },
 });
 
@@ -34,22 +38,6 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-// Middleware for uploading a single file
-// const uploadSingle = (req: Request, res: Response, next: NextFunction) => {
-//   const singleUpload = upload.single("image");
-
-//   singleUpload(req, res, (err: any) => {
-//     if (err instanceof multer.MulterError) {
-//       // Handle Multer errors
-//       return res.status(400).json({ message: err.message });
-//     } else if (err) {
-//       // Handle other errors
-//       return res.status(400).json({ message: err.message });
-//     }
-//     next();
-//   });
-// };
-
 // Higher-order function to create middleware for uploading a single file with a dynamic field name
 const uploadSingle = (fieldName: string) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -62,6 +50,8 @@ const uploadSingle = (fieldName: string) => {
         // Handle other errors
         return res.status(400).json({ message: err.message });
       }
+      // Simpan hanya nama file tanpa path
+      const filename = req.file?.filename;
       next();
     });
   };
@@ -79,6 +69,8 @@ const uploadMultiple = (req: Request, res: Response, next: NextFunction) => {
       // Handle other errors
       return res.status(400).json({ message: err.message });
     }
+    // Simpan hanya nama file tanpa path
+    const filename = req.file?.filename;
     next();
   });
 };

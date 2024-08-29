@@ -26,7 +26,7 @@ export const editUser = async (req: Request, res: Response) => {
 
   // Jika ada file yang diunggah, tambahkan ke updates
   if (req.file) {
-    updates.profilePicture = req.file.path;
+    updates.profilePicture = req.file.filename;
   }
 
   const fields = Object.keys(updates);
