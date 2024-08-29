@@ -201,6 +201,10 @@ export const editUser = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
 
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ message: "No fields to update" });
+  }
+
   if (updates.password) {
     const saltRounds = 10;
     updates.password = await bcrypt.hash(updates.password, saltRounds);
