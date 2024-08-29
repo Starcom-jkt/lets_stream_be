@@ -15,8 +15,16 @@ export const getUserTransactions = async (req: Request, res: Response) => {
   try {
     // Mengambil semua transaksi dari pengguna yang sedang login
     const [transactions]: [RowDataPacket[], any] = await pool.query(
-      "SELECT * FROM gift_transaction WHERE userId = ? ORDER BY createdAt DESC",
-      [userId]
+      `SELECT *,
+        CASE 
+          WHEN userId = ? THEN 'out' 
+          WHEN receivedId = ? THEN 'in' 
+          ELSE 'unknown' 
+        END AS transactionType
+      FROM gift_transaction 
+      WHERE userId = ? OR receivedId = ? 
+      ORDER BY createdAt DESC`,
+      [userId, userId, userId, userId]
     );
 
     res.json({ success: true, transactions });
@@ -28,3 +36,4 @@ export const getUserTransactions = async (req: Request, res: Response) => {
     });
   }
 };
+

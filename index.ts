@@ -24,6 +24,7 @@ import notificationRouter from "./src/api/notifications/router";
 import searchRouter from "./src/api/search/router";
 import activityRouter from "./src/api/activity/router";
 import giftTransactionRouter from "./src/api/transaction/gift_transaction/router";
+import agentRouter from "./src/api/profile/agent/router";
 
 // apijoyo
 import apiV2Routes from "./src/apiv2/token/router";
@@ -125,6 +126,7 @@ app.use(`${URL}/profile`, profileRouter);
 app.use(`${URL}/search`, searchRouter);
 app.use(`${URL}/activity`, activityRouter);
 app.use(`${URL}/gift_transaction`, giftTransactionRouter);
+app.use(`${URL}/agent`, agentRouter);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);
