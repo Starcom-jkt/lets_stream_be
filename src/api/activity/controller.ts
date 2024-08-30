@@ -2,13 +2,12 @@ import { Request, Response } from "express";
 import pool from "../../../db";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
 
+// Get all activities
 export const getAllActivities = async (req: Request, res: Response) => {
   try {
-    // Ambil semua data activity
     const [activities]: [RowDataPacket[], any] = await pool.query(
       "SELECT * FROM activity"
     );
-
     res.json({ success: true, data: activities });
   } catch (error) {
     res
@@ -17,6 +16,7 @@ export const getAllActivities = async (req: Request, res: Response) => {
   }
 };
 
+// Get activity detail by ID
 export const getDetailActivity = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
@@ -31,19 +31,23 @@ export const getDetailActivity = async (req: Request, res: Response) => {
     }
     res.json({ success: true, data: data[0] });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching activity details",
-        error,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching activity details",
+      error,
+    });
   }
 };
 
+// Add a new activity
 export const postActivity = async (req: Request, res: Response) => {
-  const { poster, banner, title } = req.body;
-  if (!poster || !banner || !title) {
+  const { title } = req.body;
+  const files = req.files as {
+    [fieldname: string]: Express.Multer.File[];
+  };
+
+  // Check if required fields are present
+  if (!title || !files.poster || !files.banner) {
     return res
       .status(400)
       .json({ success: false, message: "All fields are required" });
@@ -52,13 +56,17 @@ export const postActivity = async (req: Request, res: Response) => {
   try {
     const [result]: [ResultSetHeader, any] = await pool.query<ResultSetHeader>(
       "INSERT INTO activity (poster, banner, title) VALUES (?, ?, ?)",
-      [poster, banner, title]
+      [
+        files.poster[0].filename, // Assuming single file upload
+        files.banner[0].filename, // Assuming single file upload
+        title,
+      ]
     );
     res.json({
       success: true,
       id: result.insertId,
-      poster,
-      banner,
+      poster: files.poster[0].filename,
+      banner: files.banner[0].filename,
       title,
       message: "Activity added successfully",
     });
@@ -69,6 +77,7 @@ export const postActivity = async (req: Request, res: Response) => {
   }
 };
 
+// Edit an existing activity
 export const editActivity = async (req: Request, res: Response) => {
   const { id } = req.params;
   const updates = req.body;
@@ -81,7 +90,7 @@ export const editActivity = async (req: Request, res: Response) => {
       .json({ success: false, message: "No fields to update" });
   }
 
-  // Buat query dinamis
+  // Create dynamic query
   const setClause = fields.map((field) => `${field} = ?`).join(", ");
 
   try {
@@ -108,6 +117,7 @@ export const editActivity = async (req: Request, res: Response) => {
   }
 };
 
+// Delete an activity
 export const deleteActivity = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {

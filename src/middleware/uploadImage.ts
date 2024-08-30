@@ -58,21 +58,34 @@ const uploadSingle = (fieldName: string) => {
 };
 
 // Middleware for uploading multiple files
-const uploadMultiple = (req: Request, res: Response, next: NextFunction) => {
-  const multipleUpload = upload.array("images", 10);
+const uploadMultiple = (fields: { [key: string]: number }) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const uploadFields = Object.keys(fields).map((field) => ({
+      name: field,
+      maxCount: fields[field],
+    }));
 
-  multipleUpload(req, res, (err: any) => {
-    if (err instanceof multer.MulterError) {
-      // Handle Multer errors
-      return res.status(400).json({ message: err.message });
-    } else if (err) {
-      // Handle other errors
-      return res.status(400).json({ message: err.message });
-    }
-    // Simpan hanya nama file tanpa path
-    const filename = req.file?.filename;
-    next();
-  });
+    const uploadMultiples = upload.fields(uploadFields);
+
+    uploadMultiples(req, res, (err: any) => {
+      if (err instanceof multer.MulterError) {
+        // Handle Multer errors
+        return res.status(400).json({ message: err.message });
+      } else if (err) {
+        // Handle other errors
+        return res.status(400).json({ message: err.message });
+      }
+      // Optionally, you can access filenames here if needed
+      const filenames = Object.keys(req.files || {}).reduce((acc, field) => {
+        acc[field] = (req.files as { [key: string]: Express.Multer.File[] })[
+          field
+        ].map((file) => file.filename);
+        return acc;
+      }, {} as { [key: string]: string[] });
+      console.log("Uploaded files:", filenames);
+      next();
+    });
+  };
 };
 
 export { uploadSingle, uploadMultiple };
