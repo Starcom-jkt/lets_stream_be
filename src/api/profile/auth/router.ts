@@ -3,6 +3,7 @@ import {
   changeStatusUser,
   editUser,
   login,
+  loginMpo,
   loginWithGoogle,
   logout,
   register,
@@ -17,6 +18,7 @@ const router = Router();
 
 router.post("/login", login);
 router.post("/loginGoogle", loginWithGoogle);
+router.post("/loginMpo", loginMpo);
 router.post("/logout", logout);
 router.post("/register", uploadSingle("profilePicture"), register);
 router.post("/register/agent", uploadSingle("profilePicture"), registerAgent);

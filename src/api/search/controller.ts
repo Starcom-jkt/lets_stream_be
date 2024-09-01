@@ -7,7 +7,9 @@ export const searchStream = async (req: Request, res: Response) => {
     const { username } = req.query;
     const [search] = await pool.query<ResultSetHeader[]>(
       `
-         SELECT ss.*
+         SELECT ss.*, u.profilePicture,
+    u.username,
+    u.channelname
          FROM stream_session ss
          JOIN user u ON ss.userId = u.id
          WHERE ss.status = 1 AND u.username LIKE ?

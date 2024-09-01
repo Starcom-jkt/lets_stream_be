@@ -5,6 +5,9 @@ import pool from "../../../../db"; // Adjust the import according to your actual
 import { ResultSetHeader } from "mysql2";
 import { google } from "googleapis";
 require("dotenv").config();
+import axios from "axios";
+import https from "https";
+
 // import { OAuth2Client } from "google-auth-library";
 
 const CLIENT_ID = process.env.CLIENT_ID;
@@ -377,5 +380,151 @@ export const requestStream = async (req: Request, res: Response) => {
     });
   } catch (error) {
     res.status(500).json({ message: "Error requesting stream", error });
+  }
+};
+
+// export const loginMpo = async (req: Request, res: Response) => {
+//   try {
+//     const { tokenMpo } = req.body;
+
+//     const dataUserToken = jwt.decode(tokenMpo) as any;
+//     const username = dataUserToken.name;
+
+//     const [rows]: any = await pool.query(
+//       "SELECT * FROM user WHERE username = ?",
+//       [username]
+//     );
+
+//     let user;
+//     if (rows.length === 0) {
+//       // User tidak ditemukan, lakukan registrasi
+//       const email = `${username}@gmail.com`;
+
+//       const [result]: any = await pool.query(
+//         "INSERT INTO user (email, username) VALUES (?, ?)",
+//         [email, username]
+//       );
+//       user = { id: result.insertId, email, username, balance: 0 }; // Default balance adalah 0
+//       console.log("user created:", user);
+//     } else {
+//       // User ditemukan, ambil data user dari database
+//       user = rows[0];
+//     }
+
+//     // Ambil balance dari API eksternal
+//     const balanceMpo = await axios.post(
+//       "https://str-stg.mixcdn.link/str/balance",
+//       {
+//         play_id: "8dxw86xw6u027", // Menggunakan username sebagai play_id
+//       },
+//       {
+//         headers: {
+//           "Content-Type": "application/json",
+//           Authorization: `Bearer ${tokenMpo}`,
+//         },
+//       }
+//     );
+
+//     if (balanceMpo.data && balanceMpo.data.success) {
+//       const balance = balanceMpo.data.data;
+//       // Update balance di database
+//       await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
+//         balance,
+//         user.id,
+//       ]);
+//       user.balance = balance; // Update balance pada objek user
+//     }
+
+//     // Generate JWT token dengan userData
+//     const token = jwt.sign({ userData: user }, JWT_SECRET!, {
+//       expiresIn: "1d",
+//     });
+
+//     res.json({
+//       success: true,
+//       token,
+//       message: "Logged in successfully",
+//       balance: user.balance,
+//     });
+//   } catch (error) {
+//     console.error("Error during authentication:", error);
+//     res.status(500).json({ message: "Error during authentication", error });
+//   }
+// };
+
+export const loginMpo = async (req: Request, res: Response) => {
+  try {
+    const { tokenMpo } = req.body;
+
+    // Decode token untuk mendapatkan username
+    const dataUserToken = jwt.decode(tokenMpo) as any;
+    const username = dataUserToken.name;
+
+    // Cek apakah username sudah ada di database
+    const [rows]: any = await pool.query(
+      "SELECT * FROM user WHERE username = ?",
+      [username]
+    );
+
+    let user;
+    if (rows.length === 0) {
+      // Jika user tidak ditemukan, lakukan registrasi
+      const email = `${username}@gmail.com`;
+      const [result]: any = await pool.query(
+        "INSERT INTO user (email, username) VALUES (?, ?)",
+        [email, username]
+      );
+      user = { id: result.insertId, email, username, balance: 0 }; // Default balance adalah 0
+      console.log("User created:", user);
+    } else {
+      // Jika user ditemukan, ambil data user dari database
+      user = rows[0];
+    }
+
+    // Konfigurasi untuk mengabaikan verifikasi SSL
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Mengabaikan verifikasi sertifikat SSL
+    });
+
+    // Ambil balance dari API eksternal dengan play_id yang tetap
+    const balanceMpo = await axios.post(
+      "https://str-stg.mixcdn.link/str/balance",
+      {
+        play_id: "8dxw86xw6u027", // Menggunakan play_id tetap
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenMpo}`,
+        },
+        httpsAgent: agent, // Tambahkan agent untuk mengabaikan SSL
+      }
+    );
+
+    if (balanceMpo.data && balanceMpo.data.success) {
+      const balance = balanceMpo.data.data;
+      // Update balance di database
+      await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
+        balance,
+        user.id,
+      ]);
+      user.balance = balance;
+    }
+
+    // Generate JWT token dengan userData
+    const token = jwt.sign({ userData: user }, process.env.JWT_SECRET!, {
+      expiresIn: "1d",
+    });
+
+    // Berikan respon sukses
+    res.json({
+      success: true,
+      token,
+      message: "Logged in successfully",
+      balance: user.balance,
+    });
+  } catch (error) {
+    console.error("Error during authentication:", error);
+    res.status(500).json({ message: "Error during authentication", error });
   }
 };
