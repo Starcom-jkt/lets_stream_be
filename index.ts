@@ -29,6 +29,9 @@ import agentRouter from "./src/api/profile/agent/router";
 // apijoyo
 import apiV2Routes from "./src/apiv2/token/router";
 
+// api test
+import apiTestRoutes from "./src/apiv2/testAccountBalance/router";
+
 // admin view
 import authRoutes from "./src/app/adminPanel/auth/router";
 import adminRoutes from "./src/app/adminPanel/admin/router";
@@ -127,6 +130,9 @@ app.use(`${URL}/search`, searchRouter);
 app.use(`${URL}/activity`, activityRouter);
 app.use(`${URL}/gift_transaction`, giftTransactionRouter);
 app.use(`${URL}/agent`, agentRouter);
+
+// route testAPi
+app.use(`${URL}/str`, apiTestRoutes);
 
 // Route for the admin view
 app.use("/admin/login", authRoutes);

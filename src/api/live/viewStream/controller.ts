@@ -287,3 +287,42 @@ export const endViewStream = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error ending stream session", error });
   }
 };
+
+export const launchStream = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  try {
+    // // Ambil detail stream dari database berdasarkan id
+    // const [streamResult]: any = await pool.query(
+    //   "SELECT * FROM stream_session WHERE id = ? AND status = 1",
+    //   [id]
+    // );
+
+    // if (streamResult.length === 0) {
+    //   return res.status(404).json({
+    //     status: "error",
+    //     message: "Stream tidak ditemukan",
+    //   });
+    // }
+
+    // const stream = streamResult[0];
+
+    // // Buat URL iframe dengan parameter yang diperlukan
+    // // const iframeUrl = `${stream.stream_url}/${id}`;
+    const iframeUrl = ` https://we-live.vercel.app/livesession/${id}`;
+
+    // Buat HTML iframe
+    const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;
+
+    // Kembalikan iframe sebagai respons JSON
+    res.json({
+      status: "success",
+      iframeHtml,
+    });
+  } catch (error) {
+    console.error("Error launching stream:", error);
+    res
+      .status(500)
+      .json({ status: "error", message: "Failed to launch stream", error });
+  }
+};

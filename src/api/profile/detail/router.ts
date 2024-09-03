@@ -6,5 +6,5 @@ import { isLoginUser } from "../../../middleware/auth";
 const router = Router();
 
 router.put("/edit", isLoginUser, uploadSingle("profilePicture"), editUser);
-router.get("/detail", isLoginUser, getDetail);
+router.get("/details", isLoginUser, getDetail);
 export default router;

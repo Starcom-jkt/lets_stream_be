@@ -1,13 +1,17 @@
 import { Router } from "express";
-import { getAllStreams, getDetailStreamSession } from "./controller";
+import {
+  getAllStreams,
+  getDetailStreamSession,
+  launchStream,
+} from "./controller";
 
 import { isLoginUser } from "../../../middleware/auth";
-import { uploadSingle } from "../../../middleware/uploadImage";
 
 const router = Router();
 
 router.get("/", getAllStreams);
 // router.get("/all", getAllStreamSession);
 router.get("/:id", getDetailStreamSession);
+router.get("/launchstream/:id", isLoginUser, launchStream);
 
 export default router;

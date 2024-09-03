@@ -3,6 +3,13 @@ import pool from "../../../../db";
 import { RowDataPacket } from "mysql2";
 
 // Mendapatkan semua transaksi hadiah dari pengguna yang sedang login
+
+// Fungsi untuk memformat amount
+const formatAmount = (amount: string): string => {
+  const num = parseFloat(amount);
+  return num.toFixed(2); // Format dengan dua angka di belakang koma
+};
+
 export const getUserTransactions = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
@@ -27,13 +34,19 @@ export const getUserTransactions = async (req: Request, res: Response) => {
       [userId, userId, userId, userId]
     );
 
-    res.json({ success: true, transactions });
-  } catch (error) {
+    // Memformat amount untuk setiap transaksi
+    const formattedTransactions = transactions.map((transaction: any) => ({
+      ...transaction,
+      amount: formatAmount(transaction.amount),
+    }));
+
+    res.json({ success: true, transactions: formattedTransactions });
+  } catch (error: any) {
+    console.error("Error fetching user transactions:", error); // Menambahkan log error untuk debugging
     res.status(500).json({
       success: false,
       message: "Error fetching user transactions",
-      error,
+      error: error.message, // Mengembalikan pesan error yang jelas
     });
   }
 };
-

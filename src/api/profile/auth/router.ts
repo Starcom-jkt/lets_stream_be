@@ -3,6 +3,8 @@ import {
   changeStatusUser,
   editUser,
   login,
+  loginAgent,
+  loginFormMpo,
   loginMpo,
   loginWithGoogle,
   logout,
@@ -17,8 +19,10 @@ import { isLoginUser } from "../../../middleware/auth";
 const router = Router();
 
 router.post("/login", login);
+router.post("/login/agent", loginAgent);
 router.post("/loginGoogle", loginWithGoogle);
 router.post("/loginMpo", loginMpo);
+router.post("/loginFormMpo", loginFormMpo);
 router.post("/logout", logout);
 router.post("/register", uploadSingle("profilePicture"), register);
 router.post("/register/agent", uploadSingle("profilePicture"), registerAgent);

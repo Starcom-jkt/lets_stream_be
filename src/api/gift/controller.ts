@@ -1,6 +1,60 @@
 import { Request, Response } from "express";
 import pool from "../../../db";
 import { ResultSetHeader } from "mysql2";
+import https from "https";
+import axios from "axios";
+
+export const testDeductBalance = async (req: Request, res: Response) => {
+  try {
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Ignore SSL certificate errors
+    });
+
+    const data = {
+      play_id: "8dxw86xw6u027",
+      bet_id: "asasdsdafsddcsadd",
+      amount: 100,
+      gift: "giftDetails.giftName", // Make sure this is a valid string
+      streamer: "recipientUser.username", // Make sure this is a valid string
+      bet_time: "2024-09-02 11:57:21",
+    };
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+      },
+      httpsAgent: agent,
+    };
+
+    try {
+      const response = await axios.post(
+        `https://str-stg.mixcdn.link/str/deduct`,
+        data,
+        config
+      );
+      res.status(200).json({
+        success: true,
+        message: "Balance deducted successfully",
+        data: response.data,
+      });
+    } catch (error: any) {
+      console.error("Error during axios request:", error.message || error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to deduct balance",
+        error: error.message || error,
+      });
+    }
+  } catch (error: any) {
+    console.error("Unexpected error:", error.message || error);
+    res.status(500).json({
+      success: false,
+      message: "Unexpected error occurred",
+      error: error.message || error,
+    });
+  }
+};
 
 export const getAllGifts = async (req: Request, res: Response) => {
   try {
