@@ -309,16 +309,15 @@ export const launchStream = async (req: Request, res: Response) => {
 
     // // Buat URL iframe dengan parameter yang diperlukan
     // // const iframeUrl = `${stream.stream_url}/${id}`;
-    const iframeUrl = ` https://we-live.vercel.app/livesession/${id}`;
+    const iframeUrl = `https://we-live.vercel.app/livesession/${id}`;
 
     // Buat HTML iframe
     const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;
 
-    // Kembalikan iframe sebagai respons JSON
-    res.json({
-      status: "success",
-      iframeHtml,
-    });
+    // Mengatur header Content-Type menjadi text/html
+    res.setHeader("Content-Type", "text/html");
+    // Mengirimkan HTML iframe langsung dalam respons
+    res.send(iframeHtml);
   } catch (error) {
     console.error("Error launching stream:", error);
     res
