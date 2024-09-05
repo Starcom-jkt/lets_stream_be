@@ -7,6 +7,7 @@ import {
   login,
   register,
 } from "./controller";
+// import { getupdatedetailpolling } from "../../api/profile/auth/controller";
 
 const router = Router();
 
@@ -16,4 +17,6 @@ router.post("/deduct", deductBalance);
 router.post("/login", login);
 router.post("/register", register);
 router.get("/get", getAllUser);
+
+// router.post("/testDetail", getupdatedetailpolling);
 export default router;

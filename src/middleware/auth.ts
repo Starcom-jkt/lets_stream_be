@@ -78,7 +78,7 @@ export const isLoginUser = (
       }
 
       req.user = decoded.userData; // Ensure this contains valid token type
-      console.log("req.user", req.user);
+      // console.log("req.user", req.user);
       next();
     });
   } catch (error) {

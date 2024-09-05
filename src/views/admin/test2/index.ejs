@@ -3,115 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gift System</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Socket.IO Test</title>
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
 </head>
 <body>
-
-<div class="container">
-
-  <!-- Send Gift Section -->
-  <div class="send-container">
-    <h2>Send a Gift</h2>
-    <div class="form-group">
-      <label for="giftId">Select Gift:</label>
-      <select id="giftId">
-        <option value="1">Gift 1 - $10</option>
-        <option value="2">Gift 2 - $20</option>
-        <option value="3">Gift 3 - $30</option>
-        <option value="4">Gift 4 - $30</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="userId">Your User ID:</label>
-      <input type="text" id="userId" placeholder="Enter your user ID">
-    </div>
-    <button id="sendGiftButton">Send Gift</button>
+  <h1>Real-Time Balance Updates</h1>
+  <div>
+    <p>Balance: <span id="balance">Fetching...</span></p>
   </div>
 
-  <!-- Receive Gift Section -->
-  <div class="receive-container">
-    <h2>Received Gifts</h2>
-    <div id="giftContainer" class="gift-container">
-      <img id="giftImg" src="" alt="Gift">
-      <div class="gift-details">
-        <span id="giftName"><strong>Gift Name</strong></span>
-        <span id="giftPrice">Price: $0</span>
-        <span id="senderId">Sent by User ID: 0</span>
-      </div>
-    </div>
-  </div>
+  <script>
+    // Menghubungkan ke server Socket.IO
+    const socket = io("http://localhost:3006");
 
-  <!-- Error Message -->
-  <div id="errorMessage" style="color: red; display: none;">
-    <p>Insufficient balance!</p>
-  </div>
+    // Meminta pembaruan saldo untuk qwerty
+    socket.emit("startBalanceUpdates", "qwerty");
 
-</div>
+    // Mendengarkan pembaruan saldo dari server
+    socket.on("balanceUpdate", (data) => {
+      document.getElementById("balance").textContent = data.balance.toFixed(2);
+      console.log("Balance updated:", data.balance);
+    });
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io();
-
-  const channelName = "exampleChannel";
-  const username = "user123";
-
-  // Join the channel
-  socket.emit("join room", { channelName, username });
-
-  // Send gift when the button is clicked
-  document.getElementById("sendGiftButton").addEventListener("click", () => {
-    const giftId = document.getElementById("giftId").value;
-    const userId = document.getElementById("userId").value;
-
-    // Emit the send gift event
-    socket.emit("send gift", { channelName, userId, giftId });
-  });
-
-  // Listen for received gifts
-  socket.on("gift received", (gift) => {
-    console.log("Gift received:", gift);
-    displayGift(gift);
-  });
-
-  // Listen for error messages
-  socket.on("error", (error) => {
-    showError(error.message);
-  });
-
-  function displayGift(gift) {
-    const giftContainer = document.getElementById("giftContainer");
-    const giftImg = document.getElementById("giftImg");
-    const giftName = document.getElementById("giftName");
-    const giftPrice = document.getElementById("giftPrice");
-    const senderId = document.getElementById("senderId");
-
-    giftImg.src = gift.img;
-    giftName.innerText = gift.giftName;
-    giftPrice.innerText = `Price: ${gift.price}`;
-    senderId.innerText = `Sent by User ID: ${gift.userId}`;
-
-    // Show
-    // Show the gift container
-    giftContainer.style.display = "flex";
-
-    // Hide the gift after 2 seconds
-    setTimeout(() => {
-      giftContainer.style.display = "none";
-    }, 2000);
-  }
-
-  function showError(message) {
-    const errorMessage = document.getElementById("errorMessage");
-    errorMessage.innerText = message;
-    errorMessage.style.display = "block";
-
-    // Hide the error message after 2 seconds
-    setTimeout(() => {
-      errorMessage.style.display = "none";
-    }, 2000);
-  }
-</script>
-
+    // Mendengarkan error dari server
+    socket.on("error", (error) => {
+      console.error("Error occurred:", error.message);
+    });
+  </script>
 </body>
 </html>

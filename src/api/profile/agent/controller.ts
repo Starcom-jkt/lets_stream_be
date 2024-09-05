@@ -6,7 +6,7 @@ require("dotenv").config();
 export const getAllAgent = async (req: Request, res: Response) => {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      `SELECT * FROM user WHERE stream = 1`
+      `SELECT username, channelName, profilePicture, online FROM user WHERE stream = 1 ORDER BY online DESC`
     );
     res.json({
       success: true,

@@ -4,5 +4,5 @@ import { isLoginUser } from "../../../middleware/auth";
 
 const router = Router();
 
-router.get("/", isLoginUser, getAllAgent);
+router.get("/", getAllAgent);
 export default router;

@@ -302,6 +302,11 @@ export const login = async (req: Request, res: Response) => {
         .json({ success: false, message: "Invalid username or password" });
     }
 
+    await pool.query<ResultSetHeader>(
+      "UPDATE user SET online = 1 WHERE id = ?",
+      [user.id]
+    );
+
     // Generate JWT token with userData
     const token = jwt.sign({ userData: user }, JWT_SECRET!, {
       expiresIn: "1d",
@@ -322,20 +327,25 @@ export const loginAgent = async (req: Request, res: Response) => {
       email,
     ]);
 
-    if (rows.stream === 1) {
-      if (rows.length === 0) {
+    const user = rows[0];
+    if (user.stream === true || user.stream === 1) {
+      if (user.length === 0) {
         return res
           .status(401)
           .json({ success: false, message: "Invalid email or password" });
       }
 
-      const user = rows[0];
       const match = bcrypt.compareSync(password, user.password);
       if (!match) {
         return res
           .status(401)
           .json({ success: false, message: "Invalid username or password" });
       }
+
+      await pool.query<ResultSetHeader>(
+        "UPDATE user SET online = 1 WHERE id = ?",
+        [user.id]
+      );
 
       // Generate JWT token with userData
       const token = jwt.sign({ userData: user }, JWT_SECRET!, {
@@ -355,18 +365,41 @@ export const loginAgent = async (req: Request, res: Response) => {
 };
 
 export const logout = async (req: Request, res: Response) => {
-  const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
+  const userId = req.user?.id;
+  console.log(userId);
 
-  if (!token) {
-    return res.status(400).json({ message: "not authorized" });
+  // Cek jika userId tersedia
+  if (!userId) {
+    return res.status(400).json({ message: "User ID not found" });
   }
 
   try {
-    // await pool.query("INSERT INTO token_blacklist (token) VALUES (?)", [token]);
-    // await pool.query ("INSERT INTO LOGIN_LOG (token, description) VALUES (?, ?)", [token, "Logged out"]);
+    // Update status online user menjadi 0 (offline)
+    const [result]: any = await pool.query(
+      "UPDATE user SET online = 0 WHERE id = ?",
+      [userId]
+    );
+
+    // Cek jika update berhasil
+    if (result.affectedRows === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Failed to update online status, user not found",
+      });
+    }
+
+    const token = req.headers.authorization?.replace("Bearer ", "") ?? null;
+
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Error logging out", error });
+    console.error("Error during logout:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error during logging out", error });
   }
 };
 
@@ -456,189 +489,23 @@ export const requestStream = async (req: Request, res: Response) => {
   }
 };
 
-export const loginMpo = async (req: Request, res: Response) => {
-  try {
-    const { tokenMpo } = req.body;
-
-    // Decode token untuk mendapatkan username
-    const dataUserToken = jwt.decode(tokenMpo) as any;
-    console.log(dataUserToken);
-    if (dataUserToken.name == "undefined") {
-      return res.status(400).json({ message: "Username undefined" });
-    }
-
-    const username = dataUserToken.name;
-
-    const profilePictures = [
-      "avatardefault1.png",
-      "avatardefault2.png",
-      "avatardefault3.png",
-      "avatardefault4.png",
-      "avatardefault5.png",
-      "avatardefault6.png",
-      "avatardefault7.png",
-      "avatardefault8.png",
-      "avatardefault9.png",
-    ];
-
-    const profilePicture =
-      profilePictures[Math.floor(Math.random() * profilePictures.length)];
-
-    // Cek apakah username sudah ada di database
-    const [rows]: any = await pool.query(
-      "SELECT * FROM user WHERE username = ?",
-      [username]
-    );
-
-    let user;
-    if (rows.length === 0) {
-      // Jika user tidak ditemukan, lakukan registrasi
-      const email = `${username}@gmail.com`;
-      const [result]: any = await pool.query(
-        "INSERT INTO user (email, username, profilePicture, channelName) VALUES (?, ?, ?, ?)",
-        [email, username, profilePicture, username]
-      );
-
-      user = { id: result.insertId, email, username, balance: 0 }; // Default balance adalah 0
-    } else {
-      // Jika user ditemukan, ambil data user dari database
-      user = rows[0];
-    }
-
-    // Konfigurasi untuk mengabaikan verifikasi SSL
-    const agent = new https.Agent({
-      rejectUnauthorized: false, // Mengabaikan verifikasi sertifikat SSL
-    });
-
-    // Ambil balance dari API eksternal dengan play_id yang tetap
-    const balanceMpo = await axios.post(
-      `https://str-stg.mixcdn.link/str/balance`,
-      {
-        play_id: "8dxw86xw6u027", // Menggunakan play_id tetap
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenMpo}`,
-        },
-        httpsAgent: agent, // Tambahkan agent untuk mengabaikan SSL
-      }
-    );
-
-    if (balanceMpo.data && balanceMpo.data.success) {
-      const balance = balanceMpo.data.data;
-      // Update balance di database
-      await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
-        balance,
-        user.id,
-      ]);
-      user.balance = balance;
-    }
-
-    // Generate JWT token dengan userData
-    const token = jwt.sign({ userData: user }, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
-
-    // Berikan respon sukses
-    res.json({
-      success: true,
-      token,
-      message: "Logged in successfully",
-      balance: user.balance,
-    });
-  } catch (error) {
-    console.error("Error during authentication:", error);
-    res.status(500).json({ message: "Error during authentication", error });
-  }
-};
-
-// export const loginFormMpo = async (req: Request, res: Response) => {
-//   const { username, player_id } = req.body;
-
-//   try {
-//     // Periksa apakah username atau player_id sudah ada di database
-//     const [userCheck]: [any[], FieldPacket[]] = await pool.query(
-//       "SELECT * FROM user WHERE username = ? OR player_id = ?",
-//       [username, player_id]
-//     );
-
-//     if (userCheck.length > 0) {
-//       // Jika username dan player_id keduanya cocok, lakukan login
-//       const existingUser = userCheck.find(
-//         (user) => user.username === username && user.player_id === player_id
-//       );
-
-//       if (existingUser) {
-//         // Panggil getBalanceWebhook untuk mendapatkan balance terbaru
-//         req.body.player_id = player_id; // Assign player_id ke req.body untuk getBalanceWebhook
-//         await getBalanceWebhook(req, res);
-//         return;
-//       }
-
-//       // Jika username sudah ada tetapi player_id berbeda, tidak bisa registrasi
-//       const existingUsername = userCheck.find(
-//         (user) => user.username === username
-//       );
-//       if (existingUsername) {
-//         return res
-//           .status(400)
-//           .json({ success: false, message: "Username already exists" });
-//       }
-
-//       // Jika player_id sudah ada tetapi username berbeda, tidak bisa registrasi
-//       const existingPlayerId = userCheck.find(
-//         (user) => user.player_id === player_id
-//       );
-//       if (existingPlayerId) {
-//         return res
-//           .status(400)
-//           .json({ success: false, message: "Player ID already exists" });
-//       }
-//     }
-
-//     // Jika tidak ada konflik, daftarkan pengguna baru
-//     const email = `${username}@gmail.com`;
-//     const channelName = username;
-
-//     const profilePictures = [
-//       "avatardefault1.png",
-//       "avatardefault2.png",
-//       "avatardefault3.png",
-//       "avatardefault4.png",
-//       "avatardefault5.png",
-//       "avatardefault6.png",
-//       "avatardefault7.png",
-//       "avatardefault8.png",
-//       "avatardefault9.png",
-//     ];
-
-//     const profilePicture =
-//       profilePictures[Math.floor(Math.random() * profilePictures.length)];
-
-//     // Insert user baru ke database
-//     const [result]: [ResultSetHeader, FieldPacket[]] = await pool.query(
-//       "INSERT INTO user (email, username, player_id, profilePicture, channelName) VALUES (?, ?, ?, ?, ?)",
-//       [email, username, player_id, profilePicture, channelName]
-//     );
-
-//     if (result.affectedRows === 0) {
-//       return res
-//         .status(500)
-//         .json({ success: false, message: "Registration failed" });
-//     }
-
-//     // Ambil balance dari webhook
-//     req.body.player_id = player_id; // Assign player_id ke req.body untuk getBalanceWebhook
-//     await getBalanceWebhook(req, res);
-//   } catch (error) {
-//     console.error("Error during authentication:", error);
-//     res.status(500).json({ message: "Error during authentication", error });
-//   }
-// };
-
 export const loginFormMpo = async (req: Request, res: Response) => {
   const { username, player_id } = req.body;
+
+  // Check if username or player_id is missing
+  if (!username) {
+    return res.status(400).json({
+      success: false,
+      message: "Need username",
+    });
+  }
+
+  if (!player_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Need player_id",
+    });
+  }
 
   try {
     // Periksa apakah username atau player_id sudah ada di database
@@ -655,24 +522,26 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       );
 
       if (!user) {
-        // Jika username sudah ada tetapi player_id berbeda, tidak bisa registrasi
+        // Jika username sudah ada tetapi player_id berbeda
         const existingUsername = userCheck.find(
           (user) => user.username === username
         );
         if (existingUsername) {
-          return res
-            .status(400)
-            .json({ success: false, message: "Username already exists" });
+          return res.status(400).json({
+            success: false,
+            message: "Username doesn't match with player_id",
+          });
         }
 
-        // Jika player_id sudah ada tetapi username berbeda, tidak bisa registrasi
+        // Jika player_id sudah ada tetapi username berbeda
         const existingPlayerId = userCheck.find(
           (user) => user.player_id === player_id
         );
         if (existingPlayerId) {
-          return res
-            .status(400)
-            .json({ success: false, message: "Player ID already exists" });
+          return res.status(400).json({
+            success: false,
+            message: "Player_id doesn't match with username",
+          });
         }
       }
     } else {
@@ -695,10 +564,39 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       const profilePicture =
         profilePictures[Math.floor(Math.random() * profilePictures.length)];
 
+      // Dapatkan balance terbaru dari service eksternal
+      const agent = new https.Agent({
+        rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+      });
+
+      const balanceResponse = await axios.post(
+        "https://str-stg.mixcdn.link/str/balance",
+        {
+          play_id: player_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+            "Content-Type": "application/json",
+          },
+          httpsAgent: agent,
+          timeout: 20000,
+        }
+      );
+
+      if (balanceResponse.status !== 200) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch balance",
+        });
+      }
+
+      const balance = parseFloat(balanceResponse.data.data.toFixed(6));
+
       // Insert user baru ke database
       const [result]: [ResultSetHeader, FieldPacket[]] = await pool.query(
-        "INSERT INTO user (email, username, player_id, profilePicture, channelName) VALUES (?, ?, ?, ?, ?)",
-        [email, username, player_id, profilePicture, channelName]
+        "INSERT INTO user (email, username, player_id, profilePicture, channelName, balance) VALUES (?, ?, ?, ?, ?, ?)",
+        [email, username, player_id, profilePicture, channelName, balance]
       );
 
       if (result.affectedRows === 0) {
@@ -714,15 +612,47 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       );
 
       user = newUserRows[0];
+
+      await pool.query("UPDATE user SET online = 1 WHERE id = ?", [user.id]);
+
+      // Generate JWT token with user data
+      const token = jwt.sign({ userData: user }, JWT_SECRET!, {
+        expiresIn: "1d",
+      });
+
+      return res.json({
+        success: true,
+        message: "Registration successful",
+        token,
+        balance,
+      });
     }
 
-    // Dapatkan balance terbaru dari service eksternal
+    // Update balance jika user sudah terdaftar
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+    });
+
     const balanceResponse = await axios.post(
-      `http://localhost:3006/api/v1/str/balance`,
+      "https://str-stg.mixcdn.link/str/balance",
       {
-        player_id: player_id,
+        play_id: player_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+          "Content-Type": "application/json",
+        },
+        httpsAgent: agent,
+        timeout: 20000,
       }
+
+      // "http:localhost:3006/api/v1/str/balance",
+      // {
+      //   player_id: player_id,
+      // }
     );
+    // console.log("Balance API Response:", balanceResponse);
 
     if (balanceResponse.status !== 200) {
       return res.status(500).json({
@@ -731,7 +661,7 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       });
     }
 
-    const balance = parseFloat(balanceResponse.data.balance.toFixed(6));
+    const balance = parseFloat(balanceResponse.data.data.toFixed(6));
 
     // Perbarui balance di database
     const [updateResult]: [ResultSetHeader, FieldPacket[]] = await pool.query(
@@ -746,6 +676,8 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       });
     }
 
+    await pool.query("UPDATE user SET online = 1 WHERE id = ?", [user.id]);
+
     // Generate JWT token dengan userData
     const token = jwt.sign({ userData: user }, JWT_SECRET!, {
       expiresIn: "1d",
@@ -753,12 +685,50 @@ export const loginFormMpo = async (req: Request, res: Response) => {
 
     res.json({
       success: true,
+      message: "Login successful",
       token,
       balance,
-      message: "Logged in successfully",
     });
   } catch (error) {
     console.error("Error during authentication:", error);
     res.status(500).json({ message: "Error during authentication", error });
+  }
+};
+
+export const testMpo = async (req: Request, res: Response) => {
+  try {
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+    });
+
+    const response = await axios.post(
+      "https://str-stg.mixcdn.link/str/balance",
+      {
+        play_id: "8dxw86xw6u027",
+      },
+      {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+          "Content-Type": "application/json",
+        },
+        httpsAgent: agent,
+        timeout: 20000, // Increased timeout
+      }
+    );
+
+    res.status(200).json(response.data);
+  } catch (error: any) {
+    if (error.response) {
+      console.log("Response data:", error.response.data);
+      console.log("Response status:", error.response.status);
+      console.log("Response headers:", error.response.headers);
+    } else if (error.request) {
+      console.log("No response received:", error.request);
+    } else {
+      console.log("Error", error.message);
+    }
+    console.log("Error config:", error.config);
+
+    res.status(500).json({ message: "Error fetching balance", error });
   }
 };

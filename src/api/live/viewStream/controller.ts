@@ -105,12 +105,18 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
       const uid = rows[0].userId; // Use userId as uid for token generation
       const userId = rows[0].userId;
 
+      if (userId === null || userId === undefined) {
+        return res
+          .status(404)
+          .json({ success: false, message: "streamer not found" });
+      }
+
       // Query the streamer (user) data from the database
       const [dataStreamer] = await pool.query<RowDataPacket[]>(
         "SELECT * FROM user WHERE id = ?",
         [userId]
       );
-
+      console.log(dataStreamer[0]);
       const username = dataStreamer[0].username;
       const profilePicture = dataStreamer[0].profilePicture;
 
@@ -309,7 +315,7 @@ export const launchStream = async (req: Request, res: Response) => {
 
     // // Buat URL iframe dengan parameter yang diperlukan
     // // const iframeUrl = `${stream.stream_url}/${id}`;
-    const iframeUrl = `https://we-live.vercel.app/livesession/${id}`;
+    const iframeUrl = `https://globalintegra.my.id/livesession/${id}`;
 
     // Buat HTML iframe
     const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;

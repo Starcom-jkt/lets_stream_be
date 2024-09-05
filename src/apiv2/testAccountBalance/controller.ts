@@ -3,33 +3,62 @@ import jwt from "jsonwebtoken";
 import pool from "../../../db"; // Sesuaikan dengan konfigurasi db Anda
 import { ResultSetHeader } from "mysql2";
 require("dotenv").config();
+import { Server as HttpServer } from "http";
+import { Server as SocketIOServer } from "socket.io";
+import express from "express";
+import axios from "axios";
+import https from "https";
+
+// Setup Express dan HTTP Server
+const app = express();
+const httpServer = new HttpServer(app);
+
+// Setup Socket.IO
+const io = new SocketIOServer(httpServer, {
+  cors: {
+    origin: "*",
+  },
+});
 
 export const getBalance = async (req: Request, res: Response) => {
   try {
-    // const userId = req.user?.id;
-    // const [result]: any = await pool.query(
-    //   `SELECT balance FROM userTest WHERE id = ?`,
-    //   [userId]
-    // );
     const player_id = req.body.player_id;
+
+    // Query to get the balance from the database
     const [result]: any = await pool.query(
       `SELECT balance FROM userTest WHERE player_id = ?`,
       [player_id]
     );
 
     if (result.length > 0) {
+      // Get the balance and format it
       const balance = parseFloat(Number(result[0].balance).toFixed(6));
 
+      // Return the formatted payload
       res.json({
         success: true,
-        balance,
+        code: 200,
+        data: balance,
+        error: null,
       });
     } else {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({
+        success: false,
+        code: 404,
+        data: null,
+        error: "User not found",
+      });
     }
   } catch (error) {
     console.error("Error getting user balance:", error);
-    res.status(500).json({ message: "Error getting user balance", error });
+
+    // Return the error payload
+    res.status(500).json({
+      success: false,
+      code: 500,
+      data: null,
+      error: "Error getting user balance",
+    });
   }
 };
 
@@ -199,5 +228,40 @@ export const getAllUser = async (req: Request, res: Response) => {
     res.status(200).json({ message: "success", data });
   } catch (error) {
     res.status(500).json({ message: "error during get all user test" });
+  }
+};
+
+export const updateBalance = async (req: Request, res: Response) => {
+  try {
+    const { player_id, balance } = req.body;
+    const [result]: any = await pool.query(
+      `UPDATE userTest SET balance = ? WHERE player_id = ?`,
+      [balance, player_id]
+    );
+    res.status(200).json({ message: "success", data: result });
+  } catch (error) {
+    res.status(500).json({ message: "error during update user test" });
+  }
+};
+
+// Fungsi untuk fetch balance dari API
+export const fetchBalance = async (player_id: string) => {
+  try {
+    const balanceResponse = await axios.post(
+      "http://localhost:3006/api/v1/str/balance",
+      { player_id: "qwerty" },
+      {
+        timeout: 20000, // Timeout for the API request
+      }
+    );
+
+    if (balanceResponse.status === 200) {
+      return parseFloat(balanceResponse.data.data.toFixed(6));
+    } else {
+      throw new Error("Failed to fetch balance");
+    }
+  } catch (error) {
+    console.error("Error fetching balance from API:", error);
+    throw error;
   }
 };

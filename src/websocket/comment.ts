@@ -1,6 +1,7 @@
 import { Server as SocketIOServer } from "socket.io";
 import pool from "../../db";
 import { RowDataPacket } from "mysql2";
+import { fetchBalance } from "../apiv2/testAccountBalance/controller";
 
 export default function setupWebSocket(io: SocketIOServer) {
   io.on("connection", (socket) => {
@@ -25,12 +26,10 @@ export default function setupWebSocket(io: SocketIOServer) {
     socket.on("chat message", ({ channelName, message, username }) => {
       // Broadcast the message to all clients in the same room
       io.to(channelName).emit("chat message", message, username);
-      console.log("chat message", channelName, message, username);
     });
 
     // Handle sending of gifts
     socket.on("send gift", async ({ channelName, userId, giftId }) => {
-      console.log("send gift", channelName, userId, giftId);
       try {
         // Retrieve user balance for the sender
         const [userRows] = await pool.query<RowDataPacket[]>(
@@ -38,14 +37,12 @@ export default function setupWebSocket(io: SocketIOServer) {
           [userId]
         );
 
-        console.log(userRows);
-
         if (userRows.length === 0) {
           console.error(`User with ID ${userId} not found.`);
           return;
         }
 
-        const userBalance = parseInt(userRows[0].balance); // get from MPO
+        const userBalance = parseInt(userRows[0].balance, 10); // Convert to integer
         const senderName = userRows[0].username;
 
         // Retrieve gift details
@@ -60,9 +57,8 @@ export default function setupWebSocket(io: SocketIOServer) {
         }
 
         const giftDetails = giftRows[0];
-        const giftPrice = parseInt(giftDetails.price);
+        const giftPrice = parseInt(giftDetails.price, 10); // Convert to integer
 
-        // check kondisi jika balance kurang dari price
         if (userBalance < giftPrice) {
           console.error(`User with ID ${userId} has insufficient balance.`);
           socket.emit("error", { message: "Insufficient balance." });
@@ -139,6 +135,37 @@ export default function setupWebSocket(io: SocketIOServer) {
       } catch (err) {
         console.error("Error processing gift transaction:", err);
       }
+    });
+
+    socket.on("startBalanceUpdates", async (player_id: string) => {
+      console.log(`Starting balance updates for player_id: ${player_id}`);
+
+      let previousBalance: any = null;
+
+      // Function to check balance periodically
+      const checkBalance = async () => {
+        try {
+          const balance = await fetchBalance(player_id);
+
+          // Jika balance berubah, kirim pembaruan ke klien
+          if (balance !== previousBalance) {
+            console.log(
+              `Balance updated for player_id ${player_id}: ${balance}`
+            );
+            previousBalance = balance;
+            socket.emit("balanceUpdate", { balance });
+          }
+
+          // Lanjutkan pengecekan balance setiap 5 detik
+          setTimeout(checkBalance, 5000);
+        } catch (error) {
+          console.error("Error fetching balance:", error);
+          socket.emit("error", { message: "Error fetching balance" });
+        }
+      };
+
+      // Mulai pengecekan balance
+      checkBalance();
     });
 
     socket.on("disconnect", () => {

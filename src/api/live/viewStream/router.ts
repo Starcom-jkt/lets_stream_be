@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/", getAllStreams);
 // router.get("/all", getAllStreamSession);
-router.get("/:id", getDetailStreamSession);
+router.get("/:id", isLoginUser, getDetailStreamSession);
 router.get("/launchstream/:id", isLoginUser, launchStream);
 
 export default router;

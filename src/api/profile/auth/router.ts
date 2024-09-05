@@ -1,34 +1,36 @@
 import { Router } from "express";
 import {
-  changeStatusUser,
+  // changeStatusUser,
   editUser,
+  // getupdatedetailpolling,
   login,
   loginAgent,
   loginFormMpo,
-  loginMpo,
-  loginWithGoogle,
+  // loginWithGoogle,
   logout,
   register,
   registerAgent,
-  removeUser,
-  requestStream,
+  // removeUser,
+  // requestStream,
+  // testMpo,
 } from "./controller";
 import { uploadSingle } from "../../../middleware/uploadImage";
 import { isLoginUser } from "../../../middleware/auth";
+// import { isLoginUser } from "../../../middleware/auth";
 
 const router = Router();
 
+// router.post("/loginGoogle", loginWithGoogle);
 router.post("/login", login);
 router.post("/login/agent", loginAgent);
-router.post("/loginGoogle", loginWithGoogle);
-router.post("/loginMpo", loginMpo);
 router.post("/logins", loginFormMpo);
-router.post("/logout", logout);
+router.post("/logout", isLoginUser, logout);
 router.post("/register", uploadSingle("profilePicture"), register);
 router.post("/register/agent", uploadSingle("profilePicture"), registerAgent);
-router.post("/update/:id", uploadSingle("profilePicture"), changeStatusUser);
-router.delete("/remove/:id", removeUser);
 router.put("/edit", uploadSingle("profilePicture"), editUser);
-router.post("/request", isLoginUser, requestStream);
-
+// router.post("/update/:id", uploadSingle("profilePicture"), changeStatusUser);
+// router.delete("/remove/:id", removeUser);
+// router.post("/request", isLoginUser, requestStream);
+// router.post("/testmp", testMpo);
+// router.post("/testDetail", getupdatedetailpolling);
 export default router;
