@@ -198,7 +198,6 @@ export default function setupWebSocket(io: SocketIOServer) {
 
       // Hapus player dari activeSockets dan set isActive ke false saat socket terputus
       socket.on("disconnect", () => {
-        console.log(`Socket disconnected for player_id: ${player_id}`);
         if (activeSockets[player_id] === socket.id) {
           delete activeSockets[player_id];
         }
