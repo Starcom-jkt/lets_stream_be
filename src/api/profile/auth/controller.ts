@@ -366,7 +366,6 @@ export const loginAgent = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  console.log(userId);
 
   // Cek jika userId tersedia
   if (!userId) {
@@ -393,6 +392,11 @@ export const logout = async (req: Request, res: Response) => {
     if (!token) {
       return res.status(401).json({ message: "Not authorized" });
     }
+
+    await pool.query(
+      "INSERT INTO token_blacklist (token, user_id) VALUES (?, ?)",
+      [token, userId]
+    );
 
     res.json({ success: true, message: "Logged out successfully" });
   } catch (error) {

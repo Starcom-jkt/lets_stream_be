@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 import session from "express-session";
+import pool from "../../db";
 
 interface CustomSession extends session.Session {
   user?: { id: number; email: string; status: string; name: string };
@@ -58,7 +59,7 @@ export const isLoginAgent = (
   }
 };
 
-export const isLoginUser = (
+export const isLoginUser = async (
   req: CustomRequest,
   res: Response,
   next: NextFunction
@@ -70,6 +71,16 @@ export const isLoginUser = (
       return res
         .status(401)
         .json({ message: "Unauthorized: No token provided" });
+    }
+
+    // Cek apakah token ada di dalam blacklist di database
+    const [blacklistedToken]: any = await pool.query(
+      "SELECT * FROM token_blacklist WHERE token = ?",
+      [token]
+    );
+
+    if (blacklistedToken.length > 0) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
 
     jwt.verify(token, JWT_SECRET, (err, decoded: any) => {
