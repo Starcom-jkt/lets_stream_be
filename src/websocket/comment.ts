@@ -2,6 +2,7 @@ import { Server as SocketIOServer } from "socket.io";
 import pool from "../../db";
 import { RowDataPacket } from "mysql2";
 import { fetchBalance } from "../apiv2/testAccountBalance/controller";
+import axios from "axios";
 
 export default function setupWebSocket(io: SocketIOServer) {
   io.on("connection", (socket) => {
@@ -34,17 +35,21 @@ export default function setupWebSocket(io: SocketIOServer) {
       try {
         // Retrieve user balance for the sender
         const [userRows] = await pool.query<RowDataPacket[]>(
-          "SELECT balance, username FROM user WHERE id = ?",
+          "SELECT balance, username, player_id FROM user WHERE id = ?",
           [userId]
         );
 
+        console.log("userId", channelName, userId, giftId);
+
         if (userRows.length === 0) {
           console.error(`User with ID ${userId} not found.`);
+          socket.emit("error", { message: "User not found." });
           return;
         }
 
         const userBalance = parseInt(userRows[0].balance, 10); // Convert to integer
         const senderName = userRows[0].username;
+        const playerId = userRows[0].player_id;
 
         // Retrieve gift details
         const [giftRows] = await pool.query<RowDataPacket[]>(
@@ -54,6 +59,7 @@ export default function setupWebSocket(io: SocketIOServer) {
 
         if (giftRows.length === 0) {
           console.error(`Gift with ID ${giftId} not found.`);
+          socket.emit("error", { message: "Gift not found." });
           return;
         }
 
@@ -71,13 +77,9 @@ export default function setupWebSocket(io: SocketIOServer) {
 
         if (isNaN(newBalance)) {
           console.error("Calculated balance is NaN, aborting update.");
+          socket.emit("error", { message: "Error calculating balance." });
           return;
         }
-
-        await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
-          newBalance,
-          userId,
-        ]);
 
         // Retrieve the recipient user who owns the channelName
         const [recipientRows] = await pool.query<RowDataPacket[]>(
@@ -87,33 +89,90 @@ export default function setupWebSocket(io: SocketIOServer) {
 
         if (recipientRows.length === 0) {
           console.error(`No user found with channelName ${channelName}.`);
+          socket.emit("error", { message: "Recipient not found." });
           return;
         }
 
+        const recipientUser = recipientRows[0];
         const recipientBalance =
-          parseInt(recipientRows[0].balance, 10) + giftPrice;
+          parseInt(recipientUser.balance, 10) + giftPrice;
 
         if (isNaN(recipientBalance)) {
           console.error(
             "Calculated recipient balance is NaN, aborting update."
           );
+          socket.emit("error", {
+            message: "Error calculating recipient balance.",
+          });
           return;
         }
 
-        await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
-          recipientBalance,
-          recipientRows[0].id,
-        ]);
-
         const description = `payment for gift ${giftDetails.giftName} `;
 
-        const recipientUser = recipientRows[0];
+        // Call external API for transaction
+        const response = await axios.post(
+          "http://localhost:3006/api/v1/str/deduct",
+          {
+            player_id: playerId,
+            amount: giftPrice,
+            gift: giftDetails.giftName,
+            streamer: recipientUser.username,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
 
+        if (response.data.success === false) {
+          console.error("API deduct failed:", response);
+          socket.emit("error", { message: "Transaction failed." });
+          return;
+        }
+
+        // Update balance in the recipient account
+        await pool.query("UPDATE user SET balance = ? WHERE id = ?", [
+          recipientBalance,
+          recipientUser.id,
+        ]);
+
+        // Get the updated balance of the sender from external API
+        const balanceResponse = await axios.post(
+          "http://localhost:3006/api/v1/str/balance",
+          { player_id: playerId },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
+            },
+          }
+        );
+
+        console.log("balanceResponse", balanceResponse.data.data);
+
+        if (balanceResponse.data.success === false) {
+          console.error(
+            "Failed to fetch updated balance:",
+            balanceResponse.data.message
+          );
+          socket.emit("error", { message: "Failed to fetch updated balance." });
+          return;
+        }
+
+        // Update the sender's balance in the database
+        await pool.query("UPDATE user SET balance = ? WHERE player_id = ?", [
+          balanceResponse.data.data,
+          playerId,
+        ]);
+
+        // Log the transaction
         await pool.query(
           "INSERT INTO gift_transaction (userId, receivedId, giftId, giftName, amount, description) VALUES (?, ?, ?, ?, ?, ?)",
           [
             userId,
-            recipientRows[0].id,
+            recipientUser.id,
             giftId,
             giftDetails.giftName,
             giftPrice,
@@ -135,8 +194,12 @@ export default function setupWebSocket(io: SocketIOServer) {
         });
       } catch (err) {
         console.error("Error processing gift transaction:", err);
+        socket.emit("error", {
+          message: "An error occurred during the transaction.",
+        });
       }
     });
+
     ///////////////////////////////////
 
     const activeSockets: Record<string, string> = {}; // Tipe object dengan kunci dan nilai berupa string

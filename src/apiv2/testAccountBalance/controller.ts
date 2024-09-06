@@ -254,7 +254,23 @@ export const fetchBalance = async (player_id: string) => {
         timeout: 20000, // Timeout for the API request
       }
     );
-
+    // const agent = new https.Agent({
+    //   rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+    // });
+    // const balanceResponse = await axios.post(
+    //   "https://str-stg.mixcdn.link/str/balance",
+    //   {
+    //     play_id: player_id,
+    //   },
+    //   {
+    //     headers: {
+    //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+    //       "Content-Type": "application/json",
+    //     },
+    //     httpsAgent: agent,
+    //     timeout: 20000,
+    //   }
+    // );
     if (balanceResponse.status === 200) {
       return parseFloat(balanceResponse.data.data.toFixed(6));
     } else {
@@ -263,5 +279,57 @@ export const fetchBalance = async (player_id: string) => {
   } catch (error) {
     console.error("Error fetching balance from API:", error);
     throw error;
+  }
+};
+
+export const fetchDeductBalanceGift = async (
+  player_id: string,
+  amount: number,
+  gift: string,
+  streamer: string,
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Deduct balance from external service
+    const deductResponse = await axios.post(
+      "http://localhost:3006/api/v1/str/deduct",
+      { player_id, amount, gift, streamer },
+      {
+        timeout: 20000, // Timeout for the API request
+      }
+    );
+
+    // Check if the deduction was successful
+    if (deductResponse.data && deductResponse.data.status === "success") {
+      // Get updated balance from external service
+      const balanceResponse = await axios.post(
+        "http://localhost:3006/api/v1/str/balance",
+        { player_id: player_id },
+        {
+          timeout: 20000, // Timeout for the API request
+        }
+      );
+
+      // Extract the balance from the response
+      const updatedBalance = balanceResponse.data.balance;
+
+      // Update the balance in the database
+      const [result]: any = await pool.query(
+        `UPDATE user SET balance = ? WHERE player_id = ?`,
+        [updatedBalance, player_id]
+      );
+
+      // Send success response with updated data
+      res
+        .status(200)
+        .json({ message: "Balance updated successfully", data: result });
+    } else {
+      // Handle the case where deduction failed
+      res.status(400).json({ message: "Failed to deduct balance" });
+    }
+  } catch (error) {
+    console.error(error); // Log the error for debugging
+    res.status(500).json({ message: "Error during balance update process" });
   }
 };
