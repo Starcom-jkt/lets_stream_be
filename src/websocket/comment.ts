@@ -28,6 +28,7 @@ export default function setupWebSocket(io: SocketIOServer) {
       io.to(channelName).emit("chat message", message, username);
     });
 
+    // real works 6 sept without api MPO
     // Handle sending of gifts
     socket.on("send gift", async ({ channelName, userId, giftId }) => {
       try {
@@ -136,18 +137,38 @@ export default function setupWebSocket(io: SocketIOServer) {
         console.error("Error processing gift transaction:", err);
       }
     });
+    ///////////////////////////////////
+
+    const activeSockets: Record<string, string> = {}; // Tipe object dengan kunci dan nilai berupa string
 
     socket.on("startBalanceUpdates", async (player_id: string) => {
       console.log(`Starting balance updates for player_id: ${player_id}`);
 
-      let previousBalance: any = null;
+      // Cek jika player_id sudah memiliki koneksi aktif
+      if (activeSockets[player_id]) {
+        const oldSocketId = activeSockets[player_id];
 
-      // Function to check balance periodically
+        // Menggunakan pengecekan eksplisit untuk memastikan oldSocket tidak undefined
+        const oldSocket = io.sockets.sockets.get(oldSocketId);
+
+        if (oldSocket) {
+          console.log(
+            `Disconnecting previous socket for player_id: ${player_id}`
+          );
+          oldSocket.disconnect(true);
+        }
+      }
+
+      // Simpan socket.id untuk player yang baru
+      activeSockets[player_id] = socket.id;
+
+      let previousBalance: any = null;
+      let isActive = true; // Flag untuk melacak apakah socket masih aktif
+
       const checkBalance = async () => {
         try {
           const balance = await fetchBalance(player_id);
 
-          // Jika balance berubah, kirim pembaruan ke klien
           if (balance !== previousBalance) {
             console.log(
               `Balance updated for player_id ${player_id}: ${balance}`
@@ -156,8 +177,16 @@ export default function setupWebSocket(io: SocketIOServer) {
             socket.emit("balanceUpdate", { balance });
           }
 
-          // Lanjutkan pengecekan balance setiap 5 detik
-          setTimeout(checkBalance, 5000);
+          await pool.query(`UPDATE user SET balance = ? WHERE player_id = ?`, [
+            balance,
+            player_id,
+          ]);
+          console.log(`Balance updated in DB for player_id ${player_id}`);
+
+          // Lanjutkan pengecekan balance setiap 5 detik jika socket masih aktif
+          if (isActive) {
+            setTimeout(checkBalance, 5000);
+          }
         } catch (error) {
           console.error("Error fetching balance:", error);
           socket.emit("error", { message: "Error fetching balance" });
@@ -166,6 +195,15 @@ export default function setupWebSocket(io: SocketIOServer) {
 
       // Mulai pengecekan balance
       checkBalance();
+
+      // Hapus player dari activeSockets dan set isActive ke false saat socket terputus
+      socket.on("disconnect", () => {
+        console.log(`Socket disconnected for player_id: ${player_id}`);
+        if (activeSockets[player_id] === socket.id) {
+          delete activeSockets[player_id];
+        }
+        isActive = false; // Set flag menjadi false untuk menghentikan loop pembaruan saldo
+      });
     });
 
     socket.on("disconnect", () => {

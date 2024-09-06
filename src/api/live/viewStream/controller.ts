@@ -297,37 +297,56 @@ export const endViewStream = async (req: Request, res: Response) => {
 export const launchStream = async (req: Request, res: Response) => {
   const { id } = req.params;
 
+  // Pastikan user telah terautentikasi
+  if (!req.user) {
+    return res
+      .status(401)
+      .json({ success: false, message: "User not authenticated" });
+  }
+
+  const userId = req.user.id;
+
   try {
-    // // Ambil detail stream dari database berdasarkan id
-    // const [streamResult]: any = await pool.query(
-    //   "SELECT * FROM stream_session WHERE id = ? AND status = 1",
-    //   [id]
-    // );
+    // Query untuk memeriksa status online user
+    const [rows]: any = await pool.query<ResultSetHeader>(
+      "SELECT online FROM user WHERE id = ?",
+      [userId]
+    );
 
-    // if (streamResult.length === 0) {
-    //   return res.status(404).json({
-    //     status: "error",
-    //     message: "Stream tidak ditemukan",
-    //   });
-    // }
+    // Pastikan data user ditemukan
+    if (!rows || rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
 
-    // const stream = streamResult[0];
+    const online = rows[0].online;
 
-    // // Buat URL iframe dengan parameter yang diperlukan
-    // // const iframeUrl = `${stream.stream_url}/${id}`;
+    // Cek apakah user sedang offline
+    if (online === false || online === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "You're offline" });
+    }
+
+    // Buat URL iframe berdasarkan ID
     const iframeUrl = `https://globalintegra.my.id/livesession/${id}`;
 
-    // Buat HTML iframe
+    // HTML iframe yang akan dikirimkan
     const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;
 
-    // Mengatur header Content-Type menjadi text/html
+    // Set header Content-Type ke text/html
     res.setHeader("Content-Type", "text/html");
-    // Mengirimkan HTML iframe langsung dalam respons
-    res.send(iframeHtml);
+
+    // Kirimkan HTML iframe sebagai respons
+    return res.send(iframeHtml);
   } catch (error) {
     console.error("Error launching stream:", error);
-    res
-      .status(500)
-      .json({ status: "error", message: "Failed to launch stream", error });
+
+    // Kirimkan pesan error
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to launch stream",
+    });
   }
 };

@@ -249,7 +249,7 @@ export const fetchBalance = async (player_id: string) => {
   try {
     const balanceResponse = await axios.post(
       "http://localhost:3006/api/v1/str/balance",
-      { player_id: "qwerty" },
+      { player_id: player_id },
       {
         timeout: 20000, // Timeout for the API request
       }
