@@ -572,31 +572,31 @@ export const loginFormMpo = async (req: Request, res: Response) => {
         rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
       });
 
-      const balanceResponse = await axios.post(
-        "http://localhost:3006/api/v1/str/balance",
-        {
-          player_id: player_id,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
       // const balanceResponse = await axios.post(
-      //   "https://str-stg.mixcdn.link/str/balance",
+      //   "http://localhost:3006/api/v1/str/balance",
       //   {
-      //     play_id: player_id,
+      //     player_id: player_id,
       //   },
       //   {
       //     headers: {
-      //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
       //       "Content-Type": "application/json",
       //     },
-      //     httpsAgent: agent,
-      //     timeout: 20000,
       //   }
       // );
+      const balanceResponse = await axios.post(
+        "https://str-stg.mixcdn.link/str/balance",
+        {
+          play_id: player_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+            "Content-Type": "application/json",
+          },
+          httpsAgent: agent,
+          timeout: 20000,
+        }
+      );
 
       if (balanceResponse.status !== 200) {
         return res.status(500).json({
@@ -648,23 +648,23 @@ export const loginFormMpo = async (req: Request, res: Response) => {
     });
 
     const balanceResponse = await axios.post(
-      // "https://str-stg.mixcdn.link/str/balance",
-      // {
-      //   play_id: player_id,
-      // },
-      // {
-      //   headers: {
-      //     Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
-      //     "Content-Type": "application/json",
-      //   },
-      //   httpsAgent: agent,
-      //   timeout: 20000,
-      // }
-
-      "http:localhost:3006/api/v1/str/balance",
+      "https://str-stg.mixcdn.link/str/balance",
       {
-        player_id: player_id,
+        play_id: player_id,
+      },
+      {
+        headers: {
+          Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+          "Content-Type": "application/json",
+        },
+        httpsAgent: agent,
+        timeout: 20000,
       }
+
+      // "http:localhost:3006/api/v1/str/balance",
+      // {
+      //   player_id: player_id,
+      // }
     );
     // console.log("Balance API Response:", balanceResponse);
 

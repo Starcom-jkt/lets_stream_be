@@ -3,6 +3,7 @@ import pool from "../../db";
 import { RowDataPacket } from "mysql2";
 import { fetchBalance } from "../apiv2/testAccountBalance/controller";
 import axios from "axios";
+import https from "https";
 
 export default function setupWebSocket(io: SocketIOServer) {
   io.on("connection", (socket) => {
@@ -49,7 +50,7 @@ export default function setupWebSocket(io: SocketIOServer) {
 
         const userBalance = parseInt(userRows[0].balance, 10); // Convert to integer
         const senderName = userRows[0].username;
-        const playerId = userRows[0].player_id;
+        const player_id = userRows[0].player_id;
 
         // Retrieve gift details
         const [giftRows] = await pool.query<RowDataPacket[]>(
@@ -108,21 +109,64 @@ export default function setupWebSocket(io: SocketIOServer) {
         }
 
         const description = `payment for gift ${giftDetails.giftName} `;
+        const agent = new https.Agent({
+          rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+        });
+        const getTimeNow = (): string => {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, "0");
+          const day = String(now.getDate()).padStart(2, "0");
+          const hours = String(now.getHours()).padStart(2, "0");
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const seconds = String(now.getSeconds()).padStart(2, "0");
+
+          return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+        const generateRandomString = (length: number = 8): string => {
+          const characters =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+          let result = "";
+          for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * characters.length);
+            result += characters[randomIndex];
+          }
+          return result;
+        };
 
         // Call external API for transaction
+        // const response = await axios.post(
+        //   "http://localhost:3006/api/v1/str/deduct",
+        //   {
+        //     player_id: player_id,
+        //     amount: giftPrice,
+        //     gift: giftDetails.giftName,
+        //     streamer: recipientUser.username,
+        //   },
+        //   {
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "Access-Control-Allow-Origin": "*",
+        //     },
+        //   }
+        // );
         const response = await axios.post(
-          "http://localhost:3006/api/v1/str/deduct",
+          "https://str-stg.mixcdn.link/str/deduct",
           {
-            player_id: playerId,
+            play_id: player_id,
+            bet_id: generateRandomString(),
             amount: giftPrice,
             gift: giftDetails.giftName,
             streamer: recipientUser.username,
+            bet_time: getTimeNow(),
           },
           {
             headers: {
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
               "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
             },
+            httpsAgent: agent,
+            timeout: 20000,
           }
         );
 
@@ -139,18 +183,33 @@ export default function setupWebSocket(io: SocketIOServer) {
         ]);
 
         // Get the updated balance of the sender from external API
+        // const balanceResponse = await axios.post(
+        //   "http://localhost:3006/api/v1/str/balance",
+        //   { player_id: player_id },
+        //   {
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //       "Access-Control-Allow-Origin": "*",
+        //     },
+        //   }
+        // );
+
         const balanceResponse = await axios.post(
-          "http://localhost:3006/api/v1/str/balance",
-          { player_id: playerId },
+          "https://str-stg.mixcdn.link/str/balance",
+          {
+            play_id: player_id,
+          },
           {
             headers: {
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
               "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*",
             },
+            httpsAgent: agent,
+            timeout: 20000,
           }
         );
 
-        console.log("balanceResponse", balanceResponse.data.data);
+        // console.log("balanceResponse", balanceResponse.data.data);
 
         if (balanceResponse.data.success === false) {
           console.error(
@@ -164,7 +223,7 @@ export default function setupWebSocket(io: SocketIOServer) {
         // Update the sender's balance in the database
         await pool.query("UPDATE user SET balance = ? WHERE player_id = ?", [
           balanceResponse.data.data,
-          playerId,
+          player_id,
         ]);
 
         // Log the transaction
