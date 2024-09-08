@@ -218,3 +218,46 @@ export const getStreamSession = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const launchLobby = async (req: Request, res: Response) => {
+  const authHeader = req.headers["authorization"];
+
+  if (!authHeader) {
+    return res
+      .status(401)
+      .json({ success: false, message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  // Pastikan user telah terautentikasi
+  if (!req.user) {
+    return res
+      .status(401)
+      .json({ success: false, message: "User not authenticated" });
+  }
+
+  try {
+    // Buat URL iframe berdasarkan token
+    const iframeUrl = `https://globalintegra.my.id?token=${encodeURIComponent(
+      token
+    )}`;
+
+    // HTML iframe yang akan dikirimkan
+    const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;
+
+    // Set header Content-Type ke text/html
+    res.setHeader("Content-Type", "text/html");
+
+    // Kirimkan HTML iframe sebagai respons
+    return res.send(iframeHtml);
+  } catch (error) {
+    console.error("Error launching lobby:", error);
+
+    // Kirimkan pesan error
+    return res.status(500).json({
+      status: "error",
+      message: "Failed to launch lobby",
+    });
+  }
+};

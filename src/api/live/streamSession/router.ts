@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   endStreamSession,
   getStreamSession,
+  launchLobby,
   startStreamSession,
 } from "./controller";
 
@@ -18,5 +19,6 @@ router.post(
   startStreamSession
 );
 router.post("/end", isLoginUser, endStreamSession);
+router.post("/launchlobby", isLoginUser, launchLobby);
 
 export default router;
