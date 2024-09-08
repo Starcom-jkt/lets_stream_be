@@ -39,7 +39,7 @@ export const index = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -57,7 +57,7 @@ export const indexCreate = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -70,7 +70,7 @@ export const actionCreate = async (req: Request, res: Response) => {
       "INSERT INTO game (genre, gameCode, gameName, gameLink, gameImg) VALUES (?, ?, ?, ?, ?)",
       [genre, gameCode, gameName, gameLink, gameImg]
     );
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err) {
     res.status(500).send(err);
   }
@@ -92,11 +92,11 @@ export const actionDelete = async (req: Request, res: Response) => {
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -114,7 +114,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/admin/game");
     }
 
     const game = rows[0];
@@ -131,7 +131,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };
 
@@ -150,15 +150,15 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "game not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/game");
+      return res.redirect("/admin/game");
     }
 
     req.flash("alertMessage", "Berhasil mengedit game");
     req.flash("alertStatus", "success");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/game");
+    res.redirect("/admin/game");
   }
 };

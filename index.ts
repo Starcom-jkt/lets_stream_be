@@ -130,13 +130,13 @@ app.use(`${URL}/agent`, agentRouter);
 app.use(`${URL}/str`, apiTestRoutes);
 
 // Route for the admin view
-app.use("/dashboard", adminv2Routes);
-app.use("/user", userv2Routes);
-app.use("/agent", agentv2Routes);
-app.use("/gift", giftv2Routes);
-app.use("/game", gamev2Routes);
-app.use("/transaction", transactionv2Routes);
-app.use("/auth", authv2Routes);
+app.use("/admin/dashboard", adminv2Routes);
+app.use("/admin/user", userv2Routes);
+app.use("/admin/agent", agentv2Routes);
+app.use("/admin/gift", giftv2Routes);
+app.use("/admin/game", gamev2Routes);
+app.use("/admin/transaction", transactionv2Routes);
+app.use("/admin/auth", authv2Routes);
 
 // api v2
 app.use("/", apiV2Routes);

@@ -40,7 +40,7 @@
                     <td><%= transactions[i].senderName %></td>
                     <td><%= transactions[i].receiverName %></td>
                     <td><%= transactions[i].giftName %></td>
-                    <td><%= transactions[i].amount %></td>
+                    <td><%= parseFloat(transactions[i].amount).toFixed(2) %></td>
                     <td><%= transactions[i].description %></td>
                     <td><%= new Date(transactions[i].createdAt).toLocaleString() %></td>
                   </tr>

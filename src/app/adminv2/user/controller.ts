@@ -32,7 +32,7 @@ export const index = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman user
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/dashboard");
+    res.redirect("/admin/dashboard");
   }
 };
 
@@ -52,7 +52,7 @@ export const indexCreate = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman user
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/admin/user");
   }
 };
 
@@ -69,7 +69,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     if (checkEmail.length > 0) {
       req.flash("alertMessage", "Email already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/admin/user/create");
+      return res.redirect("/admin/admin/user/create");
     }
     const [checkUsername] = await pool.query<User[]>(
       "SELECT * FROM user WHERE username = ?",
@@ -79,7 +79,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     if (checkUsername.length > 0) {
       req.flash("alertMessage", "Username already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/user/create");
+      return res.redirect("/admin/user/create");
     }
     // Hash the password
     const passwordBrcypted = await bcrypt.hash(password, saltRounds);
@@ -88,7 +88,7 @@ export const actionCreate = async (req: Request, res: Response) => {
       [email, username, passwordBrcypted, profilePicture]
     );
 
-    res.redirect("/user");
+    res.redirect("/admin/user");
   } catch (err: any) {
     res.status(500).send(err.message);
     console.log(err);
@@ -111,11 +111,11 @@ export const actionDelete = async (req: Request, res: Response) => {
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/user");
+    res.redirect("/admin/user");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/admin/user");
   }
 };
 
@@ -136,7 +136,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       req.flash("alertMessage", "user not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/admin/user");
+      return res.redirect("/admin/admin/user");
     }
 
     const user = rows[0];
@@ -153,7 +153,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman user
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/admin/user");
+    res.redirect("/admin/admin/user");
   }
 };
 
@@ -172,7 +172,7 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (checkUsername.length > 0) {
       req.flash("alertMessage", "Username already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/user/edit");
+      return res.redirect("/admin/user/edit");
     }
 
     const [result] = await pool.query<ResultSetHeader>(
@@ -183,16 +183,16 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "user not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/user");
+      return res.redirect("/admin/user");
     }
 
     req.flash("alertMessage", "Berhasil mengedit user");
     req.flash("alertStatus", "success");
-    res.redirect("/user");
+    res.redirect("/admin/user");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/user");
+    res.redirect("/admin/user");
   }
 };
 
@@ -206,14 +206,14 @@ export const changeStatus = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "user not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/admin/user");
+      return res.redirect("/admin/admin/user");
     }
     req.flash("alertMessage", "Berhasil mengubah status user");
     req.flash("alertStatus", "success");
-    res.redirect("/admin/user");
+    res.redirect("/admin/admin/user");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/admin/user");
+    res.redirect("/admin/admin/user");
   }
 };

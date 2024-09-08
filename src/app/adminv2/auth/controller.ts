@@ -35,26 +35,26 @@ export const actionSignin = async (req: Request, res: Response) => {
             name: admin.name,
           };
           // console.log("req.session.user", req.session.user);
-          res.redirect("/dashboard");
+          res.redirect("/admin/dashboard");
         } else {
           req.flash("alertMessage", "Kata sandi yang anda inputkan salah");
           req.flash("alertStatus", "danger");
-          res.redirect("/login");
+          res.redirect("/admin/auth");
         }
       } else {
         req.flash("alertMessage", "Mohon maaf status anda belum aktif");
         req.flash("alertStatus", "danger");
-        res.redirect("/login");
+        res.redirect("/admin/auth");
       }
     } else {
       req.flash("alertMessage", "Email yang anda inputkan salah");
       req.flash("alertStatus", "danger");
-      res.redirect("/login");
+      res.redirect("/admin/auth");
     }
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/login");
+    res.redirect("/admin/auth");
   }
 };
 export const index = async (req: Request, res: Response) => {
@@ -72,7 +72,7 @@ export const index = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/");
+    res.redirect("/admin/");
   }
 };
 
@@ -88,6 +88,6 @@ export const actionLogout = async (req: Request, res: Response) => {
     res.clearCookie("connect.sid"); // 'connect.sid' adalah nama cookie default, sesuaikan jika berbeda
 
     // Redirect ke halaman login
-    res.redirect("/auth");
+    res.redirect("/admin/auth");
   });
 };

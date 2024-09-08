@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="stylesheet" href="/path/to/your/css/styles.css">
+</head>
+<body>
+  <div class="main-panel">
+    <div class="content-wrapper">
+      <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="page-title"><%= title %></h3>
+        </div>
+      </div>
+      <div class="row">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="card-title mb-4">Summary of Transactions</h4>
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>Total Income</th>
+                  <th>Total Expenses</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><%= userIdA %></td>
+                  <td><%= totalIncomeFromUserA %></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td><%= userIdB %></td>
+                  <td></td>
+                  <td><%= totalExpensesFromUserB %></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer class="footer">
+      <div class="d-sm-flex justify-content-center justify-content-sm-between">
+        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="https://www.bootstrapdash.com/" target="_blank">Let's stream</a>. All rights reserved.</span>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

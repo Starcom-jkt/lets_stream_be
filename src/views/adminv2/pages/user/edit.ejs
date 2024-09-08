@@ -12,8 +12,8 @@
         </div>
         <div class="col-sm-6 d-flex justify-content-end">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/user">User</a></li>
+            <li class="breadcrumb-item"><a href="/admin/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/user">User</a></li>
             <li class="breadcrumb-item active">Edit</li>
           </ol>
         </div>
@@ -34,7 +34,7 @@
                   </div>
                   <!-- /.card-header -->
                   <!-- form start -->
-                  <form action="/user/edit/<%= user.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                  <form action="/admin/user/edit/<%= user.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
                     <div class="card-body">
                       <div class="form-group">
                         <label for="username">Username</label>
@@ -69,7 +69,7 @@
                     <div class="card-footer">
                       <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
                       <button type="button" class="btn btn-secondary" style="color: blue;"> <!-- Ubah warna tulisan Cancel menjadi biru -->
-                        <a href="/user" style="color: blue;"><i class="fa fa-undo"></i> Cancel</a>
+                        <a href="/admin/user" style="color: blue;"><i class="fa fa-undo"></i> Cancel</a>
                       </button>
                     </div>
                   </form>

@@ -4,7 +4,7 @@
       <div class="d-flex justify-content-between align-items-center">
         <h3 class="page-title">agents</h3>
         <h3 class="card-title ms-4">
-          <a href="/agent/create" class="btn btn-primary">
+          <a href="/admin/agent/create" class="btn btn-primary">
              +
             Add
           </a>
@@ -70,8 +70,8 @@
                     </td>
                     
                     <td>
-                      <form action="/agent/delete/<%= agent[i].id %>?_method=DELETE" method="POST">
-                        <a href="/agent/edit/<%= agent[i].id %>" class="btn btn-warning">
+                      <form action="/admin/agent/delete/<%= agent[i].id %>?_method=DELETE" method="POST">
+                        <a href="/admin/agent/edit/<%= agent[i].id %>" class="btn btn-warning">
                           <i class="fas fa-pencil-alt"></i> Edit
                         </a>
                         <button type="submit" class="btn btn-danger">

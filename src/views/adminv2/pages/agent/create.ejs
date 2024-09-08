@@ -14,8 +14,8 @@
         </div>
         <div class="col-sm-6 d-flex justify-content-end">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/agent">agent</a></li>
+            <li class="breadcrumb-item"><a href="/admin/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admin/agent">agent</a></li>
             <li class="breadcrumb-item active">Create</li>
           </ol>
         </div>
@@ -30,7 +30,7 @@
           <div class="col-md-12">
             <div class="card">
               <div class="card-body">
-                <form action="/agent/create" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <form action="/admin/agent/create" method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
                   <!-- Profile Picture -->
                   <div class="form-group row">
                     <label for="profilePicture" class="col-sm-2 col-form-label">Profile Picture</label>
@@ -94,7 +94,7 @@
                   <!-- Buttons -->
                   <div class="card-footer text-right">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
-                    <a href="/agent" class="btn btn-secondary"><i class="fa fa-undo"></i> Cancel</a>
+                    <a href="/admin/agent" class="btn btn-secondary"><i class="fa fa-undo"></i> Cancel</a>
                   </div>
                 </form>
               </div>

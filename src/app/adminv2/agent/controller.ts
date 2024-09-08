@@ -31,7 +31,7 @@ export const index = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman agent
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/");
+    res.redirect("/admin/");
   }
 };
 
@@ -52,7 +52,7 @@ export const indexCreate = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman agent
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -69,7 +69,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     if (checkChannelName.length > 0) {
       req.flash("alertMessage", "Channel name already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent/create");
+      return res.redirect("/admin/agent/create");
     }
 
     const [checkEmail] = await pool.query<Agent[]>(
@@ -79,7 +79,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     if (checkEmail.length > 0) {
       req.flash("alertMessage", "Email already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent/create");
+      return res.redirect("/admin/agent/create");
     }
     const [checkUsername] = await pool.query<Agent[]>(
       "SELECT * FROM user WHERE username = ?",
@@ -89,7 +89,7 @@ export const actionCreate = async (req: Request, res: Response) => {
     if (checkUsername.length > 0) {
       req.flash("alertMessage", "Username already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent/create");
+      return res.redirect("/admin/agent/create");
     }
     // Hash the password
     const passwordBrcypted = await bcrypt.hash(password, saltRounds);
@@ -99,7 +99,7 @@ export const actionCreate = async (req: Request, res: Response) => {
       [email, username, passwordBrcypted, profilePicture, stream, channelName]
     );
 
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     res.status(500).send(err.message);
     console.log(err);
@@ -122,11 +122,11 @@ export const actionDelete = async (req: Request, res: Response) => {
       req.flash("alertStatus", "success");
     }
 
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -148,7 +148,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     if (rows.length === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
 
     const agent = rows[0];
@@ -166,7 +166,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     // Jika terjadi kesalahan, redirect ke halaman agent
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -185,7 +185,7 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (checkChannelName.length > 0) {
       req.flash("alertMessage", "Channel name already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent/create");
+      return res.redirect("/admin/agent/create");
     }
     const [checkUsername] = await pool.query<Agent[]>(
       "SELECT * FROM user WHERE username = ?",
@@ -194,7 +194,7 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (checkUsername.length > 0) {
       req.flash("alertMessage", "Username already exists");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent/create");
+      return res.redirect("/admin/agent/create");
     }
 
     const [result] = await pool.query<ResultSetHeader>(
@@ -205,16 +205,16 @@ export const actionEdit = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
 
     req.flash("alertMessage", "Berhasil mengedit agent");
     req.flash("alertStatus", "success");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -229,15 +229,15 @@ export const changeStatus = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
     req.flash("alertMessage", "Berhasil mengubah status agent");
     req.flash("alertStatus", "success");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
 
@@ -252,14 +252,14 @@ export const changeStatusStream = async (req: Request, res: Response) => {
     if (result.affectedRows === 0) {
       req.flash("alertMessage", "Agent not found");
       req.flash("alertStatus", "danger");
-      return res.redirect("/agent");
+      return res.redirect("/admin/agent");
     }
     req.flash("alertMessage", "Berhasil mengubah status agent");
     req.flash("alertStatus", "success");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   } catch (err: any) {
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/agent");
+    res.redirect("/admin/agent");
   }
 };
