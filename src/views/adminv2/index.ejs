@@ -1,0 +1,147 @@
+<%- include('./components/header.ejs') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper bg-black">
+        <!-- partial:partials/_navbar.html -->
+        <%- include('./components/navbar.ejs') %>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+            <div class="row">
+              <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">USER</h3>
+                          
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-success ">
+                          <span class="fa fa-user"></span>
+                        </div>
+                      </div>
+                      <p class="text-success ms-2 mb-0 font-weight-medium"><%= count.user %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">AGENT</h3>
+                          
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-danger ">
+                          <span class="fa fa-vcard "></span>
+                        </div>
+                      </div>
+                      <p class="text-danger ms-2 mb-0 font-weight-medium"><%= count.agent %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">GAME</h3>
+                          
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-warning ">
+                          <span class="fa fa-puzzle-piece"></span>
+                        </div>
+                      </div>
+                      <p class="text-warning ms-2 mb-0 font-weight-medium"><%= count.game %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>   <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">GIFT</h3>
+                          
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-primary ">
+                          <span class="fa fa-gift"></span>
+                        </div>
+                      </div>
+                      <p class="text-primary ms-2 mb-0 font-weight-medium"><%= count.gift %></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-9">
+                        <div class="d-flex align-items-center align-self-start">
+                          <h3 class="mb-0">LIVE</h3>
+                          
+                        </div>
+                      </div>
+                      <div class="col-3">
+                        <div class="icon icon-box-success ">
+                          <span class="mdi mdi-arrow-top-right icon-item"></span>
+                        </div>
+                      </div>
+                      <p class="text-success ms-2 mb-0 font-weight-medium">TOTAL</p>
+                    </div>
+                  </div>
+                </div>
+              </div> -->
+              <div class="col-xl-3 col-sm-6 grid-margin stretch-card">
+                <!-- <a href="/transaction"> -->
+                    <div class="card">
+                    <div class="card-body">
+                      <div class="row">
+                        <div class="col-9">
+                          <div class="d-flex align-items-center align-self-start">
+                            <h3 class="mb-0">TRANSACTION</h3>
+                            
+                          </div>
+                        </div>
+                        <div class="col-3">
+                          <div class="icon icon-box-success ">
+                            <span class="fa fa-money"></span>
+                          </div>
+                        </div>
+                        <p class="text-success ms-2 mb-0 font-weight-medium"><%= count.transaction %></p>
+                      </div>
+                      
+                    </div>
+                  </div>
+                <!-- </a> -->
+              </div>
+
+            </div>
+          </div>
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="/" target="_blank">Let's Stream</a>. All rights reserved.</span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+<%- include('./components/footer.ejs') %>

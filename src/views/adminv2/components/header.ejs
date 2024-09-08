@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title><%= title %></title>
+    <!-- plugins:css -->
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/mdi/css/materialdesignicons.min.css">
+    
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/font-awesome/css/font-awesome.min.css">
+    <!-- endinject -->
+    <!-- Plugin css for this page -->
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/jvectormap/jquery-jvectormap.css">
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/flag-icon-css/css/flag-icons.min.css">
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/owl-carousel-2/owl.carousel.min.css">
+    <link rel="stylesheet" href="/corona/dist/assets/vendors/owl-carousel-2/owl.theme.default.min.css">
+    <!-- End plugin css for this page -->
+    <!-- inject:css -->
+    <!-- endinject -->
+    <!-- Layout styles -->
+    <link rel="stylesheet" href="/corona/dist/assets/css/style.css">
+    <!-- End layout styles -->
+    <link rel="shortcut icon" href="./assets/letsstreamlogo.png" />
+  </head>
+  <body>
+    <div class="container-scroller" style="min-height: 100vh;">
+      <!-- partial:partials/_sidebar.html -->
+      <nav class="sidebar sidebar-offcanvas" id="sidebar">
+        <div class="sidebar-brand-wrapper d-flex align-items-center justify-content-center fixed-top">
+          <!-- Logo yang tampil di tampilan besar -->
+          <a class="brand-logo d-none d-lg-flex" href="index.html">
+            <img src="./assets/letsstreamlogo.png" style="height: 50px; width: 50px;" alt="logo" />
+          </a>  
+          
+          <!-- Logo kecil yang tampil di tampilan kecil -->
+          <a class="brand-logo-mini d-lg-none" href="index.html">
+            <img src="./assets/letsstreamlogo.png" style="height: 50px; width: 50px;" alt="logo" />
+          </a>
+        </div>
+        
+        <ul class="nav">
+          <li class="nav-item profile">
+            <div class="profile-desc">
+              <div class="profile-pic">
+                <div class="count-indicator">
+                  <img class="img-xs rounded-circle " src="/corona/dist/assets/images/faces/face15.jpg" alt="">
+                  <span class="count bg-success"></span>
+                </div>
+                <div class="profile-name">
+                  <h5 class="mb-0 font-weight-normal"><%= name %></h5>
+                  <span><%= email %></span>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="nav-item nav-category">
+            <span class="nav-link">Navigation</span>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="/dashboard">
+              <span class="menu-icon">
+                <i class="mdi mdi-speedometer"></i>
+              </span>
+              <span class="menu-title">Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+              <span class="menu-icon">
+                <i class="fa fa-user-circle-o"></i>
+              </span>
+              <span class="menu-title">User</span>
+            </a>
+            <div class="collapse" id="ui-basic">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="/user">user</a></li>
+                <li class="nav-item"> <a class="nav-link" href="/agent">agent</a></li>
+                <!-- <li class="nav-item"> <a class="nav-link" href="adminv2/request">request</a></li> -->
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="/game">
+              <span class="menu-icon">
+                <i class="fa fa-puzzle-piece"></i>
+              </span>
+              <span class="menu-title">Game</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="/gift">
+              <span class="menu-icon">
+                <i class="fa fa-gift"></i>
+              </span>
+              <span class="menu-title">Gift</span>
+            </a>
+          </li>
+          <li class="nav-item menu-items">
+            <a class="nav-link" href="/transaction">
+              <span class="menu-icon">
+                <i class="fa fa-money"></i>
+              </span>
+              <span class="menu-title">Transactions</span>
+            </a>
+          </li>
+        </ul>
+      </nav>

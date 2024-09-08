@@ -1,0 +1,124 @@
+<%- include('../../components/header.ejs') %>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper bg-black">
+        <!-- partial:partials/_navbar.html -->
+        <%- include('../../components/navbar.ejs') %>
+        <!-- partial -->
+     <%- include('./table.ejs') %>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+<%- include('../../components/footer.ejs') %>
+
+<script>
+  function searchTable() {
+  var input = document.getElementById("searchInput");
+  var filter = input.value.toUpperCase();
+  var table = document.getElementById("giftTable"); // Ganti ID menjadi "giftTable"
+  var tr = table.getElementsByTagName("tr");
+
+  for (var i = 1; i < tr.length; i++) {
+    var td = tr[i].getElementsByTagName("td")[2]; // Mengakses kolom ketiga (Username)
+    if (td) {
+      var txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+
+function sortTableByOnline() {
+  var table = document.getElementById("giftTable"); // Ganti ID menjadi "giftTable"
+  var rows = table.rows;
+  var switching = true;
+  var shouldSwitch;
+  var direction = "asc";
+  var switchCount = 0;
+
+  while (switching) {
+    switching = false;
+    var rowsArray = Array.from(rows).slice(1);
+
+    for (var i = 0; i < rowsArray.length - 1; i++) {
+      shouldSwitch = false;
+
+      var x = rowsArray[i].getElementsByTagName("TD")[4].innerText.trim().toLowerCase(); // Kolom Online
+      var y = rowsArray[i + 1].getElementsByTagName("TD")[4].innerText.trim().toLowerCase();
+
+      if (direction == "asc") {
+        if (x === "offline" && y === "online") {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (direction == "desc") {
+        if (x === "online" && y === "offline") {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+      switching = true;
+      switchCount++;
+    } else {
+      if (switchCount === 0 && direction === "asc") {
+        direction = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+  
+
+function sortTable(columnIndex) {
+  var table = document.getElementById("giftTable"); // Ganti ID menjadi "giftTable"
+  var rows = table.rows;
+  var switching = true;
+  var shouldSwitch;
+  var direction = "asc";
+  var switchCount = 0;
+
+  while (switching) {
+    switching = false;
+    var rowsArray = Array.from(rows).slice(1); // Skip header row
+
+    for (var i = 0; i < rowsArray.length - 1; i++) {
+      shouldSwitch = false;
+      var x = rowsArray[i].getElementsByTagName("TD")[columnIndex].innerText.toLowerCase();
+      var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex].innerText.toLowerCase();
+
+      if (direction == "asc") {
+        if (x > y) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (direction == "desc") {
+        if (x < y) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+      switching = true;
+      switchCount++;
+    } else {
+      if (switchCount == 0 && direction == "asc") {
+        direction = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+
+</script>
+

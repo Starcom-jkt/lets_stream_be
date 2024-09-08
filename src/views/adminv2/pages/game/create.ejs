@@ -1,0 +1,129 @@
+<%- include('../../components/header.ejs') %>
+<!-- partial -->
+<div class="container-fluid page-body-wrapper bg-black">
+  <%- include('../../components/navbar.ejs') %>
+  <!-- partial:partials/_navbar.html -->
+  
+  <!-- Tambahkan margin-top atau padding-top untuk menghindari navbar menutupi konten -->
+  <div class="content-wrapper" style="padding-top: 80px;"> <!-- Sesuaikan 80px sesuai dengan tinggi navbar -->
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="row mb-2 d-flex align-items-center justify-content-between">
+        <div class="col-sm-6">
+          <h1>Form add game</h1>
+        </div>
+        <div class="col-sm-6 d-flex justify-content-end">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/game">game</a></li>
+            <li class="breadcrumb-item active">Create</li>
+          </ol>
+        </div>
+      </div>
+      
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="card card-primary">
+                  <div class="card-header">
+                    <h3 class="card-title">Form tambah data game</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <!-- form start -->
+                  <form action="/game/create" method="POST" enctype="multipart/form-data">
+                    <div class="card-body">
+                      
+                      <div class="form-group">
+                        <label for="gameImg">Game Image</label>
+                        <input type="file" name="gameImg" class="form-control" id="gameImg" accept="image/*" onchange="previewImage(event)" />
+                      </div>
+                      <div class="form-group">
+                        <img id="gamePreviewImg" src="" alt="Profile Preview" style="display: none; max-width: 200px; max-height: 200px;" />
+                      </div>
+  
+                      <div class="form-group">
+                        <label for="gameCode">Game Code</label>
+                        <input type="text" name="gameCode" class="form-control" id="gameCode" placeholder="Game Code" required />
+                      </div>
+  
+                      <div class="form-group">
+                        <label for="genre">Game Genre</label>
+                        <select name="genre" class="form-control" id="genre" required>
+                          <option value="" disabled selected>Select a genre</option>
+                          <% genre.forEach(function(item) { %>
+                            <option value="<%= item.id %>"><%= item.genreName %></option>
+                          <% }); %>
+                        </select>
+                      </div>
+                      
+  
+  
+                      <div class="form-group">
+                        <label for="gameName">Game Name</label>
+                        <input type="text" name="gameName" class="form-control" id="gameName" placeholder="Game Name" required />
+                      </div>
+  
+                      <div class="form-group">
+                        <label for="gameLink">Game URL</label>
+                        <input type="text" name="gameLink" class="form-control" id="gameLink" placeholder="Game URL" required />
+                      </div>
+                    </div>
+  
+                    <div class="card-footer">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                      <button type="submit" class="btn btn-secondary">
+                        <a href="/game" style="color: white"><i class="fa fa-undo"></i> Cancel</a>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- /.card -->
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+  </div>
+</div>
+<!-- page-body-wrapper ends -->
+<%- include('../../components/footer.ejs') %>
+
+<!-- Tambahkan fungsi untuk preview gambar dan toggle password -->
+<script>
+  // Fungsi untuk menampilkan preview gambar
+  function previewImage(event) {
+    var input = event.target;
+    var reader = new FileReader();
+
+    reader.onload = function() {
+      var dataURL = reader.result;
+      var output = document.getElementById('profile-preview');
+      output.src = dataURL;
+      output.style.display = 'block'; // Menampilkan gambar preview
+    };
+
+    reader.readAsDataURL(input.files[0]);
+  }
+
+  // Fungsi untuk toggle visibility password
+  function togglePassword() {
+    var passwordField = document.getElementById('password');
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text'; // Menampilkan password
+    } else {
+      passwordField.type = 'password'; // Menyembunyikan password
+    }
+  }
+</script>

@@ -32,20 +32,14 @@ import apiV2Routes from "./src/apiv2/token/router";
 // api test
 import apiTestRoutes from "./src/apiv2/testAccountBalance/router";
 
-// admin view
-import authRoutes from "./src/app/adminPanel/auth/router";
-import adminRoutes from "./src/app/adminPanel/admin/router";
-import agentRoutes from "./src/app/adminPanel/agent/router";
-import userRoutes from "./src/app/adminPanel/user/router";
-import requestRoutes from "./src/app/adminPanel/requestStream/router";
-import gameRoutes from "./src/app/adminPanel/game/router";
-import giftRoutes from "./src/app/adminPanel/gift/router";
-import merchantRoutes from "./src/app/adminPanel/merchant/router";
-import currencyRoutes from "./src/app/adminPanel/currency/router";
-import languageRoutes from "./src/app/adminPanel/language/router";
-
-import testRoutes from "./src/app/adminPanel/test/router";
-import test2Routes from "./src/app/adminPanel/test2/router";
+// admin viewV2
+import adminv2Routes from "./src/app/adminv2/dashboard/router";
+import userv2Routes from "./src/app/adminv2/user/router";
+import agentv2Routes from "./src/app/adminv2/agent/router";
+import giftv2Routes from "./src/app/adminv2/gift/router";
+import gamev2Routes from "./src/app/adminv2/game/router";
+import transactionv2Routes from "./src/app/adminv2/transaction/router";
+import authv2Routes from "./src/app/adminv2/auth/router";
 
 // Import the WebSocket server
 import setupWebSocket from "./src/websocket/comment";
@@ -78,6 +72,7 @@ app.set("views", path.join(__dirname, "src/views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/uploads", express.static("public/uploads"));
 app.use("/adminlte", express.static(path.join(__dirname, "public/adminlte")));
+app.use("/corona", express.static(path.join(__dirname, "public/corona")));
 app.use(methodOverride("_method"));
 
 // Middleware
@@ -135,18 +130,13 @@ app.use(`${URL}/agent`, agentRouter);
 app.use(`${URL}/str`, apiTestRoutes);
 
 // Route for the admin view
-app.use("/admin/login", authRoutes);
-app.use("/admin", adminRoutes);
-app.use("/admin/agent", agentRoutes);
-app.use("/admin/user", userRoutes);
-app.use("/admin/request", requestRoutes);
-app.use("/admin/game", gameRoutes);
-app.use("/admin/gift", giftRoutes);
-app.use("/admin/merchant", merchantRoutes);
-app.use("/admin/currency", currencyRoutes);
-app.use("/admin/language", languageRoutes);
-app.use("/test", testRoutes);
-app.use("/test2", test2Routes);
+app.use("/dashboard", adminv2Routes);
+app.use("/user", userv2Routes);
+app.use("/agent", agentv2Routes);
+app.use("/gift", giftv2Routes);
+app.use("/game", gamev2Routes);
+app.use("/transaction", transactionv2Routes);
+app.use("/auth", authv2Routes);
 
 // api v2
 app.use("/", apiV2Routes);

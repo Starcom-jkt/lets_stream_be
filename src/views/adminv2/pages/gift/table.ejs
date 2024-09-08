@@ -1,0 +1,80 @@
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="page-title">gifts</h3>
+        <h3 class="card-title ms-4">
+          <a href="/gift/create" class="btn btn-primary">
+             +
+            Add
+          </a>
+        </h3>
+      </div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Tables</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4 ">
+            <h4 class="card-title mb-0">Table gift</h4>
+            <input type="text" id="searchInput" class="form-control w-25" onkeyup="searchTable()" placeholder="Search for names..">
+          </div>
+          <div class="table-responsive">
+            <table id="example2" class="table table-bordered table-hover table-striped" style="width: 100%">
+              <thead>
+                <tr>
+                  <th style="width: 7%">No</th>
+                  <th>Image</th>
+                  <th>Gift Name</th>
+                  <th>Price</th>
+                  <th style="width: 20%">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(let i = 0; i < gift.length; i++){ %>
+                  <tr>
+                    <td><%= i + 1 %></td>
+                    <td><img src="<%= gift[i].img %>" alt=""></td>
+                    <td><%= gift[i].giftName %></td>
+                    <td><%= gift[i].price %></td>
+                    <td>
+                      <form action="/gift/delete/<%= gift[i].id %>?_method=DELETE" method="POST">
+                        <a href="/gift/edit/<%= gift[i].id %>" class="btn btn-warning">
+                          <i class="fas fa-pencil-alt"></i> Edit
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                          <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  <footer class="footer">
+    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+      <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="https://www.bootstrapdash.com/" target="_blank">Let's stream</a>. All rights reserved.</span>
+    </div>
+  </footer>
+</div>
+
+<style>
+  .online {
+    color: green;
+  }
+  .offline {
+    color: red;
+  }
+</style>
+

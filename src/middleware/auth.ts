@@ -21,7 +21,7 @@ export const isLoginAdmin = (
       "Mohon maaf session anda telah habis silahkan login kembali"
     );
     req.flash("alertStatus", "danger");
-    return res.redirect("/admin/login");
+    return res.redirect("/auth");
   } else {
     next();
   }

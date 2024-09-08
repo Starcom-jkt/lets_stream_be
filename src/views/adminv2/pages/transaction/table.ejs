@@ -1,0 +1,82 @@
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="page-title">transactions</h3>
+        <h3 class="card-title ms-4">
+        </h3> 
+      </div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Tables</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4 ">
+            <h4 class="card-title mb-0">Table transaction</h4>
+            <input type="text" id="searchInput" class="form-control w-25" onkeyup="searchTable()" placeholder="Search for names..">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="transactionTable" data-sort-direction="asc">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th id="senderHeader" class="sortable">Sender</th>
+                  <th id="receiverHeader" class="sortable">Receiver</th>
+                  <th id="giftNameHeader" class="sortable">Gift Name</th>
+                  <th id="amountHeader" class="sortable">Amount</th>
+                  <th id="descriptionHeader" class="sortable">Description</th>
+                  <th id="dateHeader" class="sortable">Transaction Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(let i = 0; i < transactions.length; i++){ %>
+                  <tr>
+                    <td><%= i + 1 %></td>
+                    <td><%= transactions[i].senderName %></td>
+                    <td><%= transactions[i].receiverName %></td>
+                    <td><%= transactions[i].giftName %></td>
+                    <td><%= transactions[i].amount %></td>
+                    <td><%= transactions[i].description %></td>
+                    <td><%= new Date(transactions[i].createdAt).toLocaleString() %></td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+            
+            
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  <footer class="footer">
+    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+      <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="https://www.bootstrapdash.com/" target="_blank">Let's stream</a>. All rights reserved.</span>
+    </div>
+  </footer>
+</div>
+
+
+<style>
+  .sortable {
+    cursor: pointer;
+  }
+  .sortable:after {
+    content: " \25B2\25BC"; /* Up and Down Arrow */
+    font-size: 0.8em;
+    color: #333;
+  }
+  .sorted-asc:after {
+    content: " \25B2";
+  }
+  .sorted-desc:after {
+    content: " \25BC";
+  }
+</style>

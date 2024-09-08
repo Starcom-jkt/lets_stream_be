@@ -329,6 +329,17 @@ export const launchStream = async (req: Request, res: Response) => {
         .json({ success: false, message: "You're offline" });
     }
 
+    const [frame] = await pool.query<RowDataPacket[]>(
+      "SELECT * FROM stream_session WHERE id = ? AND status = 1",
+      [id]
+    );
+
+    if (frame.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Stream session not found" });
+    }
+
     // Buat URL iframe berdasarkan ID
     const iframeUrl = `https://globalintegra.my.id/livesession/${id}`;
 

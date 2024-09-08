@@ -1,0 +1,130 @@
+<%- include('../../components/header.ejs') %>
+<!-- partial -->
+<div class="container-fluid page-body-wrapper bg-black">
+  <!-- partial:partials/_navbar.html -->
+  <%- include('../../components/navbar.ejs') %>
+  <div class="content-wrapper" style="padding-top: 80px;"> <!-- Sesuaikan 80px sesuai dengan tinggi navbar -->
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="row mb-2 d-flex align-items-center justify-content-between">
+        <div class="col-sm-6">
+          <h1>Form edit agent</h1>
+        </div>
+        <div class="col-sm-6 d-flex justify-content-end">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/agent">agent</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="card card-primary">
+                  <div class="card-header">
+                    <h3 class="card-title">Form edit data agent <%= agent.username %></h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <!-- form start -->
+                  <form action="/agent/edit/<%= agent.id %>?_method=PUT" method="POST" enctype="multipart/form-data">
+                    <div class="card-body">
+                      <div class="form-group">
+                        <label for="username">username</label>
+                        <input type="text" name="username" class="form-control" id="username" value="<%= agent.username %>" placeholder="username" />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="profilePicture">Profile Picture</label>
+                        <input type="file" name="profilePicture" class="form-control" id="profilePicture" accept="image/*" onchange="previewImage(event)" />
+                      </div>
+                      
+                      <div style="display: flex; align-items: center;">
+                        <div style="text-align: center; margin-right: 20px;">
+                          <p style="margin-bottom: 10px;">before: </p>
+                          <img src="<%= agent.profilePicture %>" style="border-radius: 100%; width: 100px; height: 100px;" alt="" class="img-thumbnail">
+                        </div>
+                        
+                        <div style="text-align: center;">
+                          <p style="margin-bottom: 10px;">after:</p>
+                          <img id="profile-preview" src="" alt="Profile Preview" style="display: none; border-radius: 100%; width: 100px; height: 100px;" class="img-thumbnail" />
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" class="form-control" id="password" placeholder="password" />
+                      </div>
+
+                      <input type="checkbox" class="my-1" onclick="togglePassword()"> Show Password
+                    </div>
+
+                    <div class="card-footer">
+                      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Simpan</button>
+                      <button type="button" class="btn btn-secondary" style="color: blue;"> <!-- Ubah warna tulisan Cancel menjadi biru -->
+                        <a href="/agent" style="color: blue;"><i class="fa fa-undo"></i> Cancel</a>
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div>
+      <!-- /.container-fluid -->
+    </section>
+  </div>
+</div>
+<!-- page-body-wrapper ends -->
+<%- include('../../components/footer.ejs') %>
+
+<!-- Script untuk preview gambar dan toggle password -->
+<script>
+  // Fungsi untuk menampilkan preview gambar yang dipilih
+  function previewImage(event) {
+    var input = event.target;
+    var reader = new FileReader();
+
+    reader.onload = function() {
+      var dataURL = reader.result;
+      var output = document.getElementById('profile-preview');
+      output.src = dataURL;
+      output.style.display = 'block'; // Menampilkan gambar preview setelah file dipilih
+    };
+
+    reader.readAsDataURL(input.files[0]); // Membaca gambar
+  }
+
+  // Fungsi untuk menampilkan atau menyembunyikan password
+  function togglePassword() {
+    var passwordField = document.getElementById('password');
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text'; // Menampilkan password
+    } else {
+      passwordField.type = 'password'; // Menyembunyikan password
+    }
+  }
+</script>
+
+<!-- Custom CSS untuk mengubah warna tombol "Browse" menjadi biru -->
+<style>
+  .custom-file-input:lang(en) ~ .custom-file-label::after {
+    content: "Browse";
+    color: blue; /* Mengubah warna teks "Browse" menjadi biru */
+  }
+
+  .custom-file-input {
+    border-color: blue; /* Mengubah warna border tombol file input */
+  }
+</style>

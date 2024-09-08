@@ -1,0 +1,101 @@
+<div class="main-panel">
+  <div class="content-wrapper">
+    <div class="page-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="page-title">games</h3>
+        <h3 class="card-title ms-4">
+          <a href="/game/create" class="btn btn-primary">
+             +
+            Add
+          </a>
+        </h3>
+      </div>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Tables</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="row">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-4 ">
+            <h4 class="card-title mb-0">Table game</h4>
+            <input type="text" id="searchInput" class="form-control w-25" onkeyup="searchTable()" placeholder="Search for names..">
+          </div>
+          <div class="table-responsive">
+            <table class="table table-bordered" id="gameTable">
+              <thead>
+                <tr>
+                  <th style="width: 7%">No</th>
+                  <th>Game Name</th>
+                  <th>Game Img</th>
+                  <th>Game Genre</th>
+                  <th>Game URL</th>
+                  <th style="width: 20%">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for(let i = 0; i < game.length; i++){ %>
+                  <tr>
+                    <td><%= i + 1 %></td>
+                    <td><%= game[i].gameName %></td>
+                    <td>
+          
+                      <% if (game[i].gameImg && game[i].gameImg.startsWith('http')) { %>
+                        <!-- Menampilkan gambar dari URL HTTPS -->
+                        <img 
+                          src="<%= game[i].gameImg %>" 
+                          alt="game" 
+                          class="img-thumbnail" 
+                          style="width: 100px; height: 100px; border-radius: 100%;" 
+                        />
+                      <% } else if (game[i].gameImg) { %>
+                        <!-- Menampilkan gambar dari folder /uploads -->
+                        <img 
+                          src="/uploads/<%= game[i].gameImg %>" 
+                          alt="Profile Picture" 
+                          class="img-thumbnail" 
+                          style="width: 100px; height: 100px; border-radius: 100%;" 
+                        />
+                      <% } %>
+                    </td>
+                    <td><%= game[i].genre %></td>
+                    <td><%= game[i].gameLink %></td>
+                    <td>
+                      <form action="/game/delete/<%= game[i].id %>?_method=DELETE" method="POST">
+                        <a href="/game/edit/<%= game[i].id %>" class="btn btn-warning">
+                          <i class="fas fa-pencil-alt"></i> Edit
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                          <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                      </form>
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  <footer class="footer">
+    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+      <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2024 <a href="https://www.bootstrapdash.com/" target="_blank">Let's stream</a>. All rights reserved.</span>
+    </div>
+  </footer>
+</div>
+
+<style>
+  .online {
+    color: green;
+  }
+  .offline {
+    color: red;
+  }
+</style>
+
