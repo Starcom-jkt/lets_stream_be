@@ -8,7 +8,7 @@ const jwtSecretKey = "your_secret_key_here";
 export const actionSignin = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
-    // Query untuk menemukan admin berdasarkan email
+
     const [result] = await pool.execute(
       "SELECT * FROM admin WHERE username = ?",
       [username]
@@ -18,14 +18,12 @@ export const actionSignin = async (req: Request, res: Response) => {
 
     if (rows.length > 0) {
       const admin = rows[0];
-      // Cek status admin
+      // Cek admin status
       if (admin.status === 1) {
-        // Cek password
-        // const checkPassword = await bcrypt.compare(password, admin.password);
+        const checkPassword = await bcrypt.compare(password, admin.password);
 
-        // if (checkPassword) {
-        if (password === admin.password) {
-          // Set session user
+        if (checkPassword) {
+          // if (password === admin.password) {
           req.session.user = {
             id: admin.id,
             username: admin.username,
@@ -34,20 +32,19 @@ export const actionSignin = async (req: Request, res: Response) => {
             email: admin.email,
             name: admin.name,
           };
-          // console.log("req.session.user", req.session.user);
           res.redirect("/admin/dashboard");
         } else {
-          req.flash("alertMessage", "Kata sandi yang anda inputkan salah");
+          req.flash("alertMessage", "Wrong password");
           req.flash("alertStatus", "danger");
           res.redirect("/admin/auth");
         }
       } else {
-        req.flash("alertMessage", "Mohon maaf status anda belum aktif");
+        req.flash("alertMessage", "Sorry your account is not active");
         req.flash("alertStatus", "danger");
         res.redirect("/admin/auth");
       }
     } else {
-      req.flash("alertMessage", "Email yang anda inputkan salah");
+      req.flash("alertMessage", "Wrong username");
       req.flash("alertStatus", "danger");
       res.redirect("/admin/auth");
     }
@@ -59,7 +56,6 @@ export const actionSignin = async (req: Request, res: Response) => {
 };
 export const index = async (req: Request, res: Response) => {
   try {
-    // Ambil data dari tabel game
     const alertMessage = req.flash("alertMessage");
     const alertStatus = req.flash("alertStatus");
 
@@ -69,13 +65,11 @@ export const index = async (req: Request, res: Response) => {
       title: "Log In",
     });
   } catch (err: any) {
-    // Jika terjadi kesalahan, redirect ke halaman game
     req.flash("alertMessage", `${err.message}`);
     req.flash("alertStatus", "danger");
-    res.redirect("/admin/");
+    res.redirect("/admin/auth");
   }
 };
-
 export const actionLogout = async (req: Request, res: Response) => {
   // Menghancurkan sesi
   req.session.destroy((err) => {
@@ -84,10 +78,8 @@ export const actionLogout = async (req: Request, res: Response) => {
       return res.status(500).send("Error logging out.");
     }
 
-    // Menghapus cookie sesi (opsional, jika diperlukan)
-    res.clearCookie("connect.sid"); // 'connect.sid' adalah nama cookie default, sesuaikan jika berbeda
+    res.clearCookie("connect.sid");
 
-    // Redirect ke halaman login
     res.redirect("/admin/auth");
   });
 };

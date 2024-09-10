@@ -34,7 +34,8 @@
                   <th>Balance</th>
                   <th onclick="sortTableByOnline()">Online &#x25B2;&#x25BC;</th>
 
-                  <th style="width: 20%">Actions</th>
+                  <th>Report</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,15 +69,23 @@
                       <i class="mdi mdi-circle <%= user[i].online ? 'online' : 'offline' %>" id="status-icon-<%= user[i].id %>"></i>
                       <span id="status-text-<%= user[i].id %>"><%= user[i].online ? 'Online' : 'Offline' %></span>
                     </td>
-                    
+                    <td>
+                      <div class="text-center">
+                        <a href="/admin/user/transaction/<%= user[i].id %>" class="btn btn-success">
+                          <i class="fas fa-pencil-alt"></i> Transaction
+                        </a>
+                      </div>
+                    </td>
                     <td>
                       <form action="/admin/user/delete/<%= user[i].id %>?_method=DELETE" method="POST">
-                        <a href="/admin/user/edit/<%= user[i].id %>" class="btn btn-warning">
-                          <i class="fas fa-pencil-alt"></i> Edit
-                        </a>
-                        <button type="submit" class="btn btn-danger">
-                          <i class="fas fa-trash-alt"></i> Delete
-                        </button>
+                        <div class="text-center">
+                          <a href="/admin/user/edit/<%= user[i].id %>" class="btn btn-warning">
+                            <i class="fas fa-pencil-alt"></i> Edit
+                          </a>
+                          <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> Delete
+                          </button>
+                        </div>
                       </form>
                     </td>
                   </tr>

@@ -6,6 +6,7 @@ import session from "express-session";
 import cors from "cors";
 import methodOverride from "method-override";
 import flash from "connect-flash";
+import request from "request";
 import http from "http"; // Import the HTTP module
 import { Server as SocketIOServer } from "socket.io"; // Import Socket.IO
 
@@ -33,7 +34,8 @@ import apiV2Routes from "./src/apiv2/token/router";
 import apiTestRoutes from "./src/apiv2/testAccountBalance/router";
 
 // admin viewV2
-import adminv2Routes from "./src/app/adminv2/dashboard/router";
+import adminv2Routes from "./src/app/adminv2/admin/router";
+import dashboardv2Routes from "./src/app/adminv2/dashboard/router";
 import userv2Routes from "./src/app/adminv2/user/router";
 import agentv2Routes from "./src/app/adminv2/agent/router";
 import giftv2Routes from "./src/app/adminv2/gift/router";
@@ -43,6 +45,7 @@ import authv2Routes from "./src/app/adminv2/auth/router";
 
 // Import the WebSocket server
 import setupWebSocket from "./src/websocket/comment";
+import axios from "axios";
 
 dotenv.config();
 
@@ -81,7 +84,12 @@ app.use(
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: true,
-    cookie: {},
+    cookie: {
+      httpOnly: true, // Mencegah akses cookies melalui JavaScript
+      sameSite: "none", // Memungkinkan cookies diakses dalam iframe lintas domain
+      // secure: true, // Hanya mengizinkan cookie melalui HTTPS
+      maxAge: 24 * 60 * 60 * 1000, // Masa berlaku cookies (1 hari)
+    },
   })
 );
 
@@ -104,10 +112,50 @@ app.use(
     origin: "*", // Allow all origins
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow necessary HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Add other headers if needed
+    credentials: true, //
   })
 );
+// app.use((req, res, next) => {
+//   res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://globalintegra.my.id");
+//   res.setHeader("X-Frame-Options", "ALLOW-FROM https://globalintegra.my.id");  // Membatasi iframe ke domain tertentu
+//   next();
+// });
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.get("/proxy", async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get("https://demo.livegamesstream.com");
+    console.log(response.data);
+    res.send(response.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error fetching data from livegamesstream.com");
+  }
+});
+
+app.get("/proxy1", async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get(
+      "https://demo.livegamesstream.com/play/36d/"
+    );
+    console.log(response.data);
+    res.send(response.data);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error fetching data from livegamesstream.com");
+  }
+});
+
+// Set Content-Security-Policy header
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors 'self' https://globalintegra.my.id"
+  );
+  next();
+});
 
 // Route for the api
 app.use(`${URL}/token`, tokenouter);
@@ -130,13 +178,14 @@ app.use(`${URL}/agent`, agentRouter);
 app.use(`${URL}/str`, apiTestRoutes);
 
 // Route for the admin view
-app.use("/admin/dashboard", adminv2Routes);
+app.use("/admin/dashboard", dashboardv2Routes);
 app.use("/admin/user", userv2Routes);
 app.use("/admin/agent", agentv2Routes);
 app.use("/admin/gift", giftv2Routes);
 app.use("/admin/game", gamev2Routes);
 app.use("/admin/transaction", transactionv2Routes);
 app.use("/admin/auth", authv2Routes);
+app.use("/admins", adminv2Routes);
 
 // api v2
 app.use("/", apiV2Routes);

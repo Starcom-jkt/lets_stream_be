@@ -1,0 +1,171 @@
+<%- include('../../components/header.ejs') %>
+<!-- partial -->
+<div class="container-fluid page-body-wrapper bg-black">
+  <!-- partial:partials/_navbar.html -->
+  <%- include('../../components/navbar.ejs') %>
+  <div class="content-wrapper" style="padding-top: 80px;"> <!-- Sesuaikan 80px sesuai dengan tinggi navbar -->
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="row mb-2 d-flex align-items-center justify-content-between">
+        <div class="col-sm-6">
+          <h1>Form Edit Admin</h1>
+        </div>
+        <div class="col-sm-6 d-flex justify-content-end">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/admin/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/admins">Admin</a></li>
+            <li class="breadcrumb-item active">Edit</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card-body">
+              <div class="card card-primary">
+                <div class="card-header">
+                  <h3 class="card-title">Edit Admin <%= admin.username %></h3>
+                </div>
+                <!-- /.card-header -->
+                <!-- form start -->
+                <form action="/admins/edit/<%= admin.id %>?_method=PUT" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+                  <div class="card-body">
+                    <!-- Username -->
+                    <div class="form-group">
+                      <label for="username">Username</label>
+                      <input type="text" name="username" class="form-control" id="username" value="<%= admin.username %>" placeholder="Username" required>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input type="email" name="email" class="form-control" id="email" value="<%= admin.email %>" placeholder="Email" required>
+                    </div>
+
+                    <!-- Profile Picture -->
+                    <div class="form-group">
+                      <label for="profilePicture">Profile Picture</label>
+                      <input type="file" name="profilePicture" class="form-control " id="profilePicture" accept="image/*" onchange="previewImage(event)" />
+                      <!-- Input hidden untuk menyimpan gambar sebelumnya -->
+                      <input type="hidden" name="previousProfilePicture" value="<%= admin.profilePicture %>">
+                    </div>
+
+                    
+                    
+                    <!-- Gambar Before dan After -->
+                    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+                      <div style="text-align: center; margin-right: 20px;">
+                        <p style="margin-bottom: 10px;">Current Profile Picture:</p>
+                        <% if (admin.profilePicture && admin.profilePicture.startsWith('http')) { %>
+                          <img src="<%= admin.profilePicture %>" alt="Profile Picture" class="img-thumbnail" style="width: 100px; height: 100px; border-radius: 100%;" />
+                        <% } else if (admin.profilePicture) { %>
+                          <img src="/uploads/<%= admin.profilePicture %>" alt="Profile Picture" class="img-thumbnail" style="width: 100px; height: 100px; border-radius: 100%;" />
+                        <% } %>
+                        
+                      </div>
+                      <div style="text-align: center;">
+                        <p style="margin-bottom: 10px;">New Profile Picture:</p>
+                        <img id="profile-preview" src="" alt="Profile Preview" style="display: none; border-radius: 100%; width: 100px; height: 100px;" class="img-thumbnail" />
+                      </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                      <label for="password">Password</label>
+                      <input type="password" name="password" class="form-control" id="password" placeholder="Password (min 8 characters)">
+                      <div class="invalid-feedback" id="passwordError">
+                        Password must be at least 8 characters.
+                      </div>
+                    </div>
+
+                    <!-- Show Password Toggle -->
+                    <input type="checkbox" class="my-1" onclick="togglePassword()"> Show Password
+
+                  </div>
+
+                  <!-- Submit Buttons -->
+                  <div class="mx-4 mb-4">
+                    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Submit</button>
+                    <a href="/admins" class="btn btn-secondary"><i class="fa fa-undo"></i> Cancel</a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<!-- page-body-wrapper ends -->
+<%- include('../../components/footer.ejs') %>
+
+<!-- Script untuk preview gambar, toggle password, dan validasi form -->
+<script>
+  // Fungsi untuk menampilkan preview gambar yang dipilih
+  function previewImage(event) {
+    var input = event.target;
+    var reader = new FileReader();
+
+    reader.onload = function() {
+      var dataURL = reader.result;
+      var output = document.getElementById('profile-preview');
+      output.src = dataURL;
+      output.style.display = 'block'; // Menampilkan gambar preview setelah file dipilih
+    };
+
+    reader.readAsDataURL(input.files[0]); // Membaca gambar
+  }
+
+  // Fungsi untuk menampilkan atau menyembunyikan password
+  function togglePassword() {
+    var passwordField = document.getElementById('password');
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text'; // Menampilkan password
+    } else {
+      passwordField.type = 'password'; // Menyembunyikan password
+    }
+  }
+
+  // Fungsi untuk memvalidasi form agar password minimal 8 karakter
+// Fungsi untuk memvalidasi form agar password tidak kosong dan minimal 8 karakter
+function validateForm() {
+  var passwordField = document.getElementById('password');
+  var passwordError = document.getElementById('passwordError');
+  
+  // Cek apakah password kosong
+  if (passwordField.value.trim() === '') {
+    passwordError.textContent = "Password must not be empty.";
+    passwordField.classList.add('is-invalid');
+    return false;
+  }
+
+  // Cek panjang password
+  if (passwordField.value.length < 8) {
+    passwordError.textContent = "Password must be at least 8 characters.";
+    passwordField.classList.add('is-invalid');
+    return false;
+  } else {
+    passwordField.classList.remove('is-invalid');
+  }
+
+  return true; // Jika semua validasi berhasil
+}
+
+
+  // Fungsi untuk toggle superadmin status
+  function toggleSuperadmin() {
+    var superadminSwitch = document.getElementById('superadminSwitch');
+    var superadminHidden = document.getElementById('superadminHidden');
+    
+    if (superadminSwitch.checked) {
+      superadminHidden.value = '1'; // Superadmin diaktifkan
+    } else {
+      superadminHidden.value = '0'; // Superadmin dinonaktifkan
+    }
+  }
+</script>

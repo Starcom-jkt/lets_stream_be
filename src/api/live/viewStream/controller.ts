@@ -293,11 +293,13 @@ export const launchStream = async (req: Request, res: Response) => {
         .json({ success: false, message: "Stream session not found" });
     }
 
-    // Buat URL iframe berdasarkan ID
+    // Encode token dengan btoa
+    const encodedToken = Buffer.from(token).toString("base64");
+
+    // Buat URL iframe berdasarkan ID dan token yang sudah di-encode
     const iframeUrl = `https://globalintegra.my.id/livesession/${id}?token=${encodeURIComponent(
-      token
+      encodedToken
     )}`;
-    // const iframeUrl = `https://globalintegra.my.id/livesession/${id}`;
 
     // HTML iframe yang akan dikirimkan
     const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;

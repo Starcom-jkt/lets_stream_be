@@ -8,7 +8,7 @@ interface CustomSession extends session.Session {
   user?: { id: number; email: string; status: string; name: string };
 }
 
-const JWT_SECRET = "your_secret_key_here"; // Gantilah dengan kunci rahasia Anda
+const JWT_SECRET = "your_secret_key_here";
 
 export const isLoginAdmin = (
   req: Request & { session: CustomSession },
@@ -18,7 +18,7 @@ export const isLoginAdmin = (
   if (!req.session.user) {
     req.flash(
       "alertMessage",
-      "Mohon maaf session anda telah habis silahkan login kembali"
+      "Sorry you are not authorized to access this page"
     );
     req.flash("alertStatus", "danger");
     return res.redirect("/admin/auth");
@@ -89,7 +89,6 @@ export const isLoginUser = async (
       }
 
       req.user = decoded.userData; // Ensure this contains valid token type
-      // console.log("req.user", req.user);
       next();
     });
   } catch (error) {

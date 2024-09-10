@@ -19,6 +19,6 @@ router.post(
   startStreamSession
 );
 router.post("/end", isLoginUser, endStreamSession);
-router.post("/launchlobby", isLoginUser, launchLobby);
+router.get("/launchlobby", isLoginUser, launchLobby);
 
 export default router;

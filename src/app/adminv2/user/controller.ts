@@ -217,3 +217,81 @@ export const changeStatus = async (req: Request, res: Response) => {
     res.redirect("/admin/admin/user");
   }
 };
+
+export const getUserTransactions = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  try {
+    // Fetch user information (name)
+    const [userRows] = await pool.query<RowDataPacket[]>(
+      `SELECT username FROM user WHERE id = ?`,
+      [id]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const username = userRows[0].username;
+
+    // Fetch total income and total spend
+    const [totalIncomeRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        SUM(amount) AS totalIncome 
+      FROM gift_transaction 
+      WHERE receivedId = ?`,
+      [id]
+    );
+
+    const [totalSpendRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        SUM(amount) AS totalSpend 
+      FROM gift_transaction 
+      WHERE userId = ?`,
+      [id]
+    );
+
+    // Get transaction count for pagination
+    const [countRows] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(*) AS total FROM gift_transaction WHERE userId = ? OR receivedId = ?`,
+      [id, id]
+    );
+    const totalTransactions = countRows[0].total;
+
+    // Fetch 10 latest transactions based on page
+    const [transactionRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        giftName, 
+        amount, 
+        description, 
+        createdAt 
+      FROM gift_transaction 
+      WHERE userId = ? OR receivedId = ? 
+      ORDER BY createdAt DESC 
+      LIMIT ? OFFSET ?`,
+      [id, id, limit, offset]
+    );
+
+    const totalIncome = totalIncomeRows[0].totalIncome || 0;
+    const totalSpend = totalSpendRows[0].totalSpend || 0;
+    const totalPages = Math.ceil(totalTransactions / limit);
+
+    res.render("adminv2/pages/user/report", {
+      title: "Transaction Report",
+      name: req.session.user?.username,
+      email: req.session.user?.email,
+      username,
+      totalIncome,
+      totalSpend,
+      transactions: transactionRows,
+      currentPage: page,
+      totalPages,
+    });
+  } catch (err: any) {
+    console.log(err);
+    res.status(500).send("Internal Server Error");
+  }
+};

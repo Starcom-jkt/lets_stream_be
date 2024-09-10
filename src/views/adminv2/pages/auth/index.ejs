@@ -27,6 +27,7 @@
           <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
             <div class="card col-lg-4 mx-auto">
               <div class="card-body px-5 py-5">
+                <%- include ('../../components/messages.ejs')%>
                 <h3 class="card-title text-start mb-3">Login</h3>
                 <form action="/admin/auth" method="post">
                     <div class="input-group mb-3">
@@ -37,6 +38,7 @@
                         </div>
                       </div>
                     </div>
+                  
                     <div class="input-group">
                       <input id="pwd" type="password" class="form-control" placeholder="Password" name="password" />
                       <div class="input-group-append">
@@ -78,3 +80,19 @@
     <!-- endinject -->
   </body>
 </html>
+
+<script>
+  function myFunction() {
+    var x = document.getElementById("pwd");
+    if (x.type === "password") {
+      x.type = "text";
+    } else {
+      x.type = "password";
+    }
+  }
+</script>
+
+<!-- Plugins and Scripts -->
+<script src="/corona/dist/assets/vendors/js/vendor.bundle.base.js"></script>
+<script src="/corona/dist/assets/js/off-canvas.js"></script>
+<script src="/corona/dist/assets/js/misc.js"></script>

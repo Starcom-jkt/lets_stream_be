@@ -238,16 +238,23 @@ export const launchLobby = async (req: Request, res: Response) => {
   }
 
   try {
-    // Buat URL iframe berdasarkan token
+    // Encode token dengan base64 menggunakan Buffer (pengganti btoa di Node.js)
+    const encodedToken = Buffer.from(token).toString("base64");
+
+    // Buat URL iframe berdasarkan token yang sudah di-encode
     const iframeUrl = `https://globalintegra.my.id?token=${encodeURIComponent(
-      token
+      encodedToken
     )}`;
 
     // HTML iframe yang akan dikirimkan
-    const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0"></iframe>`;
+    const iframeHtml = `<iframe src="${iframeUrl}" width="800" height="600" frameborder="0" allow="fullscreen"></iframe>`;
 
-    // Set header Content-Type ke text/html
+    // Set header Content-Type ke text/html dan tambahkan header yang memperbolehkan iframe
     res.setHeader("Content-Type", "text/html");
+
+    // Menambahkan header untuk mengizinkan pemuatan iframe
+    // res.setHeader("X-Frame-Options", "ALLOWALL");
+    // res.setHeader("Access-Control-Allow-Origin", "*");
 
     // Kirimkan HTML iframe sebagai respons
     return res.send(iframeHtml);

@@ -7,7 +7,7 @@ import {
   actionEdit,
   indexEdit,
   changeStatus,
-  getUserTransactions,
+  // changeSuperAdmin,
 } from "./controller";
 import { uploadSingle } from "../../../middleware/uploadImage";
 import { isLoginAdmin } from "../../../middleware/auth";
@@ -31,7 +31,7 @@ router.put(
   uploadSingle("profilePicture"),
   actionEdit
 );
-router.get("/transaction/:id", isLoginAdmin, getUserTransactions);
-router.post("/status/:id", isLoginAdmin, changeStatus);
+router.post("/status/:id", changeStatus);
+// router.put("/superadmin/:id", isLoginAdmin, changeSuperAdmin);
 
 export default router;
