@@ -7,7 +7,7 @@ import https from "https";
 
 export default function setupWebSocket(io: SocketIOServer) {
   // Object to track the number of users in each channel
-  const channelViewCount: Record<string, number> = {};
+  const channelViewCount: Record<string, Set<string>> = {};
 
   // Function to format viewer count (e.g., 1000 -> 1k)
   const formatViewCount = (count: number): string => {
@@ -20,23 +20,35 @@ export default function setupWebSocket(io: SocketIOServer) {
   io.on("connection", (socket) => {
     console.log("A user connected");
 
-    // Join a specific room based on channelName
-    // socket.on("join room", ({ channelName, username }) => {
-    //   socket.join(channelName);
-
-    //   // Broadcast to the room that the user has joined
-    //   // io.to(channelName).emit(
-    //   //   "user joined",
-    //   //   `${username} has joined the channel`
-    //   // );
-    // });
-
-    socket.on("join room", (channelName) => {
+    socket.on("join room", (channelName, username, userId) => {
       socket.join(channelName);
-      // io.to(channelName).emit(
-      //   "user joined",
-      //   `${username} has joined the channel`
-      // );
+
+      // Save userId in the socket (for disconnect handling)
+      (socket as any).userId = userId;
+      (socket as any).channelName = channelName; // Also save the channelName
+
+      // If channel doesn't exist, create a new Set to track viewers
+      if (!channelViewCount[channelName]) {
+        channelViewCount[channelName] = new Set();
+      }
+
+      // Add the userId to the room's viewer set
+      if (!channelViewCount[channelName].has(userId)) {
+        channelViewCount[channelName].add(userId);
+      }
+
+      // Emit updated view count after adding the user
+      io.to(channelName).emit(
+        "joinViewCount",
+        formatViewCount(channelViewCount[channelName].size)
+      );
+
+      // Emit a message to everyone in the room that the user has joined
+      io.to(channelName).emit("user joined", {
+        message: `${username} has joined`,
+      });
+
+      console.log(`${username} has joined`);
     });
 
     // Listen for chat messages and broadcast to the specific room
@@ -54,8 +66,6 @@ export default function setupWebSocket(io: SocketIOServer) {
           "SELECT balance, username, player_id FROM user WHERE id = ?",
           [userId]
         );
-
-        console.log("userId", channelName, userId, giftId);
 
         if (userRows.length === 0) {
           console.error(`User with ID ${userId} not found.`);
@@ -150,40 +160,41 @@ export default function setupWebSocket(io: SocketIOServer) {
         };
 
         // Call external API for transaction
-        // const response = await axios.post(
-        //   "http://localhost:3006/api/v1/str/deduct",
-        //   {
-        //     player_id: player_id,
-        //     amount: giftPrice,
-        //     gift: giftDetails.giftName,
-        //     streamer: recipientUser.username,
-        //   },
-        //   {
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //       "Access-Control-Allow-Origin": "*",
-        //     },
-        //   }
-        // );
         const response = await axios.post(
-          "https://str-stg.mixcdn.link/str/deduct",
+          // "http://localhost:3006/api/v1/str/deduct",
+          "https://2shop.codes/api/v1/str/deduct",
           {
-            play_id: player_id,
-            bet_id: generateRandomString(),
+            player_id: player_id,
             amount: giftPrice,
             gift: giftDetails.giftName,
             streamer: recipientUser.username,
-            bet_time: getTimeNow(),
           },
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
               "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
             },
-            httpsAgent: agent,
-            timeout: 20000,
           }
         );
+        // const response = await axios.post(
+        //   "https://str-stg.mixcdn.link/str/deduct",
+        //   {
+        //     play_id: player_id,
+        //     bet_id: generateRandomString(),
+        //     amount: giftPrice,
+        //     gift: giftDetails.giftName,
+        //     streamer: recipientUser.username,
+        //     bet_time: getTimeNow(),
+        //   },
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+        //       "Content-Type": "application/json",
+        //     },
+        //     httpsAgent: agent,
+        //     timeout: 20000,
+        //   }
+        // );
 
         if (response.data.success === false) {
           console.error("API deduct failed:", response);
@@ -198,31 +209,31 @@ export default function setupWebSocket(io: SocketIOServer) {
         ]);
 
         // Get the updated balance of the sender from external API
-        // const balanceResponse = await axios.post(
-        //   "http://localhost:3006/api/v1/str/balance",
-        //   { player_id: player_id },
-        //   {
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //       "Access-Control-Allow-Origin": "*",
-        //     },
-        //   }
-        // );
-
         const balanceResponse = await axios.post(
-          "https://str-stg.mixcdn.link/str/balance",
-          {
-            play_id: player_id,
-          },
+          "https://2shop.codes/api/v1/str/balance",
+          { player_id: player_id },
           {
             headers: {
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
               "Content-Type": "application/json",
+              "Access-Control-Allow-Origin": "*",
             },
-            httpsAgent: agent,
-            timeout: 20000,
           }
         );
+
+        // const balanceResponse = await axios.post(
+        //   "https://str-stg.mixcdn.link/str/balance",
+        //   {
+        //     play_id: player_id,
+        //   },
+        //   {
+        //     headers: {
+        //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+        //       "Content-Type": "application/json",
+        //     },
+        //     httpsAgent: agent,
+        //     timeout: 20000,
+        //   }
+        // );
 
         // console.log("balanceResponse", balanceResponse.data.data);
 
@@ -344,6 +355,29 @@ export default function setupWebSocket(io: SocketIOServer) {
 
     socket.on("disconnect", () => {
       console.log("A user disconnected");
+
+      // Get the userId and channelName from the socket
+      const userId = (socket as any).userId;
+      const channelName = (socket as any).channelName;
+
+      if (channelName && userId && channelViewCount[channelName]) {
+        // Remove the userId from the room's viewer set
+        if (channelViewCount[channelName].has(userId)) {
+          channelViewCount[channelName].delete(userId);
+
+          const newViewersCount = channelViewCount[channelName].size; // Get updated viewer count
+
+          // Emit the updated viewer count to the room
+          io.to(channelName).emit(
+            "joinViewCount",
+            formatViewCount(newViewersCount)
+          );
+
+          console.log(
+            `Updated view count for room ${channelName}: ${newViewersCount}`
+          );
+        }
+      }
     });
   });
 }
