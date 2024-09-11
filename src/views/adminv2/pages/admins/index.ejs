@@ -11,86 +11,39 @@
 <%- include('../../components/footer.ejs') %>
 
 <script>
-  function searchTable() {
+ function searchTable() {
   var input = document.getElementById("searchInput");
   var filter = input.value.toUpperCase();
-  var table = document.getElementById("adminTable"); // Ganti ID menjadi "adminTable"
+  var table = document.getElementById("adminsTable"); // Menggunakan ID yang benar
   var tr = table.getElementsByTagName("tr");
 
   for (var i = 1; i < tr.length; i++) {
-    var td = tr[i].getElementsByTagName("td")[2]; // Mengakses kolom ketiga (Username)
+    var td = tr[i].getElementsByTagName("td")[2]; // Mengakses kolom username
     if (td) {
       var txtValue = td.textContent || td.innerText;
       if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        tr[i].style.display = "";
+        tr[i].style.display = ""; // Tampilkan baris yang sesuai dengan pencarian
       } else {
-        tr[i].style.display = "none";
+        tr[i].style.display = "none"; // Sembunyikan baris yang tidak sesuai
       }
     }
   }
 }
 
-
-function sortTableByOnline() {
-  var table = document.getElementById("adminTable"); // Ganti ID menjadi "adminTable"
-  var rows = table.rows;
-  var switching = true;
-  var shouldSwitch;
-  var direction = "asc";
-  var switchCount = 0;
-
-  while (switching) {
-    switching = false;
-    var rowsArray = Array.from(rows).slice(1);
-
-    for (var i = 0; i < rowsArray.length - 1; i++) {
-      shouldSwitch = false;
-
-      var x = rowsArray[i].getElementsByTagName("TD")[4].innerText.trim().toLowerCase(); // Kolom Online
-      var y = rowsArray[i + 1].getElementsByTagName("TD")[4].innerText.trim().toLowerCase();
-
-      if (direction == "asc") {
-        if (x === "offline" && y === "online") {
-          shouldSwitch = true;
-          break;
-        }
-      } else if (direction == "desc") {
-        if (x === "online" && y === "offline") {
-          shouldSwitch = true;
-          break;
-        }
-      }
-    }
-
-    if (shouldSwitch) {
-      rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
-      switching = true;
-      switchCount++;
-    } else {
-      if (switchCount === 0 && direction === "asc") {
-        direction = "desc";
-        switching = true;
-      }
-    }
-  }
-}
-
-  
 
 function sortTable(columnIndex) {
-  var table = document.getElementById("adminTable"); // Ganti ID menjadi "adminTable"
+  var table = document.getElementById("adminsTable"); // Menggunakan ID yang benar
   var rows = table.rows;
   var switching = true;
-  var shouldSwitch;
-  var direction = "asc";
+  var direction = "asc"; // Urutan default ascending
   var switchCount = 0;
 
   while (switching) {
     switching = false;
-    var rowsArray = Array.from(rows).slice(1); // Skip header row
+    var rowsArray = Array.from(rows).slice(1); // Abaikan header row
 
     for (var i = 0; i < rowsArray.length - 1; i++) {
-      shouldSwitch = false;
+      var shouldSwitch = false;
       var x = rowsArray[i].getElementsByTagName("TD")[columnIndex].innerText.toLowerCase();
       var y = rowsArray[i + 1].getElementsByTagName("TD")[columnIndex].innerText.toLowerCase();
 
@@ -113,12 +66,54 @@ function sortTable(columnIndex) {
       switchCount++;
     } else {
       if (switchCount == 0 && direction == "asc") {
-        direction = "desc";
+        direction = "desc"; // Jika tidak ada switching, ubah ke descending
         switching = true;
       }
     }
   }
 }
+function sortTableByStatus() {
+  var table = document.getElementById("adminsTable"); // Gunakan ID yang benar untuk tabel
+  var rows = table.rows;
+  var switching = true;
+  var direction = "asc"; // Urutan default adalah ascending
+  var switchCount = 0;
+
+  while (switching) {
+    switching = false;
+    var rowsArray = Array.from(rows).slice(1); // Skip header row
+
+    for (var i = 0; i < rowsArray.length - 1; i++) {
+      var shouldSwitch = false;
+      var x = rowsArray[i].getElementsByTagName("TD")[4].innerText.trim().toLowerCase(); // Kolom status (index 4)
+      var y = rowsArray[i + 1].getElementsByTagName("TD")[4].innerText.trim().toLowerCase();
+
+      if (direction == "asc") {
+        if (x > y) {
+          shouldSwitch = true;
+          break;
+        }
+      } else if (direction == "desc") {
+        if (x < y) {
+          shouldSwitch = true;
+          break;
+        }
+      }
+    }
+
+    if (shouldSwitch) {
+      rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+      switching = true;
+      switchCount++;
+    } else {
+      if (switchCount == 0 && direction == "asc") {
+        direction = "desc"; // Jika tidak ada perubahan, ubah ke descending
+        switching = true;
+      }
+    }
+  }
+}
+
 
 </script>
 

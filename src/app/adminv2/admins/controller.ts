@@ -20,7 +20,7 @@ export const index = async (req: Request, res: Response) => {
 
     const [admin] = await pool.query<admin[]>("SELECT * FROM admin");
 
-    res.render("adminv2/pages/admin/index", {
+    res.render("adminv2/pages/admins/index", {
       admin,
       alert,
       name: req.session.user?.name,
@@ -40,7 +40,7 @@ export const indexCreate = async (req: Request, res: Response) => {
   const alert = { message: alertMessage, status: alertStatus };
   try {
     // Render halaman dengan data admin
-    res.render("adminv2/pages/admin/create", {
+    res.render("adminv2/pages/admins/create", {
       // admin,
       alert,
       name: req.session.user?.name,
@@ -150,7 +150,7 @@ export const indexEdit = async (req: Request, res: Response) => {
     const admin = rows[0];
 
     // Render halaman dengan data admin
-    res.render("adminv2/pages/admin/edit", {
+    res.render("adminv2/pages/admins/edit", {
       admin,
       alert,
       name: req.session.user?.name,
@@ -219,6 +219,28 @@ export const changeStatus = async (req: Request, res: Response) => {
     const { id } = req.params;
     const [result] = await pool.query<ResultSetHeader>(
       "UPDATE admin SET status = !status WHERE id = ?",
+      [id]
+    );
+    if (result.affectedRows === 0) {
+      req.flash("alertMessage", "user not found");
+      req.flash("alertStatus", "danger");
+      return res.redirect("/admins");
+    }
+    req.flash("alertMessage", "Berhasil mengubah status admin");
+    req.flash("alertStatus", "success");
+    res.redirect("/admins");
+  } catch (err: any) {
+    req.flash("alertMessage", `${err.message}`);
+    req.flash("alertStatus", "danger");
+    res.redirect("/admins");
+  }
+};
+
+export const changeStatusSuperAdmin = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const [result] = await pool.query<ResultSetHeader>(
+      "UPDATE admin SET isSuperAdmin = !isSuperAdmin WHERE id = ?",
       [id]
     );
     if (result.affectedRows === 0) {

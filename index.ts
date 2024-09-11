@@ -34,7 +34,7 @@ import apiV2Routes from "./src/apiv2/token/router";
 import apiTestRoutes from "./src/apiv2/testAccountBalance/router";
 
 // admin viewV2
-import adminv2Routes from "./src/app/adminv2/admin/router";
+import adminv2Routes from "./src/app/adminv2/admins/router";
 import dashboardv2Routes from "./src/app/adminv2/dashboard/router";
 import userv2Routes from "./src/app/adminv2/user/router";
 import agentv2Routes from "./src/app/adminv2/agent/router";

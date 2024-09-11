@@ -7,6 +7,7 @@ import {
   actionEdit,
   indexEdit,
   changeStatus,
+  changeStatusSuperAdmin,
   // changeSuperAdmin,
 } from "./controller";
 import { uploadSingle } from "../../../middleware/uploadImage";
@@ -32,6 +33,6 @@ router.put(
   actionEdit
 );
 router.post("/status/:id", changeStatus);
-// router.put("/superadmin/:id", isLoginAdmin, changeSuperAdmin);
+router.post("/superadmin/:id", changeStatusSuperAdmin);
 
 export default router;

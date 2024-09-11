@@ -6,11 +6,22 @@ import axios from "axios";
 import https from "https";
 
 export default function setupWebSocket(io: SocketIOServer) {
+  // Object to track the number of users in each channel
+  const channelViewCount: Record<string, number> = {};
+
+  // Function to format viewer count (e.g., 1000 -> 1k)
+  const formatViewCount = (count: number): string => {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+    }
+    return count.toString();
+  };
+
   io.on("connection", (socket) => {
     console.log("A user connected");
 
     // Join a specific room based on channelName
-    // socket.on("join room", ({ channelName }) => {
+    // socket.on("join room", ({ channelName, username }) => {
     //   socket.join(channelName);
 
     //   // Broadcast to the room that the user has joined
@@ -22,6 +33,10 @@ export default function setupWebSocket(io: SocketIOServer) {
 
     socket.on("join room", (channelName) => {
       socket.join(channelName);
+      // io.to(channelName).emit(
+      //   "user joined",
+      //   `${username} has joined the channel`
+      // );
     });
 
     // Listen for chat messages and broadcast to the specific room

@@ -12,8 +12,7 @@
       </div>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#">Tables</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+          <li class="breadcrumb-item"><a href="#">Admins</a></li>
         </ol>
       </nav>
     </div>
@@ -26,14 +25,14 @@
             <input type="text" id="searchInput" class="form-control w-25" onkeyup="searchTable()" placeholder="Search for names..">
           </div>
           <div class="table-responsive">
-            <table class="table table-bordered" id="adminsTable">
+            <table class="table table-bordered" id="adminsTable"> <!-- Menggunakan ID adminsTable -->
               <thead>
                 <tr>
                   <th> No </th>
                   <th>Profile Picture</th>
-                  <th onclick="sortTable(2)">username &#x25B2;&#x25BC;</th>
+                  <th onclick="sortTable(2)">Username &#x25B2;&#x25BC;</th> <!-- Sort pada kolom username -->
                   <th>Email</th>
-                  <th>Status</th>
+                  <th onclick="sortTableByStatus()">Status &#x25B2;&#x25BC;</th>
                   <th>Super admin</th>
                   <th>Actions</th>
                 </tr>
@@ -43,9 +42,7 @@
                   <tr>
                     <td><%= i + 1 %></td>
                     <td>
-            
                       <% if (admin[i].profilePicture && admin[i].profilePicture.startsWith('http')) { %>
-                        <!-- Menampilkan gambar dari URL HTTPS -->
                         <img 
                           src="<%= admin[i].profilePicture %>" 
                           alt="Profile Picture" 
@@ -53,7 +50,6 @@
                           style="width: 100px; height: 100px; border-radius: 100%;" 
                         />
                       <% } else if (admin[i].profilePicture) { %>
-                        <!-- Menampilkan gambar dari folder /uploads -->
                         <img 
                           src="/uploads/<%= admin[i].profilePicture %>" 
                           alt="Profile Picture" 
@@ -62,9 +58,8 @@
                         />
                       <% } %>
                     </td>
-                    <td><%= admin[i].username %></td>
+                    <td><%= admin[i].username %></td> <!-- Kolom username untuk pencarian -->
                     <td><%= admin[i].email %></td>
-
                     <td>
                       <form action="/admins/status/<%= admin[i].id %>" method="POST">
                         <button class="" style="cursor: pointer; background: transparent; border:0;">
@@ -92,11 +87,33 @@
                         </button>
                       </form>
                     </td>
-                    
-                    
-                    
-                    <td><input type="checkbox" checked data-toggle="toggle" data-onstyle="warning"></td>
-                    
+                    <td>
+                      <form action="/admins/superadmin/<%= admin[i].id %>" method="POST">
+                        <button class="" style="cursor: pointer; background: transparent; border:0;">
+                          <% if (admin[i].isSuperAdmin) { %>
+                            <input type="checkbox" 
+                                   class="status-toggle" 
+                                   data-toggle="toggle" 
+                                   data-onstyle="warning" 
+                                   checked
+                                   name="status"
+                                   data-on="On" 
+                                   data-off="Off" 
+                                   onchange="this.form.submit()"/>
+                          <% } else { %>
+                            <input type="checkbox" 
+                                   class="status-toggle" 
+                                   data-toggle="toggle" 
+                                   data-onstyle="success" 
+                                   data-offstyle="danger"
+                                   name="status"
+                                   data-on="On" 
+                                   data-off="Off" 
+                                   onchange="this.form.submit()"/>
+                          <% } %>
+                        </button>
+                      </form>
+                    </td>
                     <td>
                       <form action="/admins/delete/<%= admin[i].id %>?_method=DELETE" method="POST">
                         <div class="text-center">
@@ -114,6 +131,7 @@
               </tbody>
             </table>
           </div>
+          
         </div>
       </div>
     </div>
