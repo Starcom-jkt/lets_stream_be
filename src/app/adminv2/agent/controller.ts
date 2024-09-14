@@ -263,3 +263,103 @@ export const changeStatusStream = async (req: Request, res: Response) => {
     res.redirect("/admin/agent");
   }
 };
+
+export const getUserLiveStreamReport = async (req: Request, res: Response) => {
+  const { id } = req.params; // ID dari user yang ingin diambil laporannya
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  try {
+    // Ambil informasi user
+    const [userRows] = await pool.query<RowDataPacket[]>(
+      `SELECT username FROM user WHERE id = ?`,
+      [id]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const username = userRows[0].username;
+
+    // Ambil total durasi streaming dan total viewers langsung dari stream_result
+    const [totalStreamData] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        IFNULL(SUM(r.duration), 0) AS totalDuration, 
+        IFNULL(SUM(r.total_view), 0) AS totalViewers 
+      FROM stream_result r
+      JOIN stream_session s ON r.stream_sessionId = s.id
+      WHERE s.userId = ?`,
+      [id]
+    );
+
+    const { totalDuration, totalViewers } = totalStreamData[0];
+
+    // Fungsi untuk memformat durasi ke dalam menit dan detik
+    const formatDuration = (seconds: number): string => {
+      if (seconds < 60) {
+        return `${seconds} seconds`;
+      } else {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return remainingSeconds === 0
+          ? `${minutes} minutes`
+          : `${minutes} minutes ${remainingSeconds} seconds`;
+      }
+    };
+
+    // Format total durasi sebelum dikirim ke view
+    const formattedTotalDuration = formatDuration(totalDuration);
+
+    // Dapatkan total jumlah sesi untuk pagination
+    const [countRows] = await pool.query<RowDataPacket[]>(
+      `SELECT COUNT(*) AS total 
+       FROM stream_session 
+       WHERE userId = ?`,
+      [id]
+    );
+
+    const totalSessions = countRows[0]?.total || 0;
+
+    // Ambil 10 sesi streaming terbaru berdasarkan pagination
+    const [streamRows] = await pool.query<RowDataPacket[]>(
+      `SELECT 
+        s.title, 
+        s.thumbnail, 
+        r.duration, 
+        r.total_view, 
+        s.createdAt 
+      FROM stream_result r
+      JOIN stream_session s ON r.stream_sessionId = s.id
+      WHERE s.userId = ? 
+      ORDER BY s.createdAt DESC 
+      LIMIT ? OFFSET ?`,
+      [id, limit, offset]
+    );
+
+    // Format durasi untuk setiap stream
+    const formattedStreams = streamRows.map((stream) => ({
+      ...stream,
+      formattedDuration: formatDuration(stream.duration),
+    }));
+
+    const totalPages = Math.ceil(totalSessions / limit);
+
+    // Kirimkan data laporan ke view
+    res.render("adminv2/pages/agent/liveReport", {
+      title: "Live Stream Report",
+      name: req.session.user?.username,
+      email: req.session.user?.email,
+      username,
+      totalDuration: formattedTotalDuration, // Durasi total sudah diformat
+      totalViewers,
+      streams: formattedStreams, // Streams dengan durasi yang sudah diformat
+      currentPage: page,
+      totalPages,
+    });
+  } catch (err: any) {
+    console.error(err);
+    res.status(500).send("Internal Server Error");
+  }
+};

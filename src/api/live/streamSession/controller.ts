@@ -25,6 +25,11 @@ export const startStreamSession = async (req: Request, res: Response) => {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
+  const [dataStreamer] = await pool.query<RowDataPacket[]>(
+    "SELECT * FROM user WHERE id = ?",
+    [userId]
+  );
+
   const channelName = req.user?.channelName ?? "";
   const uid = userId.toString();
   try {
@@ -39,7 +44,7 @@ export const startStreamSession = async (req: Request, res: Response) => {
         .json({ success: true, message: "You're on the live" });
     }
 
-    const thumbnail = req.file?.filename || req.user?.profilePicture;
+    const thumbnail = dataStreamer[0].profilePicture;
 
     // const token = generateRtcToken(channelName, uid);
 
@@ -242,7 +247,7 @@ export const launchLobby = async (req: Request, res: Response) => {
     const encodedToken = Buffer.from(token).toString("base64");
 
     // Buat URL iframe berdasarkan token yang sudah di-encode
-    const iframeUrl = `https://globalintegra.my.id?token=${encodeURIComponent(
+    const iframeUrl = `https://innovativetechnology.my.id?token=${encodeURIComponent(
       encodedToken
     )}`;
 

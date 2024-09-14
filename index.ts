@@ -32,6 +32,7 @@ import apiV2Routes from "./src/apiv2/token/router";
 
 // api test
 import apiTestRoutes from "./src/apiv2/testAccountBalance/router";
+import integratorRoutes from "./src/apiv2/integrator/router";
 
 // admin viewV2
 import adminv2Routes from "./src/app/adminv2/admins/router";
@@ -107,19 +108,28 @@ declare module "express-session" {
 }
 
 app.use(flash());
+// app.use(
+//   cors({
+//     origin: ["http://localhost:5173", "https://innovativetechnology.my.id"], // Ganti dengan URL frontend yang benar
+//     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true, // Mengizinkan pengiriman cookies atau credentials
+//   })
+// );
+
 app.use(
   cors({
     origin: "*", // Allow all origins
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow necessary HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Add other headers if needed
-    credentials: true, //
   })
 );
-// app.use((req, res, next) => {
-//   res.setHeader("Content-Security-Policy", "frame-ancestors 'self' https://globalintegra.my.id");
-//   res.setHeader("X-Frame-Options", "ALLOW-FROM https://globalintegra.my.id");  // Membatasi iframe ke domain tertentu
-//   next();
-// });
+// app.options("*", (req, res) => {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   res.sendStatus(200);
+// }); // Menangani OPTIONS preflight request
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -148,15 +158,6 @@ app.get("/proxy1", async (req: Request, res: Response) => {
   }
 });
 
-// Set Content-Security-Policy header
-app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    "frame-ancestors 'self' https://globalintegra.my.id"
-  );
-  next();
-});
-
 // Route for the api
 app.use(`${URL}/token`, tokenouter);
 app.use(`${URL}/gift`, giftRouter);
@@ -176,6 +177,7 @@ app.use(`${URL}/agent`, agentRouter);
 
 // route testAPi
 app.use(`${URL}/str`, apiTestRoutes);
+app.use(`${URL}/tr`, integratorRoutes);
 
 // Route for the admin view
 app.use("/admin/dashboard", dashboardv2Routes);

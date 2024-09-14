@@ -9,7 +9,6 @@
       <div class="page-header">
         <div class="d-flex align-items-center">
           <h3 class="page-title">Transaction Report for <%= username %></h3>
-          <!-- <button onclick="printPDF()" class="btn btn-primary ms-auto">Print PDF</button> -->
         </div>
         
         <nav aria-label="breadcrumb">
@@ -20,11 +19,28 @@
         </nav>
       </div>
 
+    
+
       <div class="row">
         <div class="card">
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h4 class="card-title mb-0">Transaction Summary</h4>
+                <!-- Filter Bar -->
+      <div class="row mb-0">
+        <div class="col d-flex justify-content-end">
+          <div class="input-group">
+            <!-- Start Date Input -->
+            <input type="date" id="startDate" name="startDate" class="form-control ml-2">
+        
+            <!-- End Date Input -->
+            <input type="date" id="endDate" name="endDate" class="form-control ml-2">
+        
+            <!-- Filter Button -->
+            <button class="btn btn-primary ml-2" onclick="filterByDate()">Filter</button>
+          </div>
+        </div>
+      </div>
             </div>
 
             <div class="table-responsive">
@@ -112,18 +128,6 @@
 <!-- partial -->
 <%- include('../../components/footer.ejs') %>
 
-<style>
-  .online {
-    color: green;
-  }
-  .offline {
-    color: red;
-  }
-  .table-bordered {
-    border: 1px solid #dee2e6;
-  }
-</style>
-
 <script>
   let sortDirection = false;
 
@@ -144,30 +148,50 @@
     tableBody.innerHTML = '';
     tableBody.append(...sortedRows);
   }
-</script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  function filterByDate() {
+    const startDateInput = document.getElementById('startDate').value;
+    const endDateInput = document.getElementById('endDate').value;
+    const pagination = document.querySelector('.pagination'); // Mengambil elemen pagination
 
-<script>
-  function printPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+    if (startDateInput && endDateInput) {
+      const startDate = new Date(startDateInput);
+      startDate.setHours(0, 0, 0, 0); // Set start date to 00:00
 
-    doc.text("Transaction Report", 10, 10);
-    
-    const table = document.getElementById('transactionTable');
-    const rows = Array.from(table.rows).map(row => 
-      Array.from(row.cells).map(cell => cell.innerText)
-    );
+      const endDate = new Date(endDateInput);
+      endDate.setHours(23, 59, 59, 999); // Set end date to 23:59:59
 
-    doc.autoTable({
-      head: [rows[0]], // Header row
-      body: rows.slice(1), // Data rows
-    });
+      const table = document.getElementById('transactionTable');
+      const rows = Array.from(table.rows).slice(1); // Skip the header row
+      let hasVisibleRow = false;
 
-    doc.save('transaction-report.pdf');
+      rows.forEach(row => {
+        const dateCell = new Date(row.cells[4].innerText);
+
+        // Display only rows that fall within the selected date range
+        if (dateCell >= startDate && dateCell <= endDate) {
+          row.style.display = '';
+          hasVisibleRow = true; // Jika ada baris yang sesuai dengan filter, tandai true
+        } else {
+          row.style.display = 'none';
+        }
+      });
+
+      // Sembunyikan pagination jika ada hasil filter
+      if (hasVisibleRow) {
+        pagination.style.display = 'none'; // Sembunyikan pagination
+      } else {
+        pagination.style.display = ''; // Tampilkan kembali pagination jika tidak ada hasil filter
+      }
+    } else {
+      alert('Please select both start and end dates.');
+      pagination.style.display = ''; // Tampilkan kembali pagination jika filter dibersihkan
+    }
+  }
+
+  // Call both filter and sort in the desired order
+  function filterAndSort() {
+    filterByDate(); // Filter first, then sort the filtered rows
+    sortTableByDate(); // Optionally call the sort function after filtering
   }
 </script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>

@@ -573,7 +573,7 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       });
 
       // const balanceResponse = await axios.post(
-      //   "http://localhost:3006/api/v1/str/balance",
+      //   "https://2shop.codes/api/v1/str/balance",
       //   {
       //     player_id: player_id,
       //   },
@@ -583,6 +583,7 @@ export const loginFormMpo = async (req: Request, res: Response) => {
       //     },
       //   }
       // );
+
       const balanceResponse = await axios.post(
         "https://str-stg.mixcdn.link/str/balance",
         {
@@ -661,10 +662,227 @@ export const loginFormMpo = async (req: Request, res: Response) => {
         timeout: 20000,
       }
 
-      // "http:localhost:3006/api/v1/str/balance",
+      // "https://2shop.codes/api/v1/str/balance",
       // {
       //   player_id: player_id,
       // }
+    );
+    // console.log("Balance API Response:", balanceResponse);
+
+    if (balanceResponse.status !== 200) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch balance",
+      });
+    }
+
+    const balance = parseFloat(balanceResponse.data.data.toFixed(6));
+
+    // Perbarui balance di database
+    const [updateResult]: [ResultSetHeader, FieldPacket[]] = await pool.query(
+      "UPDATE user SET balance = ? WHERE player_id = ?",
+      [balance, player_id]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update balance in the database",
+      });
+    }
+
+    await pool.query("UPDATE user SET online = 1 WHERE id = ?", [user.id]);
+
+    // Generate JWT token dengan userData
+    const token = jwt.sign({ userData: user }, JWT_SECRET!, {
+      expiresIn: "1d",
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      token,
+      balance,
+    });
+  } catch (error) {
+    console.error("Error during authentication:", error);
+    res.status(500).json({ message: "Error during authentication", error });
+  }
+};
+
+export const loginIntegrator = async (req: Request, res: Response) => {
+  const { username, player_id } = req.body;
+  // Check if username or player_id is missing
+  if (!username) {
+    return res.status(400).json({
+      success: false,
+      message: "Need username",
+    });
+  }
+
+  if (!player_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Need player_id",
+    });
+  }
+
+  try {
+    // Periksa apakah username atau player_id sudah ada di database
+    const [userCheck]: [any[], FieldPacket[]] = await pool.query(
+      "SELECT * FROM user WHERE username = ? OR player_id = ?",
+      [username, player_id]
+    );
+
+    let user;
+    if (userCheck.length > 0) {
+      // Jika username dan player_id keduanya cocok, lakukan login
+      user = userCheck.find(
+        (user) => user.username === username && user.player_id === player_id
+      );
+
+      if (!user) {
+        // Jika username sudah ada tetapi player_id berbeda
+        const existingUsername = userCheck.find(
+          (user) => user.username === username
+        );
+        if (existingUsername) {
+          return res.status(400).json({
+            success: false,
+            message: "Username doesn't match with player_id",
+          });
+        }
+
+        // Jika player_id sudah ada tetapi username berbeda
+        const existingPlayerId = userCheck.find(
+          (user) => user.player_id === player_id
+        );
+        if (existingPlayerId) {
+          return res.status(400).json({
+            success: false,
+            message: "Player_id doesn't match with username",
+          });
+        }
+      }
+    } else {
+      // Jika tidak ada konflik, daftarkan pengguna baru
+      const email = `${username}@gmail.com`;
+      const channelName = username;
+
+      const profilePictures = [
+        "avatardefault1.png",
+        "avatardefault2.png",
+        "avatardefault3.png",
+        "avatardefault4.png",
+        "avatardefault5.png",
+        "avatardefault6.png",
+        "avatardefault7.png",
+        "avatardefault8.png",
+        "avatardefault9.png",
+      ];
+
+      const profilePicture =
+        profilePictures[Math.floor(Math.random() * profilePictures.length)];
+
+      // Dapatkan balance terbaru dari service eksternal
+      const agent = new https.Agent({
+        rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+      });
+
+      const balanceResponse = await axios.post(
+        "https://2shop.codes/api/v1/str/balance",
+        {
+          player_id: player_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // const balanceResponse = await axios.post(
+      //   "https://str-stg.mixcdn.link/str/balance",
+      //   {
+      //     play_id: player_id,
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+      //       "Content-Type": "application/json",
+      //     },
+      //     httpsAgent: agent,
+      //     timeout: 20000,
+      //   }
+      // );
+
+      if (balanceResponse.status !== 200) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to fetch balance",
+        });
+      }
+
+      const balance = parseFloat(balanceResponse.data.data.toFixed(6));
+
+      // Insert user baru ke database
+      const [result]: [ResultSetHeader, FieldPacket[]] = await pool.query(
+        "INSERT INTO user (email, username, player_id, profilePicture, channelName, balance) VALUES (?, ?, ?, ?, ?, ?)",
+        [email, username, player_id, profilePicture, channelName, balance]
+      );
+
+      if (result.affectedRows === 0) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Registration failed" });
+      }
+
+      // Ambil data pengguna yang baru saja didaftarkan
+      const [newUserRows]: [any[], FieldPacket[]] = await pool.query(
+        "SELECT * FROM user WHERE id = ?",
+        [result.insertId]
+      );
+
+      user = newUserRows[0];
+
+      await pool.query("UPDATE user SET online = 1 WHERE id = ?", [user.id]);
+
+      // Generate JWT token with user data
+      const token = jwt.sign({ userData: user }, JWT_SECRET!, {
+        expiresIn: "1d",
+      });
+
+      return res.json({
+        success: true,
+        message: "Registration successful",
+        token,
+        balance,
+      });
+    }
+
+    // Update balance jika user sudah terdaftar
+    const agent = new https.Agent({
+      rejectUnauthorized: false, // Ignoring SSL verification for testing purposes
+    });
+
+    const balanceResponse = await axios.post(
+      // "https://str-stg.mixcdn.link/str/balance",
+      // {
+      //   play_id: player_id,
+      // },
+      // {
+      //   headers: {
+      //     Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY2hyaXMifQ.JBvFJ1OPCkb4l69zUJTwNzpbFjQeZ0FEmaSBn6VLb00`,
+      //     "Content-Type": "application/json",
+      //   },
+      //   httpsAgent: agent,
+      //   timeout: 20000,
+      // }
+
+      "https://2shop.codes/api/v1/str/balance",
+      {
+        player_id: player_id,
+      }
     );
     // console.log("Balance API Response:", balanceResponse);
 

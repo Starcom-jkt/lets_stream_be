@@ -6,6 +6,7 @@ import {
   login,
   loginAgent,
   loginFormMpo,
+  loginIntegrator,
   // loginWithGoogle,
   logout,
   register,
@@ -24,6 +25,7 @@ const router = Router();
 router.post("/login", login);
 router.post("/login/agent", loginAgent);
 router.post("/logins", loginFormMpo);
+router.post("/login-integrator", loginIntegrator);
 router.post("/logout", isLoginUser, logout);
 router.post("/register", uploadSingle("profilePicture"), register);
 router.post("/register/agent", uploadSingle("profilePicture"), registerAgent);

@@ -113,48 +113,69 @@ export const getDetailStreamSession = async (req: Request, res: Response) => {
 
 export const startViewStream = async (req: Request, res: Response) => {
   const userId = req.user?.id;
-  const title = req.body.title ?? "";
+  const stream_sessionId = req.body.stream_sessionId;
+
   if (!userId) {
     return res.status(401).json({ success: false, message: "Unauthorized" });
   }
 
-  const channelName = req.user?.channelName ?? "";
-  const uid = userId.toString();
   try {
-    const [existingSessions] = await pool.query<RowDataPacket[]>(
-      "SELECT * FROM stream_session WHERE userId = ? AND status = 1",
-      [userId]
+    // Pastikan stream session valid
+    const [stream_session] = await pool.query<RowDataPacket[]>(
+      "SELECT * FROM stream_session WHERE id = ?",
+      [stream_sessionId]
     );
 
-    if (existingSessions.length > 0) {
+    if (stream_session.length === 0) {
       return res
-        .status(400)
-        .json({ success: true, message: "You're on the live" });
+        .status(404)
+        .json({ success: false, message: "Stream session not found" });
     }
 
-    const thumbnail = req.file?.filename || "";
-
-    const token = generateRtcToken(channelName, uid);
-    const status = 1;
-
-    const [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO stream_session (userId, thumbnail, title, status, token) VALUES (?, ?, ?, ?, ?)",
-      [userId, thumbnail, title, status, token]
+    // Cek apakah user sudah pernah menonton stream ini
+    const [viewSession] = await pool.query<RowDataPacket[]>(
+      "SELECT * FROM view_session WHERE userId = ? AND stream_sessionId = ?",
+      [userId, stream_sessionId]
     );
 
+    if (viewSession.length > 0) {
+      // Jika sudah menonton, kirim respon tanpa detail stream
+      return res.json({
+        success: true,
+        message: "You have already watched this stream",
+      });
+    }
+
+    // Mendapatkan nama channel pemilik stream
+    const [channel] = await pool.query<RowDataPacket[]>(
+      "SELECT channelName FROM user WHERE id = ?",
+      [stream_session[0].userId]
+    );
+
+    if (channel.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Channel not found" });
+    }
+
+    // Tambahkan entri ke view_session
+    await pool.query<ResultSetHeader>(
+      "INSERT INTO view_session (userId, stream_sessionId) VALUES (?, ?)",
+      [userId, stream_sessionId]
+    );
+
+    // Kirim data stream detail hanya jika pengguna baru menonton
     res.json({
-      id: result.insertId,
-      userId,
-      channelName,
-      thumbnail,
-      title,
-      token,
-      status,
+      success: true,
+      message: "You just entered the stream",
+      channelName: channel[0].channelName, // Mengirimkan nama channel
+      stream_session: stream_session[0], // Mengirimkan informasi stream session
     });
   } catch (error) {
+    console.error(error);
     res
       .status(500)
-      .json({ success: false, message: "Error adding stream session", error });
+      .json({ success: false, message: "Error starting view session", error });
   }
 };
 
@@ -297,7 +318,7 @@ export const launchStream = async (req: Request, res: Response) => {
     const encodedToken = Buffer.from(token).toString("base64");
 
     // Buat URL iframe berdasarkan ID dan token yang sudah di-encode
-    const iframeUrl = `https://globalintegra.my.id/livesession/${id}?token=${encodeURIComponent(
+    const iframeUrl = `https://innovativetechnology.my.id/livesession/${id}?token=${encodeURIComponent(
       encodedToken
     )}`;
 

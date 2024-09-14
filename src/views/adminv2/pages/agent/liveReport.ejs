@@ -1,0 +1,150 @@
+<%- include('../../components/header.ejs') %>
+<div class="container-fluid page-body-wrapper bg-black">
+  <%- include('../../components/navbar.ejs') %>
+  <div class="main-panel">
+    <div class="content-wrapper">
+      <div class="page-header d-flex justify-content-between align-items-center">
+        <h3 class="page-title">Live Stream Report for <%= username %></h3>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Reports</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Live Stream Report</li>
+          </ol>
+        </nav>
+      </div>
+
+      <!-- Filter Bar (Positioned Right) -->
+   
+
+      <div class="row">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="card-title mb-4">Live Stream Summary</h4>
+            <div class="row mb-4">
+              <div class="col d-flex justify-content-end">
+                <div class="input-group">
+                  <!-- Keyword Search -->
+                  
+                  <!-- Start Date Input -->
+                  <input type="date" id="startDate" name="startDate" class="form-control ml-2">
+      
+                  <!-- End Date Input -->
+                  <input type="date" id="endDate" name="endDate" class="form-control ml-2">
+                  
+                  <!-- Filter Button -->
+                  <button class="btn btn-primary ml-2" onclick="filterByDate()">Filter</button>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Total Duration</th>
+                    <th>Total Viewers</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><%= totalDuration %></td>
+                    <td><%= totalViewers %> viewers</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h4 class="mt-5">Live Stream Details</h4>
+            <div class="table-responsive">
+              <table class="table table-bordered" id="liveStreamTable">
+                <thead>
+                  <tr>
+                    <th>No</th>
+                    <th>Duration</th>
+                    <th>Total Viewers</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% streams.forEach((stream, index) => { %>
+                    <tr>
+                      <td><%= (currentPage - 1) * 10 + index + 1 %></td>
+                      <td><%= stream.formattedDuration %></td>
+                      <td><%= stream.total_view %> viewers</td>
+                      <td><%= new Date(stream.createdAt).toLocaleString() %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+
+            <nav aria-label="Page navigation" style="padding-top: 40px;">
+              <ul class="pagination justify-content-center">
+                <% if (currentPage > 1) { %>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                <% } %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                    <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                  </li>
+                <% } %>
+                <% if (currentPage < totalPages) { %>
+                  <li class="page-item">
+                    <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                <% } %>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <div class="d-sm-flex justify-content-center justify-content-sm-between">
+        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">
+          Copyright © 2024 <a href="https://www.bootstrapdash.com/" target="_blank">Let's Stream</a>. All rights reserved.
+        </span>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<script>
+  function filterByDate() {
+    const keyword = document.getElementById('keywordSearch').value.toLowerCase();
+    const startDateInput = document.getElementById('startDate').value;
+    const endDateInput = document.getElementById('endDate').value;
+
+    if (startDateInput && endDateInput) {
+      const startDate = new Date(startDateInput);
+      startDate.setHours(0, 0, 0, 0); // Start at 00:00
+
+      const endDate = new Date(endDateInput);
+      endDate.setHours(23, 59, 59, 999); // End at 23:59:59
+
+      const table = document.getElementById('liveStreamTable');
+      const rows = Array.from(table.rows).slice(1);
+
+      rows.forEach(row => {
+        const dateCell = new Date(row.cells[3].innerText);
+        const rowText = row.innerText.toLowerCase();
+
+        if ((dateCell >= startDate && dateCell <= endDate) && rowText.includes(keyword)) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
+      });
+    } else {
+      alert('Please select both start and end dates.');
+    }
+  }
+</script>

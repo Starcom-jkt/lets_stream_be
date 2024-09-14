@@ -20,12 +20,14 @@ export default function setupWebSocket(io: SocketIOServer) {
   io.on("connection", (socket) => {
     console.log("A user connected");
 
-    socket.on("join room", (channelName, username, userId) => {
+    socket.on("join room", (channelName, username, userId, isOwner) => {
       socket.join(channelName);
 
       // Save userId in the socket (for disconnect handling)
       (socket as any).userId = userId;
-      (socket as any).channelName = channelName; // Also save the channelName
+      (socket as any).channelName = channelName;
+      (socket as any).isOwner = isOwner;
+      // Also save the channelName
 
       // If channel doesn't exist, create a new Set to track viewers
       if (!channelViewCount[channelName]) {
@@ -37,10 +39,15 @@ export default function setupWebSocket(io: SocketIOServer) {
         channelViewCount[channelName].add(userId);
       }
 
+      // Emit the updated view count after adding the user (subtract 1 if owner is present)
+      const totalViewCount = channelViewCount[channelName].size;
+      // const actualViewCount = totalViewCount - 1;
+
       // Emit updated view count after adding the user
       io.to(channelName).emit(
         "joinViewCount",
-        formatViewCount(channelViewCount[channelName].size)
+        // formatViewCount(actualViewCount)
+        formatViewCount(totalViewCount)
       );
 
       // Emit a message to everyone in the room that the user has joined
@@ -198,7 +205,9 @@ export default function setupWebSocket(io: SocketIOServer) {
 
         if (response.data.success === false) {
           console.error("API deduct failed:", response);
-          socket.emit("error", { message: "Transaction failed." });
+          socket.emit("error", {
+            message: "Transaction failed, check your balance.",
+          });
           return;
         }
 
@@ -353,10 +362,36 @@ export default function setupWebSocket(io: SocketIOServer) {
       });
     });
 
+    // socket.on("disconnect", () => {
+    //   console.log("A user disconnected");
+
+    //   // Get the userId and channelName from the socket
+    //   const userId = (socket as any).userId;
+    //   const channelName = (socket as any).channelName;
+
+    //   if (channelName && userId && channelViewCount[channelName]) {
+    //     // Remove the userId from the room's viewer set
+    //     if (channelViewCount[channelName].has(userId)) {
+    //       channelViewCount[channelName].delete(userId);
+
+    //       const newViewersCount = channelViewCount[channelName].size; // Get updated viewer count
+
+    //       // Emit the updated viewer count to the room
+    //       io.to(channelName).emit(
+    //         "joinViewCount",
+    //         formatViewCount(newViewersCount)
+    //       );
+
+    //       console.log(
+    //         `Updated view count for room ${channelName}: ${newViewersCount}`
+    //       );
+    //     }
+    //   }
+    // });
+
     socket.on("disconnect", () => {
       console.log("A user disconnected");
 
-      // Get the userId and channelName from the socket
       const userId = (socket as any).userId;
       const channelName = (socket as any).channelName;
 
@@ -365,16 +400,19 @@ export default function setupWebSocket(io: SocketIOServer) {
         if (channelViewCount[channelName].has(userId)) {
           channelViewCount[channelName].delete(userId);
 
-          const newViewersCount = channelViewCount[channelName].size; // Get updated viewer count
+          const totalViewCount = channelViewCount[channelName].size;
+          const actualViewCount = (socket as any).isOwner
+            ? totalViewCount - 1
+            : totalViewCount;
 
           // Emit the updated viewer count to the room
           io.to(channelName).emit(
             "joinViewCount",
-            formatViewCount(newViewersCount)
+            formatViewCount(actualViewCount)
           );
 
           console.log(
-            `Updated view count for room ${channelName}: ${newViewersCount}`
+            `Updated view count for room ${channelName}: ${actualViewCount}`
           );
         }
       }

@@ -12,8 +12,7 @@
       </div>
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="#">Tables</a></li>
-          <li class="breadcrumb-item active" aria-current="page">Basic tables</li>
+          <li class="breadcrumb-item active" aria-current="page">Agent</li>
         </ol>
       </nav>
     </div>
@@ -62,7 +61,7 @@
                       <% } %>
                     </td>
                     <td><%= agent[i].username %></td>
-                    <td><%= parseFloat(agent[i].balance).toFixed(2) %></td>
+                    <td>Rp <%= parseFloat(agent[i].balance).toFixed(2) %></td>
                     <td>
                       <!-- Status Online/Offline -->
                       <i class="mdi mdi-circle <%= agent[i].online ? 'online' : 'offline' %>" id="status-icon-<%= agent[i].id %>"></i>
@@ -70,7 +69,7 @@
                     </td>
                     <td class="">
                       <div class="text-center">
-                        <a href="/admin/user/live_report/<%= agent[i].id %>" class="btn btn-danger">
+                        <a href="/admin/agent/live_report/<%= agent[i].id %>" class="btn btn-danger">
                           <i class="fas fa-pencil-alt"></i> Live Report
                         </a>
                         <a href="/admin/user/transaction/<%= agent[i].id %>" class="btn btn-success">
